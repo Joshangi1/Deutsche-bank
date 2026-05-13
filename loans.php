@@ -1,0 +1,3 @@
+<?php $pageTitle = 'Loans'; include __DIR__ . '/includes/public_header.php'; ?>
+<section class="section-pad service-band"><div class="container"><h1 class="section-title display-5">Lending with clarity from application to payoff.</h1><div class="row g-4 mt-3"><?php foreach ([['fa-car','Auto Loans'],['fa-house','Mortgages'],['fa-briefcase','Business Lines'],['fa-graduation-cap','Personal Loans']] as $x): ?><div class="col-md-3"><div class="premium-card p-4 h-100"><div class="icon-chip mb-3"><i class="fa-solid <?= $x[0] ?>"></i></div><h5><?= $x[1] ?></h5><p class="muted">Competitive rates with transparent review.</p></div></div><?php endforeach; ?></div></div></section>
+<?php include __DIR__ . '/includes/public_footer.php'; ?>

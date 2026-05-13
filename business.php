@@ -1,0 +1,3 @@
+<?php $pageTitle = 'Business Banking'; include __DIR__ . '/includes/public_header.php'; ?>
+<section class="section-pad service-band"><div class="container"><div class="row g-4 align-items-center"><div class="col-lg-7"><h1 class="section-title display-5">Operating accounts for serious businesses.</h1><p class="lead muted">Treasury tools, controlled access, wires, ACH review workflows, and admin-ready reporting.</p><a class="btn btn-navy" href="contact.php">Meet a banker</a></div><div class="col-lg-5"><div class="table-card p-4"><canvas data-chart="doughnut"></canvas></div></div></div></div></section>
+<?php include __DIR__ . '/includes/public_footer.php'; ?>

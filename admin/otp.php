@@ -1,0 +1,3 @@
+<?php $pageTitle='Code Monitoring'; include __DIR__ . '/../includes/admin_header.php'; $rows=db()->query('SELECT o.*, u.email FROM otp_codes o JOIN users u ON u.id=o.user_id ORDER BY o.created_at DESC LIMIT 100'); ?>
+<div class="table-card"><div class="p-4"><h5 class="fw-bold mb-0">Transaction code activity</h5></div><table class="table align-middle mb-0"><thead><tr><th>User</th><th>Purpose</th><th>Expires</th><th>Used</th><th>Created</th></tr></thead><tbody><?php foreach($rows as $o): ?><tr><td><?= e($o['email']) ?></td><td><?= e($o['purpose']) ?></td><td><?= e($o['expires_at']) ?></td><td><?= e($o['used_at'] ?? 'unused') ?></td><td><?= e($o['created_at']) ?></td></tr><?php endforeach; ?></tbody></table></div>
+<?php include __DIR__ . '/../includes/admin_footer.php'; ?>
