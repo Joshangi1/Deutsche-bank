@@ -1,0 +1,4 @@
+config/brevo.local.php
+uploads/private/
+uploads/avatars/
+tmp/
