@@ -1,11 +1,16 @@
 <?php
 declare(strict_types=1);
 
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'sterling_harbor_bank');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_CHARSET', 'utf8mb4');
+$localConfig = __DIR__ . '/database.local.php';
+if (is_file($localConfig)) {
+    require_once $localConfig;
+}
+
+defined('DB_HOST') || define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
+defined('DB_NAME') || define('DB_NAME', getenv('DB_NAME') ?: 'sterling_harbor_bank');
+defined('DB_USER') || define('DB_USER', getenv('DB_USER') ?: 'root');
+defined('DB_PASS') || define('DB_PASS', getenv('DB_PASS') ?: '');
+defined('DB_CHARSET') || define('DB_CHARSET', getenv('DB_CHARSET') ?: 'utf8mb4');
 
 function db(): PDO
 {
