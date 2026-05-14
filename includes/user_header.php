@@ -82,7 +82,7 @@ $notificationPreview = $previewStmt->fetchAll();
             <div><div class="topbar-kicker"><?= e($regionConfig['workspace']) ?></div><h1 class="h3 mb-0 fw-bold"><?= e($pageTitle ?? 'Dashboard') ?></h1><div class="muted">Welcome back, <?= e($user['first_name']) ?></div></div>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <span class="language-static-pill"><i class="fa-solid fa-language"></i><?= $accountLanguage === 'de' ? 'Deutsch' : 'English' ?></span>
+            <span class="language-static-pill"><i class="fa-solid fa-language"></i><span class="language-static-label"><?= $accountLanguage === 'de' ? 'Deutsch' : 'English' ?></span></span>
             <div class="dropdown notification-menu">
                 <button class="btn btn-light border position-relative" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="fa-solid fa-bell"></i>
