@@ -278,6 +278,101 @@ body { top: 0 !important; }
 
 .hero .col-lg-5 { display: block; }
 
+.home-region-router {
+    width: min(100%, 560px);
+}
+
+.home-region-control {
+    display: grid;
+    gap: .85rem;
+    padding: 1rem;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: rgba(255,255,255,.84);
+    box-shadow: 0 18px 46px rgba(15,23,42,.08);
+}
+
+.country-choice-shell {
+    min-height: calc(100vh - 92px);
+    display: flex;
+    align-items: center;
+    padding: clamp(56px, 8vw, 104px) 0;
+    background:
+        radial-gradient(circle at 85% 10%, rgba(0,24,168,.12), transparent 32%),
+        linear-gradient(180deg, #fff, #f5f7fb);
+}
+
+.country-choice-head {
+    max-width: 760px;
+    margin-bottom: 2rem;
+}
+
+.country-choice-head h1 {
+    max-width: 760px;
+    color: var(--lead-blue);
+    font-size: clamp(2.6rem, 7vw, 5.1rem);
+    line-height: .98;
+    margin: .5rem 0 1rem;
+}
+
+.country-choice-head p {
+    color: var(--muted);
+    font-size: 1.12rem;
+}
+
+.country-choice-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.country-choice-card {
+    min-height: 190px;
+    display: grid;
+    align-content: space-between;
+    gap: 1rem;
+    padding: 1.2rem;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--ink);
+    text-decoration: none;
+    box-shadow: 0 18px 48px rgba(15,23,42,.08);
+    transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+
+.country-choice-card:hover {
+    color: var(--ink);
+    border-color: rgba(0,24,168,.3);
+    transform: translateY(-3px);
+    box-shadow: 0 24px 64px rgba(0,24,168,.14);
+}
+
+.country-choice-card strong,
+.country-choice-card small {
+    display: block;
+}
+
+.country-choice-card strong {
+    font-size: 1.2rem;
+    margin-bottom: .45rem;
+}
+
+.country-choice-card small {
+    color: var(--muted);
+    line-height: 1.42;
+}
+
+.country-choice-icon {
+    width: 44px;
+    height: 44px;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 12px;
+    background: #f2f5ff;
+    color: var(--lead-blue);
+}
+
 .hero-bank-visual {
     position: relative;
     width: min(100%, 560px);
@@ -379,47 +474,6 @@ body { top: 0 !important; }
 .hero-panel p {
     font-size: clamp(1.08rem, 1.55vw, 1.35rem);
     line-height: 1.38;
-}
-
-.home-region-router {
-    max-width: 680px;
-    padding: 1rem;
-    border: 1px solid rgba(0, 24, 168, .13);
-    border-radius: 8px;
-    background: rgba(255, 255, 255, .78);
-    box-shadow: 0 18px 54px rgba(17, 24, 39, .08);
-    backdrop-filter: blur(18px);
-}
-
-.home-region-router label {
-    display: block;
-    margin-bottom: .55rem;
-    color: var(--ink);
-    font-size: .78rem;
-    font-weight: 820;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-}
-
-.home-region-control {
-    display: grid;
-    grid-template-columns: minmax(220px, 280px) 1fr;
-    gap: .85rem;
-    align-items: center;
-}
-
-.home-region-control .form-select {
-    min-height: 48px;
-    border-color: rgba(0, 24, 168, .18);
-    border-radius: 8px;
-    color: var(--ink);
-    font-weight: 760;
-}
-
-.home-region-control span {
-    color: var(--muted);
-    font-size: .95rem;
-    line-height: 1.35;
 }
 
 .lead-overview-panel {
@@ -1669,7 +1723,12 @@ body { top: 0 !important; }
         max-width: 100%;
         margin-top: 2rem !important;
     }
-    .home-region-control { grid-template-columns: 1fr; }
+    .home-region-control {
+        padding: .9rem;
+    }
+    .country-choice-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
     .hero-panel {
         max-width: 100%;
         margin-top: 2.25rem;
@@ -1731,54 +1790,70 @@ body { top: 0 !important; }
     .auth-card { padding: 1.25rem; }
     .auth-panel { padding: 1.35rem; }
     .auth-panel h2 { font-size: 2rem; }
+    .country-choice-shell {
+        min-height: auto;
+        padding: 42px 0 64px;
+    }
+    .country-choice-head h1 {
+        font-size: clamp(2.35rem, 12vw, 3.25rem);
+    }
+    .country-choice-grid {
+        grid-template-columns: 1fr;
+    }
+    .country-choice-card {
+        min-height: auto;
+        grid-template-columns: 44px minmax(0, 1fr) auto;
+        align-items: center;
+    }
     .app-main {
-        padding: 18px 14px 28px;
+        padding: 16px 14px 28px;
         overflow-x: hidden;
+        background: #f6f8fc;
     }
     .topbar {
         display: grid;
         grid-template-columns: 1fr;
         align-items: start;
-        gap: .95rem;
+        gap: .9rem;
         padding-inline: 2px;
     }
     .topbar > .d-flex:first-child {
         width: 100%;
         align-items: center !important;
-        gap: .8rem !important;
+        gap: .75rem !important;
     }
     .mobile-toggle {
-        width: 52px;
-        height: 52px;
-        min-width: 52px;
-        font-size: 1.15rem;
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+        font-size: 1.05rem;
     }
     .topbar-kicker {
-        font-size: .72rem;
-        line-height: 1.12;
+        font-size: .68rem;
+        line-height: 1.1;
         letter-spacing: .1em;
     }
     .topbar h1 {
-        font-size: clamp(2rem, 9vw, 2.45rem);
+        font-size: clamp(1.65rem, 8vw, 2.05rem);
         letter-spacing: 0;
-        line-height: 1.02;
+        line-height: 1.04;
     }
     .topbar .muted {
         margin-top: .15rem;
-        font-size: 1rem;
+        font-size: .98rem;
         line-height: 1.2;
     }
     .operations-section-nav { grid-template-columns: 1fr; }
     .topbar > .d-flex:last-child {
         width: 100%;
         display: grid !important;
-        grid-template-columns: 48px 48px 48px 56px;
+        grid-template-columns: 46px 46px 46px 54px;
         justify-content: start;
-        gap: .6rem !important;
+        gap: .55rem !important;
     }
     .language-static-pill {
-        width: 48px;
-        height: 48px;
+        width: 46px;
+        height: 46px;
         padding: 0;
         justify-content: center;
         box-shadow: 0 12px 26px rgba(15,23,42,.08);
@@ -1786,8 +1861,8 @@ body { top: 0 !important; }
     .language-static-label { display: none; }
     .notification-menu > .btn,
     .avatar-sm {
-        width: 48px;
-        height: 48px;
+        width: 46px;
+        height: 46px;
     }
     .notification-menu > .btn {
         display: inline-flex;
@@ -1801,8 +1876,8 @@ body { top: 0 !important; }
         right: -4px;
     }
     .topbar .btn-outline-danger {
-        width: 56px;
-        height: 48px;
+        width: 54px;
+        height: 46px;
         padding: 0;
         border-radius: 999px;
         font-size: 0;
@@ -1812,7 +1887,7 @@ body { top: 0 !important; }
     }
     .topbar .btn-outline-danger i {
         margin: 0 !important;
-        font-size: 1.1rem;
+        font-size: 1.08rem;
     }
     .app-main > .row {
         --bs-gutter-x: .95rem;
@@ -1824,16 +1899,16 @@ body { top: 0 !important; }
         box-shadow: 0 22px 54px rgba(0,24,168,.18);
     }
     .balance-card:after {
-        width: 190px;
-        height: 190px;
-        top: -50px;
-        right: -76px;
+        width: 178px;
+        height: 178px;
+        top: -48px;
+        right: -78px;
     }
     .balance-card .display-5 {
-        font-size: clamp(2.45rem, 14vw, 3.4rem);
+        font-size: clamp(2.25rem, 13vw, 3.1rem);
         letter-spacing: 0;
     }
-    .balance-card h5 { font-size: 1.35rem; }
+    .balance-card h5 { font-size: 1.28rem; }
     .balance-card .btn {
         width: 100%;
         justify-content: center;
@@ -1845,13 +1920,13 @@ body { top: 0 !important; }
         padding: .42rem .7rem;
     }
     .virtual-card {
-        min-height: 218px;
-        padding: 1.25rem;
+        min-height: 216px;
+        padding: 1.2rem;
         border-radius: 12px;
         box-shadow: 0 20px 50px rgba(0,24,168,.18);
     }
     .virtual-card .fs-4 {
-        font-size: clamp(1.35rem, 7vw, 1.8rem) !important;
+        font-size: clamp(1.32rem, 7vw, 1.76rem) !important;
         letter-spacing: 0;
     }
     .premium-card,

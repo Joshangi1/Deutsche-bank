@@ -1,6 +1,6 @@
 <?php require_once __DIR__ . '/../config/database.php'; require_once __DIR__ . '/helpers.php'; require_once __DIR__ . '/frontend_components.php'; ?>
 <?php
-$publicLoginUrl = $GLOBALS['pageLoginUrl'] ?? 'login_us.php';
+$publicLoginUrl = $GLOBALS['pageLoginUrl'] ?? 'choose_banking.php?next=login';
 $pageLanguage = $GLOBALS['pageLanguage'] ?? 'en';
 $translateDisabled = !empty($GLOBALS['disableTranslate']);
 $publicStaticMode = !empty($GLOBALS['publicStaticMode']);
@@ -50,7 +50,8 @@ $navLabels = $isGermanPage
                 <li class="nav-item"><a class="nav-link" href="<?= url('personal.php') ?>"><?= e($navLabels['banking']) ?></a></li>
                 <li class="nav-item"><a class="nav-link" href="<?= url('about.php') ?>"><?= e($navLabels['about']) ?></a></li>
                 <li class="nav-item"><a class="nav-link" href="<?= url('contact.php') ?>"><?= e($navLabels['contact']) ?></a></li>
-                <li class="nav-item ms-lg-3"><a class="btn btn-primary-pill btn-sm px-4" href="<?= url($publicLoginUrl) ?>" data-region-auth="login"><?= e($navLabels['signin']) ?></a></li>
+                <?php if (!$translateDisabled): ?><li class="nav-item"><?= google_translate_widget() ?></li><?php endif; ?>
+                <li class="nav-item ms-lg-3"><a class="btn btn-primary-pill btn-sm px-4" href="<?= url($publicLoginUrl) ?>"><?= e($navLabels['signin']) ?></a></li>
             </ul>
         </div>
     </div>

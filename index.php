@@ -2,8 +2,6 @@
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/helpers.php';
 $pageTitle = 'Deutsche | Programmable Banking';
-$GLOBALS['pageLanguage'] = 'en';
-$GLOBALS['pageLoginUrl'] = 'login_us.php';
 $GLOBALS['publicStaticMode'] = true;
 include __DIR__ . '/includes/public_header.php';
 ?>
@@ -14,21 +12,21 @@ include __DIR__ . '/includes/public_header.php';
                 <h1>A partner you can bank on.</h1>
                 <p class="mt-4">Programmable financial services built to support any use case, quickly.</p>
                 <div class="home-region-router mt-5" id="banking-country">
-                    <label for="homeRegionSelect">Choose your banking country</label>
+                    <label class="eyebrow" for="homeRegionSelect">Choose your banking country</label>
                     <div class="home-region-control">
-                        <select id="homeRegionSelect" class="form-select" data-home-region>
+                        <select id="homeRegionSelect" class="form-select form-select-lg" data-home-region>
                             <option value="us" data-login="login_us.php" data-register="register_us.php" data-copy="U.S. checking, ACH, Zelle, bill pay, and wire transfers.">United States</option>
-                            <option value="de" data-login="login_de.php" data-register="register_de.php" data-copy="German Girokonto, SEPA transfers, BIC/SWIFT, and IBAN onboarding.">Germany</option>
                             <option value="ca" data-login="login_ca.php" data-register="register_ca.php" data-copy="Canadian chequing, Interac e-Transfer, EFT, bill payments, and wires.">Canada</option>
                             <option value="uk" data-login="login_uk.php" data-register="register_uk.php" data-copy="UK current accounts, Faster Payments, Direct Debits, and CHAPS.">United Kingdom</option>
-                            <option value="ch" data-login="login_ch.php" data-register="register_ch.php" data-copy="Swiss private accounts, SIC, QR-bills, IBAN, and international transfers.">Switzerland</option>
+                            <option value="ch" data-login="login_ch.php" data-register="register_ch.php" data-copy="Swiss accounts, SIC, QR-bills, IBAN, and international transfers.">Switzerland</option>
+                            <option value="de" data-login="login_de.php" data-register="register_de.php" data-copy="German accounts, SEPA, IBAN, and local banking details.">Germany</option>
                         </select>
-                        <span data-home-region-copy>U.S. checking, ACH, Zelle, bill pay, and wire transfers.</span>
+                        <p class="muted mb-0" data-home-region-copy>U.S. checking, ACH, Zelle, bill pay, and wire transfers.</p>
                     </div>
-                </div>
-                <div class="d-flex flex-wrap gap-3 mt-4">
-                    <a class="btn btn-primary-pill btn-lg" href="login_us.php" data-region-auth="login">Sign in</a>
-                    <a class="btn btn-light btn-lg border" href="register_us.php" data-region-auth="register">Open account</a>
+                    <div class="d-flex flex-wrap gap-3 mt-4">
+                        <a class="btn btn-primary-pill btn-lg" href="login_us.php" data-region-auth="login">Sign in</a>
+                        <a class="btn btn-light btn-lg border" href="register_us.php" data-region-auth="register">Open account</a>
+                    </div>
                 </div>
                 <div class="hero-panel">
                     <p><strong>Reinventing Modern Banking.</strong> From regulatory oversight to modern account tools, our role is to resolve friction behind the scenes so you can focus on creating meaningful financial experiences.</p>

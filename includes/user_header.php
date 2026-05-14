@@ -31,7 +31,7 @@ $notificationPreview = $previewStmt->fetchAll();
     <link rel="icon" href="<?= url('assets/icons/favicon.svg') ?>" type="image/svg+xml">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
-    <link href="<?= url('assets/css/styles.css') ?>" rel="stylesheet">
+    <link href="<?= url('assets/css/styles.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/styles.css') ?>" rel="stylesheet">
     <script>
         (function () {
             document.cookie = 'googtrans=;path=/;expires=Thu, 01 Jan 1970 00:00:00 GMT';
