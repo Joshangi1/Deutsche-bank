@@ -71,9 +71,11 @@ if (!$account) {
     exit;
 }
 
-$isUsAccount = user_is_us_account($user, $account);
+$bankingRegion = user_banking_region($user, $account);
+$regionConfig = banking_region_config($bankingRegion);
+$isUsAccount = $bankingRegion === 'us';
 $currency = user_account_currency($user, $account);
-$useGermanLabels = !$isUsAccount && current_language() !== 'en';
+$useGermanLabels = $regionConfig['language'] === 'de';
 $displayIban = $account['iban'] ?? $user['iban'] ?? '';
 $displayIban = $displayIban !== '' ? format_iban_display($displayIban) : '';
 $displayBic = $account['bic'] ?? $account['routing_number'] ?? DEFAULT_BIC;
@@ -107,7 +109,7 @@ $isNewAccount = $txCount === 0 && (float) $account['available_balance'] === 0.0 
 $accountStatus = strtolower((string) ($user['status'] ?? 'active'));
 $verificationStatus = strtolower((string) ($user['verification_status'] ?? 'not_started'));
 
-if ($isUsAccount) {
+if ($bankingRegion === 'us') {
     $ui = [
         'available' => 'Available balance', 'pending' => 'Pending', 'savings' => 'Savings', 'account' => 'Account',
         'transfer' => 'Wire transfer', 'recent' => 'Recent transactions', 'view_all' => 'View all',
@@ -119,6 +121,42 @@ if ($isUsAccount) {
         'bill_title' => 'Upcoming bill payments', 'bill_day' => 'Due day', 'bill_active' => 'AUTOPAY', 'bill_manual' => 'MANUAL',
         'bill_empty' => 'No bill payments yet. Add a biller when you are ready.',
         'recipient_title' => 'Zelle recipients', 'recipient_action' => 'Send', 'recipient_empty' => 'No Zelle recipients yet.',
+    ];
+} elseif ($bankingRegion === 'ca') {
+    $ui = [
+        'available' => 'Available balance', 'pending' => 'Pending', 'savings' => 'Savings', 'account' => 'Account',
+        'transfer' => 'Wire transfer', 'recent' => 'Recent transactions', 'view_all' => 'View all',
+        'balance' => 'Balance trend', 'cash' => 'Cash flow', 'income' => 'Income', 'expenses' => 'Expenses',
+        'verification' => 'Verification status', 'review' => 'Current account review', 'quick' => 'Quick access',
+        'link_card' => 'Add Credit Card', 'statements' => 'Statements', 'security' => 'Security',
+        'hero_eyebrow' => 'Welcome to Deutsche Canada', 'hero_title' => 'Your Canadian chequing account is ready',
+        'hero_copy' => 'Interac e-Transfer, EFT, bill payments, and wire tools are available after verification.',
+        'bill_title' => 'Upcoming bill payments', 'bill_day' => 'Due day', 'bill_active' => 'AUTOPAY', 'bill_manual' => 'MANUAL',
+        'bill_empty' => 'No bill payments yet.', 'recipient_title' => 'Interac recipients', 'recipient_action' => 'Send', 'recipient_empty' => 'No recipients yet.',
+    ];
+} elseif ($bankingRegion === 'uk') {
+    $ui = [
+        'available' => 'Available balance', 'pending' => 'Pending', 'savings' => 'Savings', 'account' => 'Account',
+        'transfer' => 'CHAPS transfer', 'recent' => 'Recent transactions', 'view_all' => 'View all',
+        'balance' => 'Balance trend', 'cash' => 'Cash flow', 'income' => 'Income', 'expenses' => 'Expenses',
+        'verification' => 'Verification status', 'review' => 'Current account review', 'quick' => 'Quick access',
+        'link_card' => 'Add Credit Card', 'statements' => 'Statements', 'security' => 'Security',
+        'hero_eyebrow' => 'Welcome to Deutsche UK', 'hero_title' => 'Your UK current account is ready',
+        'hero_copy' => 'Faster Payments, standing orders, direct debits, and CHAPS tools are available after verification.',
+        'bill_title' => 'Direct debits and standing orders', 'bill_day' => 'Run day', 'bill_active' => 'ACTIVE', 'bill_manual' => 'MANUAL',
+        'bill_empty' => 'No direct debits yet.', 'recipient_title' => 'Faster Payments recipients', 'recipient_action' => 'Send', 'recipient_empty' => 'No recipients yet.',
+    ];
+} elseif ($bankingRegion === 'ch') {
+    $ui = [
+        'available' => 'Available balance', 'pending' => 'Pending', 'savings' => 'Savings', 'account' => 'Account',
+        'transfer' => 'International transfer', 'recent' => 'Recent transactions', 'view_all' => 'View all',
+        'balance' => 'Balance trend', 'cash' => 'Cash flow', 'income' => 'Income', 'expenses' => 'Expenses',
+        'verification' => 'Verification status', 'review' => 'Current account review', 'quick' => 'Quick access',
+        'link_card' => 'Add Credit Card', 'statements' => 'Statements', 'security' => 'Security',
+        'hero_eyebrow' => 'Welcome to Deutsche Switzerland', 'hero_title' => 'Your Swiss private account is ready',
+        'hero_copy' => 'Swiss IBAN, BIC/SWIFT, SIC payments, QR-bills, and international transfer tools are available after verification.',
+        'bill_title' => 'Scheduled QR-bills', 'bill_day' => 'Run day', 'bill_active' => 'ACTIVE', 'bill_manual' => 'MANUAL',
+        'bill_empty' => 'No QR-bills yet.', 'recipient_title' => 'Swiss recipients', 'recipient_action' => 'Send', 'recipient_empty' => 'No recipients yet.',
     ];
 } elseif ($useGermanLabels) {
     $ui = [
@@ -196,9 +234,9 @@ $newAccountCards = $isUsAccount ? [
                 <div class="col-md-5">
                     <div class="text-white-50 small"><?= e($ui['account']) ?></div>
                     <h5><?= e($account['account_type']) ?></h5>
-                    <?php if ($isUsAccount): ?>
-                        <p class="mb-1">Account <?= e(mask_account($account['account_number'])) ?></p>
-                        <p>Routing <?= e($account['routing_number'] ?: US_ROUTING_NUMBER) ?></p>
+                    <?php if (in_array($bankingRegion, ['us', 'ca', 'uk'], true)): ?>
+                        <p class="mb-1"><?= e($regionConfig['account_label']) ?> <?= e(mask_account($account['account_number'])) ?></p>
+                        <p><?= e($regionConfig['routing_label']) ?> <?= e($account['routing_number'] ?: $regionConfig['routing']) ?></p>
                     <?php else: ?>
                         <p class="mb-1">IBAN <?= e($displayIban) ?></p>
                         <p>BIC/SWIFT <?= e($displayBic) ?></p>
@@ -219,12 +257,12 @@ $newAccountCards = $isUsAccount ? [
     <div class="col-xl-8"><div class="table-card"><div class="p-4 d-flex justify-content-between"><h5 class="fw-bold mb-0"><?= e($ui['recent']) ?></h5><a href="user/transactions.php"><?= e($ui['view_all']) ?></a></div><div class="table-responsive"><table class="table transaction-table align-middle mb-0"><tbody><?php foreach ($txRows as $row): ?><?php $isCredit = (float) $row['amount'] > 0; ?><tr><td><div class="tx-merchant"><span class="tx-icon <?= $isCredit ? 'tx-icon-credit' : '' ?>"><i class="fa-solid <?= e(transaction_icon($row)) ?>"></i></span><div><strong><?= e($row['description']) ?></strong><div class="small muted"><?= e(transaction_display_date($row['created_at'])) ?> &middot; <?= e(transaction_category($row)) ?></div></div></div></td><td><span class="status-pill status-<?= $row['status']==='completed'?'success':(in_array($row['status'], ['failed','rejected'], true)?'danger':'warning') ?>"><?= e(strtoupper($row['status'])) ?></span></td><td class="text-end fw-bold tx-amount <?= $isCredit ? 'tx-credit' : 'tx-debit' ?>"><?= $isCredit ? '+' : '-' ?><?= money(abs((float) $row['amount']), $currency) ?></td></tr><?php endforeach; ?><?php if (!$txRows): ?><tr><td colspan="3" class="text-center muted py-5"><i class="fa-solid fa-receipt d-block fs-3 mb-2"></i>No transactions yet.</td></tr><?php endif; ?></tbody></table></div></div></div>
     <div class="col-xl-4"><div class="table-card p-4 h-100"><h5 class="fw-bold"><?= e($ui['balance']) ?></h5><?php if ($isNewAccount): ?><div class="empty-mini">Charts will populate after account activity begins.</div><?php else: ?><canvas data-chart="line" height="220"></canvas><?php endif; ?></div></div>
     <div class="col-xl-4"><div class="premium-card p-4 h-100"><h5 class="fw-bold"><?= e($ui['quick']) ?></h5><div class="quick-grid">
+        <a href="user/accounts.php"><i class="fa-solid fa-layer-group"></i><span><?= $isUsAccount ? 'Accounts' : ($useGermanLabels ? 'Konten' : 'Accounts') ?></span></a>
         <a href="user/linked_accounts.php"><i class="fa-solid fa-credit-card"></i><span><?= e($ui['link_card']) ?></span></a>
-        <a href="user/send_money.php"><i class="fa-solid fa-bolt"></i><span><?= $isUsAccount ? 'Zelle' : 'SEPA Instant' ?></span></a>
-        <a href="user/bill_pay.php"><i class="fa-solid fa-calendar-check"></i><span><?= $isUsAccount ? 'Bill Pay' : ($useGermanLabels ? 'Dauerauftraege' : 'Standing Orders') ?></span></a>
-        <a href="user/ach_transfers.php"><i class="fa-solid fa-building-columns"></i><span><?= $isUsAccount ? 'ACH' : 'SEPA' ?></span></a>
-        <a href="user/transfers.php"><i class="fa-solid fa-right-left"></i><span><?= $isUsAccount ? 'Wire' : 'Transfer' ?></span></a>
-        <a href="user/statements.php"><i class="fa-solid fa-file-lines"></i><span><?= e($ui['statements']) ?></span></a>
+        <a href="user/send_money.php"><i class="fa-solid fa-bolt"></i><span><?= e($regionConfig['rail_primary']) ?></span></a>
+        <a href="user/bill_pay.php"><i class="fa-solid fa-calendar-check"></i><span><?= e($regionConfig['rail_scheduled']) ?></span></a>
+        <a href="user/ach_transfers.php"><i class="fa-solid fa-building-columns"></i><span><?= e($regionConfig['rail_bank']) ?></span></a>
+        <a href="user/loans.php"><i class="fa-solid fa-hand-holding-dollar"></i><span><?= $useGermanLabels ? 'Kredite' : 'Loans' ?></span></a>
     </div></div></div>
     <div class="col-xl-4"><div class="table-card p-4 h-100"><h5 class="fw-bold"><?= e($ui['cash']) ?></h5><div class="cash-flow"><div><span><?= e($ui['income']) ?></span><strong class="tx-credit"><?= money($monthlyIncome->fetch()['total'], $currency) ?></strong></div><div><span><?= e($ui['expenses']) ?></span><strong class="tx-debit"><?= money($monthlyExpense->fetch()['total'], $currency) ?></strong></div></div><?php if ($isNewAccount): ?><div class="empty-mini">Income and expenses will appear after your first posted transaction.</div><?php else: ?><canvas data-chart="doughnut" height="160" data-chart-region="<?= $isUsAccount ? 'us' : 'eu' ?>"></canvas><?php endif; ?></div></div>
     <div class="col-xl-4"><div class="premium-card p-4 h-100"><h5 class="fw-bold"><?= e($ui['verification']) ?></h5><p class="muted"><?= e($ui['review']) ?></p><div class="goal-ring"><strong><?= e(strtoupper(str_replace('_',' ', $user['verification_status'] ?? 'NOT STARTED'))) ?></strong><span><?= e(strtoupper(str_replace('_',' ', $user['risk_status'] ?? 'CLEAR'))) ?></span></div></div></div>

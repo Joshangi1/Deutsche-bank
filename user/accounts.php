@@ -1,0 +1,85 @@
+<?php
+$pageTitle = 'Accounts';
+require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../includes/helpers.php';
+ensure_banking_schema();
+$user = require_user();
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verify_csrf();
+    try {
+        banking_create_user_account((int) $user['id'], (string) ($_POST['account_type'] ?? 'Savings Account'), banking_actor('customer', (int) $user['id']));
+        flash('success', 'New account opened under your existing login.');
+    } catch (Throwable $e) {
+        flash('danger', $e->getMessage());
+    }
+    header('Location: accounts.php');
+    exit;
+}
+
+$accounts = user_accounts((int) $user['id']);
+$primary = $accounts[0] ?? null;
+$region = user_banking_region($user, $primary);
+$regionConfig = banking_region_config($region);
+$usesIban = in_array($region, ['de', 'ch'], true);
+$currency = user_account_currency($user, $primary);
+$accountOptions = in_array($region, ['us', 'ca'], true)
+    ? ['Everyday Checking', 'Savings Account', 'Money Market', 'Business Current Account']
+    : ($region === 'uk' ? ['Current Account', 'Savings Account', 'Business Current Account'] : ['Girokonto', 'Tagesgeld', 'Business Current Account']);
+?>
+<?php include __DIR__ . '/../includes/user_header.php'; ?>
+<div class="banking-hero mb-4">
+    <div>
+        <div class="eyebrow">Account portfolio</div>
+        <h2>Open and manage accounts</h2>
+        <p>Keep checking, savings, and business accounts inside the same secure login.</p>
+    </div>
+    <i class="fa-solid fa-layer-group"></i>
+</div>
+<div class="row g-4">
+    <div class="col-xl-8">
+        <div class="row g-3">
+            <?php foreach ($accounts as $account): ?>
+                <div class="col-md-6">
+                    <div class="premium-card p-4 h-100">
+                        <div class="d-flex justify-content-between align-items-start gap-3">
+                            <div>
+                                <div class="eyebrow"><?= (int) $account['id'] === (int) ($primary['id'] ?? 0) ? 'Primary account' : 'Additional account' ?></div>
+                                <h5 class="fw-bold mb-1"><?= e($account['account_type']) ?></h5>
+                                <p class="muted mb-3">Opened <?= e(date('M j, Y', strtotime((string) $account['created_at']))) ?></p>
+                            </div>
+                            <span class="status-pill status-success">ACTIVE</span>
+                        </div>
+                        <div class="account-detail-grid">
+                            <div><span>Available</span><strong><?= money($account['available_balance'], $currency) ?></strong></div>
+                            <div><span>Pending</span><strong><?= money($account['pending_balance'], $currency) ?></strong></div>
+                            <?php if (!$usesIban): ?>
+                                <div><span><?= e($regionConfig['account_label']) ?></span><strong><?= e(mask_account((string) $account['account_number'])) ?></strong></div>
+                                <div><span><?= e($regionConfig['routing_label']) ?></span><strong><?= e($account['routing_number'] ?: $regionConfig['routing']) ?></strong></div>
+                            <?php else: ?>
+                                <div><span>IBAN</span><strong><?= e(format_iban_display($account['iban'] ?? '')) ?></strong></div>
+                                <div><span>BIC/SWIFT</span><strong><?= e($account['bic'] ?: DEFAULT_BIC) ?></strong></div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <form class="premium-card p-4" method="post">
+            <?= csrf_field() ?>
+            <span class="tx-icon mb-3"><i class="fa-solid fa-plus"></i></span>
+            <h5 class="fw-bold">Open another account</h5>
+            <p class="muted">Create a separate account number while keeping the same profile, cards, security, and dashboard login.</p>
+            <label class="form-label">Account type</label>
+            <select name="account_type" class="form-select mb-3">
+                <?php foreach ($accountOptions as $option): ?>
+                    <option value="<?= e($option) ?>"><?= e($option) ?></option>
+                <?php endforeach; ?>
+            </select>
+            <button class="btn btn-navy w-100">Open account</button>
+        </form>
+    </div>
+</div>
+<?php include __DIR__ . '/../includes/user_footer.php'; ?>

@@ -265,6 +265,24 @@ function ensure_banking_schema(): void
             CONSTRAINT referral_bonus_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
             CONSTRAINT referral_bonus_tx_fk FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci',
+        'loan_applications' => 'CREATE TABLE IF NOT EXISTS loan_applications (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            loan_type VARCHAR(80) NOT NULL,
+            amount DECIMAL(14,2) NOT NULL,
+            currency CHAR(3) NOT NULL,
+            term_months INT NOT NULL,
+            purpose VARCHAR(180) DEFAULT NULL,
+            status ENUM("pending_review","approved","rejected","cancelled") DEFAULT "pending_review",
+            reference_code VARCHAR(32) NOT NULL,
+            reviewed_by INT DEFAULT NULL,
+            reviewed_at DATETIME DEFAULT NULL,
+            review_note TEXT DEFAULT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY idx_loan_reference (reference_code),
+            INDEX idx_loan_user_status (user_id, status),
+            CONSTRAINT loan_applications_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci',
         'password_resets' => 'CREATE TABLE IF NOT EXISTS password_resets (
             id INT AUTO_INCREMENT PRIMARY KEY,
             user_id INT NOT NULL,
@@ -588,6 +606,9 @@ function money(float|int|string $amount, ?string $currency = null): string
     $value = (float) $amount;
     $language = current_language();
     $currency = $currency ?: ($language === 'en' ? 'USD' : 'EUR');
+    if (in_array($currency, ['GBP', 'CAD', 'CHF'], true)) {
+        return $currency . ' ' . number_format($value, 2);
+    }
     if ($currency === 'EUR') {
         return number_format($value, 2, ',', '.') . ' €';
     }
@@ -605,15 +626,57 @@ function user_is_us_account(?array $user = null, ?array $account = null): bool
     if (in_array($country, ['united states', 'usa', 'us'], true)) {
         return true;
     }
+    if (in_array($country, ['canada', 'ca', 'united kingdom', 'uk', 'gb', 'great britain', 'switzerland', 'swiss', 'ch', 'germany', 'deutschland', 'de'], true)) {
+        return false;
+    }
     if ($account && empty($account['iban']) && !empty($account['routing_number'])) {
         return true;
     }
     return false;
 }
 
+function banking_region_config(string $regionOrCountry): array
+{
+    $key = strtolower(trim($regionOrCountry));
+    $key = match ($key) {
+        'united states', 'usa', 'us' => 'us',
+        'germany', 'deutschland', 'de', 'eu' => 'de',
+        'canada', 'ca' => 'ca',
+        'united kingdom', 'uk', 'gb', 'great britain' => 'uk',
+        'switzerland', 'swiss', 'ch' => 'ch',
+        default => $key,
+    };
+    $configs = [
+        'us' => ['region' => 'us', 'country' => 'United States', 'language' => 'en', 'currency' => 'USD', 'login' => 'login_us.php', 'register' => 'register_us.php', 'account_type' => 'Premium Checking', 'routing' => US_ROUTING_NUMBER, 'rail_primary' => 'Zelle', 'rail_scheduled' => 'Bill Pay', 'rail_bank' => 'ACH Transfers', 'rail_wire' => 'Wire Transfers', 'transfer' => 'Wire transfer', 'workspace' => 'Deutsche US banking', 'account_label' => 'Account', 'routing_label' => 'Routing'],
+        'de' => ['region' => 'de', 'country' => 'Germany', 'language' => 'de', 'currency' => 'EUR', 'login' => 'login_de.php', 'register' => 'register_de.php', 'account_type' => 'Girokonto', 'routing' => DEFAULT_BIC, 'rail_primary' => 'SEPA Instant', 'rail_scheduled' => 'Dauerauftraege', 'rail_bank' => 'SEPA-Ueberweisungen', 'rail_wire' => 'Transfers', 'transfer' => 'SEPA-Ueberweisung', 'workspace' => 'Deutsche European banking', 'account_label' => 'IBAN', 'routing_label' => 'BIC/SWIFT'],
+        'ca' => ['region' => 'ca', 'country' => 'Canada', 'language' => 'en', 'currency' => 'CAD', 'login' => 'login_ca.php', 'register' => 'register_ca.php', 'account_type' => 'Premium Chequing', 'routing' => '001000002', 'rail_primary' => 'Interac e-Transfer', 'rail_scheduled' => 'Bill Payments', 'rail_bank' => 'EFT Transfers', 'rail_wire' => 'Wire Transfers', 'transfer' => 'Wire transfer', 'workspace' => 'Deutsche Canada banking', 'account_label' => 'Account', 'routing_label' => 'Institution/Transit'],
+        'uk' => ['region' => 'uk', 'country' => 'United Kingdom', 'language' => 'en', 'currency' => 'GBP', 'login' => 'login_uk.php', 'register' => 'register_uk.php', 'account_type' => 'Current Account', 'routing' => '040004', 'rail_primary' => 'Faster Payments', 'rail_scheduled' => 'Direct Debits', 'rail_bank' => 'Standing Orders', 'rail_wire' => 'CHAPS Transfers', 'transfer' => 'CHAPS transfer', 'workspace' => 'Deutsche UK banking', 'account_label' => 'Account', 'routing_label' => 'Sort code'],
+        'ch' => ['region' => 'ch', 'country' => 'Switzerland', 'language' => 'en', 'currency' => 'CHF', 'login' => 'login_ch.php', 'register' => 'register_ch.php', 'account_type' => 'Privatkonto', 'routing' => 'DEUTCHZZXXX', 'rail_primary' => 'SIC Instant', 'rail_scheduled' => 'QR-Bills', 'rail_bank' => 'Swiss Transfers', 'rail_wire' => 'International Transfers', 'transfer' => 'International transfer', 'workspace' => 'Deutsche Switzerland banking', 'account_label' => 'IBAN', 'routing_label' => 'BIC/SWIFT'],
+    ];
+    return $configs[$key] ?? $configs['de'];
+}
+
+function user_banking_region(?array $user = null, ?array $account = null): string
+{
+    $country = strtolower(trim((string) ($user['country'] ?? '')));
+    if (in_array($country, ['united states', 'usa', 'us'], true)) return 'us';
+    if (in_array($country, ['canada', 'ca'], true)) return 'ca';
+    if (in_array($country, ['united kingdom', 'uk', 'gb', 'great britain'], true)) return 'uk';
+    if (in_array($country, ['switzerland', 'swiss', 'ch'], true)) return 'ch';
+    if (in_array($country, ['germany', 'deutschland', 'de'], true)) return 'de';
+    if ($account && empty($account['iban']) && !empty($account['routing_number'])) {
+        $routing = preg_replace('/\D+/', '', (string) $account['routing_number']);
+        if (strlen($routing) === 6) return 'uk';
+        if (strlen($routing) === 9 && str_starts_with($routing, '001')) return 'ca';
+        return 'us';
+    }
+    if ($account && !empty($account['iban']) && str_starts_with((string) $account['iban'], 'CH')) return 'ch';
+    return 'de';
+}
+
 function user_account_currency(?array $user = null, ?array $account = null): string
 {
-    return user_is_us_account($user, $account) ? 'USD' : 'EUR';
+    return banking_region_config(user_banking_region($user, $account))['currency'];
 }
 
 function current_user(): ?array
@@ -1437,7 +1500,7 @@ function banking_create_card_funding(int $cardId, float $amount, string $schedul
 
 function banking_request_credit_card_funding(int $userId, int $cardId, string $direction, float $amount, string $note, array $actor): int
 {
-    $direction = $direction === 'fund_card' ? 'fund_card' : 'fund_account';
+    $direction = 'fund_card';
     $amount = abs(banking_validate_amount($amount, false));
     $stmt = db()->prepare('SELECT * FROM linked_cards WHERE id=? AND user_id=? LIMIT 1');
     $stmt->execute([$cardId, $userId]);
@@ -2146,6 +2209,96 @@ function user_account(int $userId): ?array
     $stmt = db()->prepare('SELECT * FROM accounts WHERE user_id=? LIMIT 1');
     $stmt->execute([$userId]);
     return $stmt->fetch() ?: null;
+}
+
+function user_accounts(int $userId): array
+{
+    $stmt = db()->prepare('SELECT * FROM accounts WHERE user_id=? ORDER BY id ASC');
+    $stmt->execute([$userId]);
+    return $stmt->fetchAll();
+}
+
+function banking_create_user_account(int $userId, string $accountType, array $actor): int
+{
+    ensure_banking_schema();
+    $allowed = ['Premium Checking', 'Premium Chequing', 'Everyday Checking', 'Current Account', 'Savings Account', 'Money Market', 'Business Current Account', 'Girokonto', 'Tagesgeld'];
+    $accountType = trim($accountType);
+    if (!in_array($accountType, $allowed, true)) {
+        $accountType = 'Savings Account';
+    }
+
+    $userStmt = db()->prepare('SELECT * FROM users WHERE id=? LIMIT 1');
+    $userStmt->execute([$userId]);
+    $user = $userStmt->fetch();
+    if (!$user) {
+        throw new RuntimeException('User not found.');
+    }
+
+    $primary = user_account($userId);
+    $region = user_banking_region($user, $primary);
+    $regionConfig = banking_region_config($region);
+    $usesIban = in_array($region, ['de', 'ch'], true);
+    $accountNumber = '';
+    do {
+        $accountNumber = (string) random_int(1000000000, 9999999999);
+        $check = db()->prepare('SELECT id FROM accounts WHERE account_number=? LIMIT 1');
+        $check->execute([$accountNumber]);
+    } while ($check->fetch());
+
+    $iban = null;
+    $bic = null;
+    $routing = $regionConfig['routing'];
+    if ($usesIban) {
+        $iban = $region === 'ch' ? 'CH9300762011623852957' : demo_german_iban();
+        $bic = $regionConfig['routing'];
+        if ($accountType === 'Premium Checking' || $accountType === 'Everyday Checking') {
+            $accountType = $regionConfig['account_type'];
+        }
+        if ($accountType === 'Savings Account') {
+            $accountType = $region === 'ch' ? 'Sparkonto' : 'Tagesgeld';
+        }
+    } elseif ($region === 'ca' && $accountType === 'Premium Checking') {
+        $accountType = 'Premium Chequing';
+    } elseif ($region === 'uk' && $accountType === 'Premium Checking') {
+        $accountType = 'Current Account';
+    }
+
+    db()->prepare('INSERT INTO accounts (user_id, account_number, routing_number, iban, bic, account_type, available_balance, pending_balance, savings_balance) VALUES (?,?,?,?,?,?,?,?,?)')
+        ->execute([$userId, $accountNumber, $routing, $iban, $bic, $accountType, 0, 0, 0]);
+    $accountId = (int) db()->lastInsertId();
+    banking_emit_event('account.created', [
+        'account_id' => $accountId,
+        'account_type' => $accountType,
+        'system_detail' => 'Customer opened an additional account under the same login.',
+    ], $actor, $userId, 'account', $accountId);
+    return $accountId;
+}
+
+function banking_create_loan_application(int $userId, string $loanType, float $amount, int $termMonths, string $purpose, array $actor): int
+{
+    ensure_banking_schema();
+    $amount = abs(banking_validate_amount($amount, false));
+    if ($termMonths < 3 || $termMonths > 360) {
+        throw new RuntimeException('Choose a loan term between 3 and 360 months.');
+    }
+    $account = user_account($userId);
+    $userStmt = db()->prepare('SELECT * FROM users WHERE id=? LIMIT 1');
+    $userStmt->execute([$userId]);
+    $user = $userStmt->fetch();
+    $currency = user_account_currency($user ?: null, $account);
+    $reference = 'LON' . random_int(100000, 999999);
+    db()->prepare('INSERT INTO loan_applications (user_id, loan_type, amount, currency, term_months, purpose, reference_code) VALUES (?, ?, ?, ?, ?, ?, ?)')
+        ->execute([$userId, trim($loanType) ?: 'Personal Loan', $amount, $currency, $termMonths, trim($purpose), $reference]);
+    $loanId = (int) db()->lastInsertId();
+    banking_emit_event('loan_application.created', [
+        'loan_id' => $loanId,
+        'reference' => $reference,
+        'amount' => $amount,
+        'currency' => $currency,
+        'system_detail' => 'Customer submitted a loan request for review.',
+    ], $actor, $userId, 'loan', $loanId);
+    notify_customer_event($userId, 'transfer_pending', ['message' => 'Your loan request was submitted for review.']);
+    return $loanId;
 }
 
 function seed_banking_experience(int $userId): void

@@ -12,8 +12,10 @@ $accountForRegion = $isOfflineDemo ? [
     'iban' => (($user['country'] ?? '') === 'Germany') ? 'DE89370400440532013000' : '',
     'routing_number' => (($user['country'] ?? '') === 'United States') ? US_ROUTING_NUMBER : '',
 ] : user_account((int) $user['id']);
-$isUsExperience = user_is_us_account($user, $accountForRegion);
-$accountLanguage = $isUsExperience ? 'en' : 'de';
+$bankingRegion = user_banking_region($user, $accountForRegion);
+$regionConfig = banking_region_config($bankingRegion);
+$isUsExperience = $bankingRegion === 'us';
+$accountLanguage = $regionConfig['language'];
 $GLOBALS['pageLanguage'] = $accountLanguage;
 $GLOBALS['disableTranslate'] = true;
 $isRestricted = account_is_restricted($user);
@@ -55,12 +57,14 @@ if (!$isOfflineDemo) {
     <nav class="nav flex-column">
         <?php $nav = [
             ['dashboard.php','fa-gauge-high','Overview'],
-            ['user/send_money.php','fa-bolt',$isUsExperience ? 'Zelle' : 'SEPA Instant'],
-            ['user/bill_pay.php','fa-calendar-check',$isUsExperience ? 'Bill Pay' : 'Standing Orders'],
-            ['user/ach_transfers.php','fa-building-columns',$isUsExperience ? 'ACH Transfers' : 'SEPA Transfers'],
+            ['user/accounts.php','fa-layer-group',$accountLanguage === 'de' ? 'Konten' : 'Accounts'],
+            ['user/send_money.php','fa-bolt',$regionConfig['rail_primary']],
+            ['user/bill_pay.php','fa-calendar-check',$regionConfig['rail_scheduled']],
+            ['user/ach_transfers.php','fa-building-columns',$regionConfig['rail_bank']],
             ['user/linked_accounts.php','fa-credit-card','Manage Credit Cards'],
+            ['user/loans.php','fa-hand-holding-dollar',$accountLanguage === 'de' ? 'Kredite' : 'Loans'],
             ['user/transactions.php','fa-receipt','Transactions'],
-            ['user/transfers.php','fa-right-left',$isUsExperience ? 'Wire Transfers' : 'Transfers'],
+            ['user/transfers.php','fa-right-left',$regionConfig['rail_wire']],
             ['user/cards.php','fa-credit-card','Cards'],
             ['user/deposits.php','fa-camera','Deposits'],
             ['user/statements.php','fa-file-lines','Statements'],
@@ -84,10 +88,10 @@ if (!$isOfflineDemo) {
     <div class="topbar">
         <div class="d-flex align-items-center gap-3">
             <button class="btn btn-navy mobile-toggle" data-toggle-sidebar><i class="fa-solid fa-bars"></i></button>
-            <div><div class="topbar-kicker"><?= $isUsExperience ? 'Deutsche US banking' : 'Deutsche European banking' ?></div><h1 class="h3 mb-0 fw-bold"><?= e($pageTitle ?? 'Dashboard') ?></h1><div class="muted">Welcome back, <?= e($user['first_name']) ?></div></div>
+            <div><div class="topbar-kicker"><?= e($regionConfig['workspace']) ?></div><h1 class="h3 mb-0 fw-bold"><?= e($pageTitle ?? 'Dashboard') ?></h1><div class="muted">Welcome back, <?= e($user['first_name']) ?></div></div>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <span class="language-static-pill"><i class="fa-solid fa-language"></i><?= $isUsExperience ? 'English' : 'Deutsch' ?></span>
+            <span class="language-static-pill"><i class="fa-solid fa-language"></i><?= $accountLanguage === 'de' ? 'Deutsch' : 'English' ?></span>
             <div class="dropdown notification-menu">
                 <button class="btn btn-light border position-relative" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="fa-solid fa-bell"></i>

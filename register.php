@@ -5,12 +5,13 @@ require_once __DIR__ . '/includes/helpers.php';
 ensure_banking_schema();
 
 $scriptName = basename((string) ($_SERVER['SCRIPT_NAME'] ?? 'register.php'));
-$authRegion = $GLOBALS['authRegion'] ?? (str_contains($scriptName, '_us') ? 'us' : (str_contains($scriptName, '_de') ? 'de' : 'de'));
+$authRegion = $GLOBALS['authRegion'] ?? (str_contains($scriptName, '_us') ? 'us' : (str_contains($scriptName, '_ca') ? 'ca' : (str_contains($scriptName, '_uk') ? 'uk' : (str_contains($scriptName, '_ch') ? 'ch' : (str_contains($scriptName, '_de') ? 'de' : 'de')))));
+$regionConfig = banking_region_config($authRegion);
 $isUsPortal = $authRegion === 'us';
-$forcedCountry = $isUsPortal ? 'United States' : 'Germany';
-$pageLanguage = $isUsPortal ? 'en' : 'de';
-$pageLoginUrl = $isUsPortal ? 'login_us.php' : 'login_de.php';
-$pageRegisterUrl = $isUsPortal ? 'register_us.php' : 'register_de.php';
+$forcedCountry = $regionConfig['country'];
+$pageLanguage = $regionConfig['language'];
+$pageLoginUrl = $regionConfig['login'];
+$pageRegisterUrl = $regionConfig['register'];
 $GLOBALS['pageLanguage'] = $pageLanguage;
 $GLOBALS['pageLoginUrl'] = $pageLoginUrl;
 $GLOBALS['forcePageLanguage'] = true;
@@ -24,9 +25,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $last = $nameParts[1] ?? '';
     $email = strtolower(trim((string) ($_POST['email'] ?? '')));
     $country = $forcedCountry;
-    $isUsOnboarding = $country === 'United States';
+    $region = $regionConfig['region'];
+    $isUsOnboarding = $region === 'us';
+    $usesIbanOnboarding = in_array($region, ['de', 'ch'], true);
+    $defaultPhoneCode = match ($region) {
+        'us', 'ca' => '+1',
+        'uk' => '+44',
+        'ch' => '+41',
+        default => '+49',
+    };
     $phoneRaw = trim((string) ($_POST['phone'] ?? ''));
-    $phoneCountryCode = trim((string) ($_POST['phone_country_code'] ?? ($isUsOnboarding ? '+1' : '+49')));
+    $phoneCountryCode = trim((string) ($_POST['phone_country_code'] ?? $defaultPhoneCode));
     $phone = str_starts_with($phoneRaw, '+') ? normalize_sms_phone($phoneRaw) : normalize_sms_phone($phoneCountryCode . ltrim($phoneRaw, '0'));
     $password = (string) ($_POST['password'] ?? '');
     $dob = trim((string) ($_POST['date_of_birth'] ?? ''));
@@ -41,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $address1 = trim((string) ($_POST['address_line1'] ?? ''));
     $address2 = trim((string) ($_POST['address_line2'] ?? ''));
     $city = trim((string) ($_POST['city'] ?? ''));
-    $state = $isUsOnboarding ? strtoupper(substr(trim((string) ($_POST['state_code'] ?? '')), 0, 2)) : 'DE';
+    $state = in_array($region, ['us', 'ca'], true) ? strtoupper(substr(trim((string) ($_POST['state_code'] ?? '')), 0, 2)) : strtoupper($region);
     $postal = trim((string) ($_POST['postal_code'] ?? ''));
     $employment = trim((string) ($_POST['employment_status'] ?? ''));
     $income = trim((string) ($_POST['annual_income_range'] ?? ''));
@@ -54,17 +63,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'blink' => (string) ($_POST['biometric_blink'] ?? ''),
     ];
 
-    $allowedDocuments = $isUsOnboarding ? ['id_card', 'driver_license', 'passport'] : ['national_id', 'passport'];
+    $allowedDocuments = in_array($region, ['us', 'ca', 'uk'], true) ? ['id_card', 'driver_license', 'passport'] : ['national_id', 'passport'];
     $documentType = in_array(($_POST['document_type'] ?? ''), $allowedDocuments, true) ? (string) $_POST['document_type'] : $allowedDocuments[0];
     $hasKycUpload = !empty($_FILES['identity_document']['name']);
     $hasBiometricCapture = trim($biometricCaptures['forward']) !== '';
     $passwordOk = strlen($password) >= 6 && hash_equals($password, $confirmPassword);
-    $identityOk = $isUsOnboarding ? is_valid_us_ssn($ssnDigits) : is_valid_german_tax_id($taxId);
-    $bankingOk = $isUsOnboarding
+    $identityOk = $isUsOnboarding ? is_valid_us_ssn($ssnDigits) : ($region === 'de' ? is_valid_german_tax_id($taxId) : strlen($taxId) >= 4);
+    $bankingOk = !$usesIbanOnboarding
         ? (!$linkJointAccount || ($linkedInstitution !== '' && preg_match('/^\d{9}$/', $externalRouting) && preg_match('/^\d{4,17}$/', $externalAccount)))
-        : ($iban === '' || is_valid_german_iban($iban));
-    $postalOk = $isUsOnboarding ? preg_match('/^\d{5}(-\d{4})?$/', $postal) : preg_match('/^\d{5}$/', $postal);
-    $stateOk = $isUsOnboarding ? preg_match('/^[A-Z]{2}$/', $state) : true;
+        : ($iban === '' || ($region === 'ch' ? preg_match('/^CH[0-9A-Z]{19}$/', $iban) : is_valid_german_iban($iban)));
+    $postalOk = match ($region) {
+        'us' => preg_match('/^\d{5}(-\d{4})?$/', $postal),
+        'ca' => preg_match('/^[A-Z]\d[A-Z][ -]?\d[A-Z]\d$/i', $postal),
+        'uk' => preg_match('/^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i', $postal),
+        'ch' => preg_match('/^\d{4}$/', $postal),
+        default => preg_match('/^\d{5}$/', $postal),
+    };
+    $stateOk = $region === 'us' ? preg_match('/^[A-Z]{2}$/', $state) : true;
     if ($first && $last && filter_var($email, FILTER_VALIDATE_EMAIL) && is_valid_sms_phone($phone) && $passwordOk && $identityOk && $bankingOk && preg_match('/^\d{4}$/', $transactionPin) && $dob && $address1 && $city && $postalOk && $stateOk && $country && $hasKycUpload && $hasBiometricCapture) {
         $hash = password_hash($password, PASSWORD_BCRYPT);
         try {
@@ -72,21 +87,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pinHash = password_hash($transactionPin, PASSWORD_BCRYPT);
             $stmt = db()->prepare('INSERT INTO users (first_name,last_name,email,phone,date_of_birth,ssn_last4,tax_id,iban,address_line1,address_line2,city,state_code,postal_code,country,employment_status,annual_income_range,verification_status,risk_status,password_hash,transaction_pin_hash,email_verified,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,"pending","verification_review",?,?,0,"active")');
             $storedTaxId = $isUsOnboarding ? null : $taxId;
-            $storedIban = $isUsOnboarding ? null : ($iban !== '' ? $iban : null);
+            $storedIban = $usesIbanOnboarding ? ($iban !== '' ? $iban : null) : null;
             $storedSsnLast4 = $isUsOnboarding ? substr($ssnDigits, -4) : substr($taxId, -4);
             $stmt->execute([$first,$last,$email,$phone,$dob,$storedSsnLast4,$storedTaxId,$storedIban,$address1,$address2,$city,$state,$postal,$country,$employment,$income,$hash,$pinHash]);
             $userId = (int) db()->lastInsertId();
-            if ($isUsOnboarding) {
-                $acct = '904' . random_int(100000000, 999999999);
-                db()->prepare('INSERT INTO accounts (user_id, account_number, routing_number, iban, bic, account_type, available_balance, pending_balance, savings_balance) VALUES (?,?,?,?,?,?,?,?,?)')->execute([$userId,$acct,US_ROUTING_NUMBER,null,null,'Premium Checking',0,0,0]);
+            if (!$usesIbanOnboarding) {
+                $acct = ($region === 'uk' ? (string) random_int(10000000, 99999999) : '904' . random_int(100000000, 999999999));
+                db()->prepare('INSERT INTO accounts (user_id, account_number, routing_number, iban, bic, account_type, available_balance, pending_balance, savings_balance) VALUES (?,?,?,?,?,?,?,?,?)')->execute([$userId,$acct,$regionConfig['routing'],null,null,$regionConfig['account_type'],0,0,0]);
                 if ($linkJointAccount) {
                     db()->prepare('INSERT INTO linked_accounts (user_id, institution_name, joint_owner_name, account_type, account_mask, routing_number, verification_method, status, last_synced_at) VALUES (?, ?, ?, "Joint Checking", ?, ?, "micro_deposit", "review", NULL)')
                         ->execute([$userId, $linkedInstitution, $jointOwnerName !== '' ? $jointOwnerName : null, substr($externalAccount, -4), $externalRouting]);
                 }
             } else {
-                $accountIban = $iban !== '' ? $iban : demo_german_iban();
+                $accountIban = $iban !== '' ? $iban : ($region === 'ch' ? 'CH9300762011623852957' : demo_german_iban());
                 $acct = substr($accountIban, -10);
-                db()->prepare('INSERT INTO accounts (user_id, account_number, routing_number, iban, bic, account_type, available_balance, pending_balance, savings_balance) VALUES (?,?,?,?,?,?,?,?,?)')->execute([$userId,$acct,DEFAULT_BIC,$accountIban,DEFAULT_BIC,'Girokonto',0,0,0]);
+                db()->prepare('INSERT INTO accounts (user_id, account_number, routing_number, iban, bic, account_type, available_balance, pending_balance, savings_balance) VALUES (?,?,?,?,?,?,?,?,?)')->execute([$userId,$acct,$regionConfig['routing'],$accountIban,$regionConfig['routing'],$regionConfig['account_type'],0,0,0]);
             }
             db()->prepare('INSERT INTO cards (user_id, card_last4, card_type, status, spending_limit, spent_month) VALUES (?,?,?,?,?,?)')->execute([$userId,substr((string) random_int(1000,9999), -4),$isUsOnboarding ? 'Signature Debit' : 'Debitkarte','active',0,0]);
             banking_submit_kyc_document($userId, $documentType, $_FILES['identity_document'], banking_actor('customer', $userId));
@@ -107,7 +122,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         flash('danger', 'Please complete each step and use valid identity, address, phone, and banking details for the selected country.');
     }
 }
-$pageTitle = $isUsPortal ? 'Open U.S. Account' : 'Deutsches Konto eroeffnen';
+$postalPattern = match ($authRegion) {
+    'us' => '\d{5}(-\d{4})?',
+    'ca' => '[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d',
+    'uk' => '[A-Za-z]{1,2}\d[A-Za-z\d]?\s*\d[A-Za-z]{2}',
+    'ch' => '\d{4}',
+    default => '\d{5}',
+};
+$postalPlaceholder = match ($authRegion) {
+    'us' => '10001',
+    'ca' => 'M5V 2T6',
+    'uk' => 'SW1A 1AA',
+    'ch' => '8001',
+    default => '40549',
+};
+$regionTitle = match ($authRegion) {
+    'us' => 'Open U.S. Account',
+    'ca' => 'Open Canadian Account',
+    'uk' => 'Open UK Account',
+    'ch' => 'Open Swiss Account',
+    default => 'Deutsches Konto eroeffnen',
+};
+$pageTitle = $regionTitle;
+$onboardingEyebrow = match ($authRegion) {
+    'us' => 'U.S. account opening',
+    'ca' => 'Canada account opening',
+    'uk' => 'UK account opening',
+    'ch' => 'Swiss account opening',
+    default => 'Kontoeroeffnung Deutschland',
+};
+$onboardingTitle = match ($authRegion) {
+    'us' => 'Open your U.S. Deutsche account',
+    'ca' => 'Open your Canadian Deutsche account',
+    'uk' => 'Open your UK Deutsche account',
+    'ch' => 'Open your Swiss Deutsche account',
+    default => 'Deutsches Konto eroeffnen',
+};
+$onboardingCopy = match ($authRegion) {
+    'us' => 'Complete U.S. onboarding with SSN, address, phone, and identity verification.',
+    'ca' => 'Complete Canadian onboarding with address, phone, identity verification, Interac, EFT, and wire tools.',
+    'uk' => 'Complete UK onboarding with address, phone, identity verification, sort code, Faster Payments, and CHAPS tools.',
+    'ch' => 'Complete Swiss onboarding with address, phone, identity verification, IBAN, SIC, QR-bill, and transfer tools.',
+    default => 'Digitale Kontoeroeffnung mit Steuer-ID, Meldeadresse, Telefonnummer und Identitaetspruefung.',
+};
+$bonusCopy = $regionConfig['currency'] . ' 250 signup bonus pending after account opening';
 ?>
 <?php include __DIR__ . '/includes/public_header.php'; ?>
 <section class="onboarding-modern-shell">
@@ -116,10 +174,10 @@ $pageTitle = $isUsPortal ? 'Open U.S. Account' : 'Deutsches Konto eroeffnen';
         <aside class="onboarding-rail">
             <?= lead_logo('light') ?>
             <div>
-                <div class="eyebrow"><?= $isUsPortal ? 'U.S. account opening' : 'Kontoeroeffnung Deutschland' ?></div>
-                <h1><?= $isUsPortal ? 'Open your U.S. Deutsche account' : 'Deutsches Konto eroeffnen' ?></h1>
-                <p><?= $isUsPortal ? 'Complete U.S. onboarding with SSN, address, phone, and identity verification.' : 'Digitale Kontoeroeffnung mit Steuer-ID, Meldeadresse, Telefonnummer und Identitaetspruefung.' ?></p>
-                <div class="referral-chip"><i class="fa-solid fa-gift"></i><span><?= $isUsPortal ? '$250 signup bonus pending after account opening' : '250 Bonus nach Kontoeroeffnung vorgemerkt' ?></span></div>
+                <div class="eyebrow"><?= e($onboardingEyebrow) ?></div>
+                <h1><?= e($onboardingTitle) ?></h1>
+                <p><?= e($onboardingCopy) ?></p>
+                <div class="referral-chip"><i class="fa-solid fa-gift"></i><span><?= e($authRegion === 'de' ? '250 Bonus nach Kontoeroeffnung vorgemerkt' : $bonusCopy) ?></span></div>
             </div>
             <div class="onboarding-assurance">
                 <span><i class="fa-solid fa-key"></i> <?= $isUsPortal ? '4-digit code' : '4-stelliger Code' ?></span>
@@ -142,11 +200,11 @@ $pageTitle = $isUsPortal ? 'Open U.S. Account' : 'Deutsches Konto eroeffnen';
                 <div class="slide-heading"><span class="eyebrow"><?= $isUsPortal ? 'Step 1' : 'Schritt 1' ?></span><h2><?= $isUsPortal ? 'Personal information' : 'Persoenliche Angaben' ?></h2><p><?= $isUsPortal ? 'Use your full legal name as it appears on your ID document.' : 'Verwenden Sie Ihren vollstaendigen Namen wie im Ausweisdokument.' ?></p></div>
                 <div class="row g-3">
                     <div class="col-12">
-                        <label class="form-label"><?= $isUsPortal ? 'Banking region' : 'Banking-Region' ?></label>
+                        <label class="form-label">Banking region</label>
                         <input type="hidden" name="country" value="<?= e($forcedCountry) ?>" data-country-select>
                         <div class="region-lock-panel">
                             <i class="fa-solid <?= $isUsPortal ? 'fa-flag-usa' : 'fa-building-columns' ?>"></i>
-                            <div><strong><?= $isUsPortal ? 'United States' : 'Deutschland' ?></strong><span><?= $isUsPortal ? 'U.S. English onboarding, SSN, ZIP, ACH, Zelle, Bill Pay, and wire tools.' : 'Deutsche Anmeldung, Steuer-ID, PLZ, IBAN, SEPA und Girokonto.' ?></span></div>
+                            <div><strong><?= e($forcedCountry) ?></strong><span><?= e($regionConfig['rail_primary'] . ', ' . $regionConfig['rail_bank'] . ', ' . $regionConfig['rail_wire'] . ' and local account details.') ?></span></div>
                         </div>
                     </div>
                     <div class="col-md-8"><label class="form-label"><?= $isUsPortal ? 'Full legal name' : 'Vollstaendiger rechtlicher Name' ?></label><input name="full_name" class="form-control" autocomplete="name" required></div>
@@ -180,7 +238,7 @@ $pageTitle = $isUsPortal ? 'Open U.S. Account' : 'Deutsches Konto eroeffnen';
                         </div>
                     </div>
                     <div class="col-12" data-region-block="us" hidden><label class="form-label">Apartment, suite, unit</label><input name="address_line2" class="form-control" autocomplete="address-line2"></div>
-                    <div class="col-md-4"><label class="form-label" data-postal-label>Postal code (PLZ)</label><input name="postal_code" class="form-control" inputmode="numeric" maxlength="10" pattern="\d{5}" placeholder="40549" autocomplete="postal-code" required></div>
+                    <div class="col-md-4"><label class="form-label" data-postal-label><?= $isUsPortal ? 'ZIP code' : 'Postal code' ?></label><input name="postal_code" class="form-control" maxlength="10" pattern="<?= e($postalPattern) ?>" placeholder="<?= e($postalPlaceholder) ?>" autocomplete="postal-code" required></div>
                     <div class="col-md-4"><label class="form-label">City</label><input name="city" class="form-control" autocomplete="address-level2" placeholder="Duesseldorf" required></div>
                     <div class="col-md-4" data-region-block="us" hidden><label class="form-label">State</label><input name="state_code" maxlength="2" class="form-control text-uppercase" autocomplete="address-level1" placeholder="NY"></div>
                     <div class="col-md-4" data-region-block="eu"><label class="form-label">Country</label><select class="form-select" disabled><option selected>Germany</option><option>Austria</option><option>Switzerland</option><option>Netherlands</option><option>France</option><option>Belgium</option><option>Spain</option><option>Italy</option><option>Portugal</option></select></div>

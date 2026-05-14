@@ -3,11 +3,12 @@ require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/helpers.php';
 
 $scriptName = basename((string) ($_SERVER['SCRIPT_NAME'] ?? 'login.php'));
-$authRegion = $GLOBALS['authRegion'] ?? (str_contains($scriptName, '_us') ? 'us' : (str_contains($scriptName, '_de') ? 'de' : 'us'));
+$authRegion = $GLOBALS['authRegion'] ?? (str_contains($scriptName, '_us') ? 'us' : (str_contains($scriptName, '_ca') ? 'ca' : (str_contains($scriptName, '_uk') ? 'uk' : (str_contains($scriptName, '_ch') ? 'ch' : (str_contains($scriptName, '_de') ? 'de' : 'us')))));
+$regionConfig = banking_region_config($authRegion);
 $isUsPortal = $authRegion === 'us';
-$pageLanguage = $isUsPortal ? 'en' : 'de';
-$pageLoginUrl = $isUsPortal ? 'login_us.php' : 'login_de.php';
-$pageRegisterUrl = $isUsPortal ? 'register_us.php' : 'register_de.php';
+$pageLanguage = $regionConfig['language'];
+$pageLoginUrl = $regionConfig['login'];
+$pageRegisterUrl = $regionConfig['register'];
 $GLOBALS['pageLanguage'] = $pageLanguage;
 $GLOBALS['pageLoginUrl'] = $pageLoginUrl;
 $GLOBALS['forcePageLanguage'] = true;
@@ -17,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
     $email = strtolower(trim($_POST['email'] ?? ''));
     $password = (string) ($_POST['password'] ?? '');
-    $demoEmail = $isUsPortal ? 'demo.us@deutsche.local' : 'demo.de@deutsche.local';
+    $demoEmail = 'demo.' . $regionConfig['region'] . '@deutsche.local';
     $demoPassword = 'Deutsche123!';
     $user = null;
     $databaseOnline = true;
@@ -37,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         session_regenerate_id(true);
         unset($_SESSION['user_id']);
         $_SESSION['offline_demo_user'] = [
-            'region' => $isUsPortal ? 'us' : 'de',
+            'region' => $regionConfig['region'],
             'first_name' => $isUsPortal ? 'Lincoln' : 'Lukas',
             'last_name' => $isUsPortal ? 'Martin' : 'Weber',
             'email' => $demoEmail,
@@ -72,8 +73,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$pageTitle = $isUsPortal ? 'U.S. Online Banking Login' : 'Deutscher Online-Banking-Login';
+$pageTitle = match ($regionConfig['region']) {
+    'us' => 'U.S. Online Banking Login',
+    'ca' => 'Canada Online Banking Login',
+    'uk' => 'UK Online Banking Login',
+    'ch' => 'Swiss Online Banking Login',
+    default => 'Deutscher Online-Banking-Login',
+};
 $prefillEmail = filter_var($_GET['email'] ?? '', FILTER_VALIDATE_EMAIL) ? strtolower((string) $_GET['email']) : '';
+$loginRailTitle = match ($regionConfig['region']) {
+    'us' => 'Modern access for checking, cards, ACH, Zelle, and wires.',
+    'ca' => 'Modern access for chequing, cards, Interac, EFT, and wires.',
+    'uk' => 'Modern access for current accounts, cards, Faster Payments, and CHAPS.',
+    'ch' => 'Modern access for Swiss accounts, cards, SIC, QR-bills, and international transfers.',
+    default => 'Moderner Zugang fuer Girokonto, Karten, SEPA und Ueberweisungen.',
+};
+$loginHeading = match ($regionConfig['region']) {
+    'us' => 'U.S. online banking sign in',
+    'ca' => 'Canadian online banking sign in',
+    'uk' => 'UK online banking sign in',
+    'ch' => 'Swiss online banking sign in',
+    default => 'Deutsches Online-Banking anmelden',
+};
+$createAccountLabel = match ($regionConfig['region']) {
+    'us' => 'Create U.S. account',
+    'ca' => 'Create Canadian account',
+    'uk' => 'Create UK account',
+    'ch' => 'Create Swiss account',
+    default => 'Deutsches Konto eroeffnen',
+};
 include __DIR__ . '/includes/public_header.php';
 ?>
 
@@ -82,18 +110,18 @@ include __DIR__ . '/includes/public_header.php';
     <aside class="auth-panel">
       <?= lead_logo('light') ?>
       <div>
-        <span class="eyebrow"><?= $isUsPortal ? 'U.S. private banking portal' : 'Deutsches Online-Banking' ?></span>
-        <h2><?= $isUsPortal ? 'Modern access for checking, cards, ACH, Zelle, and wires.' : 'Moderner Zugang fuer Girokonto, Karten, SEPA und Ueberweisungen.' ?></h2>
-        <p><?= $isUsPortal ? 'Sign in with your profile credentials. Transactions use your 4-digit transaction code and are reviewed by admin before completion.' : 'Melden Sie sich mit Ihren Zugangsdaten an. Transaktionen werden mit Ihrem 4-stelligen Code bestaetigt und durch den Admin geprueft.' ?></p>
+        <span class="eyebrow"><?= e($regionConfig['workspace']) ?></span>
+        <h2><?= e($loginRailTitle) ?></h2>
+        <p><?= $regionConfig['language'] === 'de' ? 'Melden Sie sich mit Ihren Zugangsdaten an. Transaktionen werden mit Ihrem 4-stelligen Code bestaetigt und durch den Admin geprueft.' : 'Sign in with your profile credentials. Transactions use your 4-digit code and are reviewed by admin before completion.' ?></p>
       </div>
       <div class="auth-assurance"><span><i class="fa-solid fa-key"></i> <?= $isUsPortal ? '4-digit code' : '4-stelliger Code' ?></span><span><i class="fa-solid fa-building-columns"></i> <?= $isUsPortal ? 'Protected dashboard' : 'Geschuetzter Arbeitsbereich' ?></span><span><i class="fa-solid fa-user-shield"></i> <?= $isUsPortal ? 'Admin approval' : 'Admin-Freigabe' ?></span></div>
     </aside>
     <form class="auth-card" method="post">
       <?= csrf_field() ?>
       <div class="mb-4"><?= lead_logo('dark') ?></div>
-      <span class="auth-kicker"><?= $isUsPortal ? 'Welcome back' : 'Willkommen zurueck' ?></span>
-      <h1 class="h3 fw-bold"><?= $isUsPortal ? 'U.S. online banking sign in' : 'Deutsches Online-Banking anmelden' ?></h1>
-      <p class="muted"><?= $isUsPortal ? 'Access your U.S. accounts with secure online banking.' : 'Greifen Sie sicher auf Ihr deutsches Konto zu.' ?></p>
+      <span class="auth-kicker"><?= $regionConfig['language'] === 'de' ? 'Willkommen zurueck' : 'Welcome back' ?></span>
+      <h1 class="h3 fw-bold"><?= e($loginHeading) ?></h1>
+      <p class="muted"><?= $regionConfig['language'] === 'de' ? 'Greifen Sie sicher auf Ihr deutsches Konto zu.' : 'Access your accounts with secure online banking.' ?></p>
       <label class="form-label"><?= $isUsPortal ? 'Email' : 'E-Mail' ?></label>
       <input name="email" type="text" inputmode="email" autocomplete="email" class="form-control mb-3" value="<?= e($prefillEmail) ?>" required>
       <label class="form-label"><?= $isUsPortal ? 'Password' : 'Passwort' ?></label>
@@ -106,10 +134,10 @@ include __DIR__ . '/includes/public_header.php';
         <a class="small fw-bold" href="forgot_password.php"><?= $isUsPortal ? 'Forgot password?' : 'Passwort vergessen?' ?></a>
       </div>
       <button class="btn btn-gold w-100"><?= $isUsPortal ? 'Sign in securely' : 'Sicher anmelden' ?></button>
-      <p class="small muted mt-3 mb-0"><?= $isUsPortal ? 'New here?' : 'Neu hier?' ?> <a class="fw-bold" href="<?= e($pageRegisterUrl) ?>"><?= $isUsPortal ? 'Create U.S. account' : 'Deutsches Konto eroeffnen' ?></a></p>
+      <p class="small muted mt-3 mb-0"><?= $regionConfig['language'] === 'de' ? 'Neu hier?' : 'New here?' ?> <a class="fw-bold" href="<?= e($pageRegisterUrl) ?>"><?= e($createAccountLabel) ?></a></p>
       <div class="demo-login-note mt-3">
         <strong><?= $isUsPortal ? 'Demo account' : 'Demo-Konto' ?></strong>
-        <span><?= e($isUsPortal ? 'demo.us@deutsche.local' : 'demo.de@deutsche.local') ?> / Deutsche123!</span>
+        <span><?= e('demo.' . $regionConfig['region'] . '@deutsche.local') ?> / Deutsche123!</span>
       </div>
     </form>
   </div>

@@ -15,8 +15,17 @@ $admin = require_admin();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
     <link href="<?= url('assets/css/styles.css') ?>" rel="stylesheet">
+    <meta name="google" content="notranslate">
+    <script>
+        (function () {
+            document.cookie = 'googtrans=;path=/;expires=Thu, 01 Jan 1970 00:00:00 GMT';
+            document.cookie = 'googtrans=;path=/;domain=' + location.hostname + ';expires=Thu, 01 Jan 1970 00:00:00 GMT';
+            document.documentElement.classList.add('notranslate');
+            document.documentElement.setAttribute('translate', 'no');
+        })();
+    </script>
 </head>
-<body>
+<body class="notranslate" translate="no">
 <div class="app-shell">
 <aside class="sidebar">
     <a class="sidebar-brand" href="<?= url('admin/index.php') ?>"><?= lead_logo('light') ?><span class="admin-brand-label">Admin</span></a>
@@ -27,6 +36,7 @@ $admin = require_admin();
             ['admin/transfers.php','fa-money-bill-transfer','Transfers'],
             ['admin/referral_bonuses.php','fa-gift','Signup Bonuses'],
             ['admin/card_approvals.php','fa-credit-card','Manage Credit Cards'],
+            ['admin/loans.php','fa-hand-holding-dollar','Loans'],
             ['admin/operations.php','fa-sitemap','Operations'],
             ['admin/deposits.php','fa-file-circle-check','Deposits'],
             ['admin/verification.php','fa-id-card','Verification'],
@@ -48,7 +58,7 @@ $admin = require_admin();
             <div><h1 class="h3 mb-0 fw-bold"><?= e($pageTitle ?? 'Admin') ?></h1><div class="muted">Operational command center</div></div>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <?= google_translate_widget() ?>
+            <span class="language-static-pill"><i class="fa-solid fa-language"></i>English</span>
             <a class="btn btn-outline-danger" href="<?= url('admin/logout.php') ?>"><i class="fa-solid fa-arrow-right-from-bracket me-1"></i>Sign out</a>
         </div>
     </div>

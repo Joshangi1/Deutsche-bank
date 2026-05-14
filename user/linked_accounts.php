@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             banking_request_credit_card_funding(
                 (int) $user['id'],
                 (int) ($_POST['card_id'] ?? 0),
-                (string) ($_POST['funding_direction'] ?? 'fund_account'),
+                'fund_card',
                 (float) ($_POST['amount'] ?? 0),
                 (string) ($_POST['note'] ?? ''),
                 banking_actor('customer', (int) $user['id'])
@@ -67,18 +67,10 @@ $approvedCards = array_values(array_filter($cardRows, fn ($card) => ($card['stat
                                     <input type="hidden" name="card_id" value="<?= (int) $card['id'] ?>">
                                     <input type="hidden" name="funding_direction" value="fund_card">
                                     <strong>Fund credit card from account</strong>
+                                    <span>Move available account funds to this approved credit card. The request stays pending until admin review.</span>
                                     <input name="amount" type="number" step="0.01" min="1" class="form-control form-control-sm" placeholder="Amount" required>
                                     <input name="note" class="form-control form-control-sm" placeholder="Optional reference">
                                     <button name="request_card_funding" value="1" class="btn btn-sm btn-navy w-100">Submit pending review</button>
-                                </form>
-                                <form method="post">
-                                    <?= csrf_field() ?>
-                                    <input type="hidden" name="card_id" value="<?= (int) $card['id'] ?>">
-                                    <input type="hidden" name="funding_direction" value="fund_account">
-                                    <strong>Fund account using credit card</strong>
-                                    <input name="amount" type="number" step="0.01" min="1" class="form-control form-control-sm" placeholder="Amount" required>
-                                    <input name="note" class="form-control form-control-sm" placeholder="Optional reference">
-                                    <button name="request_card_funding" value="1" class="btn btn-sm btn-gold w-100">Submit pending review</button>
                                 </form>
                             </div>
                         </details>
