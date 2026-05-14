@@ -1,9 +1,19 @@
 <?php
 declare(strict_types=1);
 
-$localConfig = __DIR__ . '/database.local.php';
-if (is_file($localConfig)) {
-    require_once $localConfig;
+$localConfigCandidates = array_filter([
+    getenv('APP_DATABASE_CONFIG') ?: null,
+    __DIR__ . '/database.local.php',
+    dirname(__DIR__) . '/database.local.php',
+    dirname(__DIR__, 2) . '/database.local.php',
+    !empty($_SERVER['HOME']) ? rtrim((string) $_SERVER['HOME'], '/\\') . '/database.local.php' : null,
+]);
+
+foreach ($localConfigCandidates as $localConfig) {
+    if (is_file($localConfig)) {
+        require_once $localConfig;
+        break;
+    }
 }
 
 defined('DB_HOST') || define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
