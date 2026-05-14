@@ -1,13 +1,10 @@
 <?php require_once __DIR__ . '/../config/database.php'; require_once __DIR__ . '/helpers.php'; require_once __DIR__ . '/frontend_components.php'; ?>
 <?php
 $publicLoginUrl = $GLOBALS['pageLoginUrl'] ?? 'choose_banking.php?next=login';
-$pageLanguage = $GLOBALS['pageLanguage'] ?? 'en';
-$translateDisabled = !empty($GLOBALS['disableTranslate']);
+$pageLanguage = 'en';
+$translateDisabled = true;
 $publicStaticMode = !empty($GLOBALS['publicStaticMode']);
-$isGermanPage = $pageLanguage === 'de';
-$navLabels = $isGermanPage
-    ? ['infra' => 'Finanzinfrastruktur', 'banking' => 'Banking', 'about' => 'Ueber uns', 'contact' => 'Kontakt', 'signin' => 'Anmelden']
-    : ['infra' => 'Financial Infrastructure', 'banking' => 'Banking', 'about' => 'About', 'contact' => 'Contact', 'signin' => 'Sign in'];
+$navLabels = ['infra' => 'Financial Infrastructure', 'banking' => 'Banking', 'about' => 'About', 'contact' => 'Contact', 'signin' => 'Sign in'];
 ?>
 <!doctype html>
 <html lang="<?= e($pageLanguage) ?>"<?= $translateDisabled ? ' class="notranslate" translate="no"' : '' ?>>

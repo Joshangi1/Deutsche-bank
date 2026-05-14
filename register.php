@@ -8,7 +8,7 @@ $scriptName = basename((string) ($_SERVER['SCRIPT_NAME'] ?? 'register.php'));
 $authRegion = $GLOBALS['authRegion'] ?? (str_contains($scriptName, '_us') ? 'us' : (str_contains($scriptName, '_ca') ? 'ca' : (str_contains($scriptName, '_uk') ? 'uk' : (str_contains($scriptName, '_ch') ? 'ch' : (str_contains($scriptName, '_de') ? 'de' : 'us')))));
 $regionConfig = banking_region_config($authRegion);
 $isUsPortal = $authRegion === 'us';
-$isGermanPortal = $regionConfig['language'] === 'de';
+$isGermanPortal = false;
 $usesIbanOnboarding = in_array($authRegion, ['de', 'ch'], true);
 $requiresTaxId = $authRegion !== 'us';
 $defaultPhoneCode = match ($authRegion) {
@@ -18,7 +18,7 @@ $defaultPhoneCode = match ($authRegion) {
     default => '+49',
 };
 $forcedCountry = $regionConfig['country'];
-$pageLanguage = $regionConfig['language'];
+$pageLanguage = 'en';
 $pageLoginUrl = $regionConfig['login'];
 $pageRegisterUrl = $regionConfig['register'];
 $GLOBALS['pageLanguage'] = $pageLanguage;
@@ -112,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $acct = substr($accountIban, -10);
                 db()->prepare('INSERT INTO accounts (user_id, account_number, routing_number, iban, bic, account_type, available_balance, pending_balance, savings_balance) VALUES (?,?,?,?,?,?,?,?,?)')->execute([$userId,$acct,$regionConfig['routing'],$accountIban,$regionConfig['routing'],$regionConfig['account_type'],0,0,0]);
             }
-            db()->prepare('INSERT INTO cards (user_id, card_last4, card_type, status, spending_limit, spent_month) VALUES (?,?,?,?,?,?)')->execute([$userId,substr((string) random_int(1000,9999), -4),$isGermanPortal ? 'Debitkarte' : 'Debit Card','active',0,0]);
+            db()->prepare('INSERT INTO cards (user_id, card_last4, card_type, status, spending_limit, spent_month) VALUES (?,?,?,?,?,?)')->execute([$userId,substr((string) random_int(1000,9999), -4),'Debit Card','active',0,0]);
             banking_submit_kyc_document($userId, $documentType, $_FILES['identity_document'], banking_actor('customer', $userId));
             if (!banking_submit_biometric_verification($userId, $biometricCaptures, banking_actor('customer', $userId))) {
                 throw new RuntimeException('Biometric verification capture could not be saved.');
@@ -150,7 +150,7 @@ $regionTitle = match ($authRegion) {
     'ca' => 'Open Canadian Account',
     'uk' => 'Open UK Account',
     'ch' => 'Open Swiss Account',
-    default => 'Deutsches Konto eroeffnen',
+    default => 'Open Germany Account',
 };
 $pageTitle = $regionTitle;
 $onboardingEyebrow = match ($authRegion) {
@@ -158,21 +158,21 @@ $onboardingEyebrow = match ($authRegion) {
     'ca' => 'Canada account opening',
     'uk' => 'UK account opening',
     'ch' => 'Swiss account opening',
-    default => 'Kontoeroeffnung Deutschland',
+    default => 'Germany account opening',
 };
 $onboardingTitle = match ($authRegion) {
     'us' => 'Open your U.S. Deutsche account',
     'ca' => 'Open your Canadian Deutsche account',
     'uk' => 'Open your UK Deutsche account',
     'ch' => 'Open your Swiss Deutsche account',
-    default => 'Deutsches Konto eroeffnen',
+    default => 'Open your Germany Deutsche account',
 };
 $onboardingCopy = match ($authRegion) {
     'us' => 'Complete U.S. onboarding with SSN, address, phone, and identity verification.',
     'ca' => 'Complete Canadian onboarding with address, phone, identity verification, Interac, EFT, and wire tools.',
     'uk' => 'Complete UK onboarding with address, phone, identity verification, sort code, Faster Payments, and CHAPS tools.',
     'ch' => 'Complete Swiss onboarding with address, phone, identity verification, IBAN, SIC, QR-bill, and transfer tools.',
-    default => 'Digitale Kontoeroeffnung mit Steuer-ID, Meldeadresse, Telefonnummer und Identitaetspruefung.',
+    default => 'Complete Germany onboarding with tax ID, address, phone, identity verification, IBAN, and SEPA tools.',
 };
 $bonusCopy = $regionConfig['currency'] . ' 250 signup bonus pending after account opening';
 $identityLabel = match ($authRegion) {
@@ -180,7 +180,7 @@ $identityLabel = match ($authRegion) {
     'ca' => 'Social Insurance Number',
     'uk' => 'National Insurance Number',
     'ch' => 'Tax identification number',
-    default => 'Tax ID (Steuer-ID)',
+    default => 'Tax identification number',
 };
 $identityPlaceholder = match ($authRegion) {
     'us' => 'XXX-XX-XXXX',
@@ -208,27 +208,23 @@ $incomeOptions = match ($regionConfig['currency']) {
                 <div class="eyebrow"><?= e($onboardingEyebrow) ?></div>
                 <h1><?= e($onboardingTitle) ?></h1>
                 <p><?= e($onboardingCopy) ?></p>
-                <div class="referral-chip"><i class="fa-solid fa-gift"></i><span><?= e($isGermanPortal ? '250 Bonus nach Kontoeroeffnung vorgemerkt' : $bonusCopy) ?></span></div>
+                <div class="referral-chip"><i class="fa-solid fa-gift"></i><span><?= e($bonusCopy) ?></span></div>
             </div>
             <div class="onboarding-assurance">
-                <span><i class="fa-solid fa-key"></i> <?= $isGermanPortal ? '4-stelliger Code' : '4-digit code' ?></span>
-                <span><i class="fa-solid fa-fingerprint"></i> <?= $isGermanPortal ? 'Biometrische Pruefung' : 'Biometric review' ?></span>
-                <span><i class="fa-solid fa-id-card"></i> <?= $isGermanPortal ? 'KYC-Pruefung' : 'KYC review' ?></span>
+                <span><i class="fa-solid fa-key"></i> 4-digit code</span>
+                <span><i class="fa-solid fa-fingerprint"></i> Biometric review</span>
+                <span><i class="fa-solid fa-id-card"></i> KYC review</span>
             </div>
             <div class="onboarding-stepper" data-stepper>
-                <?php if ($isGermanPortal): ?>
-                    <span class="active">Person</span><span>Adresse</span><span>Sicherheit</span><span>Finanzen</span><span>Identitaet</span><span>Pruefung</span>
-                <?php else: ?>
-                    <span class="active">Personal</span><span>Address</span><span>Security</span><span>Financial</span><span>Identity</span><span>Review</span>
-                <?php endif; ?>
+                <span class="active">Personal</span><span>Address</span><span>Security</span><span>Financial</span><span>Identity</span><span>Review</span>
             </div>
         </aside>
         <div class="onboarding-card-modern">
             <div class="onboarding-mobile-progress"><span data-step-label>Personal information</span><strong data-step-count>1 of 6</strong></div>
             <div class="onboarding-progress"><span data-onboarding-meter></span></div>
 
-            <section class="onboarding-slide active" data-step-panel data-step-title="<?= $isGermanPortal ? 'Persoenliche Angaben' : 'Personal information' ?>">
-                <div class="slide-heading"><span class="eyebrow"><?= $isGermanPortal ? 'Schritt 1' : 'Step 1' ?></span><h2><?= $isGermanPortal ? 'Persoenliche Angaben' : 'Personal information' ?></h2><p><?= $isGermanPortal ? 'Verwenden Sie Ihren vollstaendigen Namen wie im Ausweisdokument.' : 'Use your full legal name as it appears on your ID document.' ?></p></div>
+            <section class="onboarding-slide active" data-step-panel data-step-title="Personal information">
+                <div class="slide-heading"><span class="eyebrow">Step 1</span><h2>Personal information</h2><p>Use your full legal name as it appears on your ID document.</p></div>
                 <div class="row g-3">
                     <div class="col-12">
                         <label class="form-label">Banking region</label>
@@ -238,11 +234,11 @@ $incomeOptions = match ($regionConfig['currency']) {
                             <div><strong><?= e($forcedCountry) ?></strong><span><?= e($regionConfig['rail_primary'] . ', ' . $regionConfig['rail_bank'] . ', ' . $regionConfig['rail_wire'] . ' and local account details.') ?></span></div>
                         </div>
                     </div>
-                    <div class="col-md-8"><label class="form-label"><?= $isGermanPortal ? 'Vollstaendiger rechtlicher Name' : 'Full legal name' ?></label><input name="full_name" class="form-control" autocomplete="name" required></div>
-                    <div class="col-md-4"><label class="form-label"><?= $isGermanPortal ? 'Geburtsdatum' : 'Date of birth' ?></label><input name="date_of_birth" type="date" class="form-control" required></div>
-                    <div class="col-md-6"><label class="form-label"><?= $isGermanPortal ? 'E-Mail-Adresse' : 'Email address' ?></label><input name="email" type="email" class="form-control" autocomplete="email" required></div>
+                    <div class="col-md-8"><label class="form-label">Full legal name</label><input name="full_name" class="form-control" autocomplete="name" required></div>
+                    <div class="col-md-4"><label class="form-label">Date of birth</label><input name="date_of_birth" type="date" class="form-control" required></div>
+                    <div class="col-md-6"><label class="form-label">Email address</label><input name="email" type="email" class="form-control" autocomplete="email" required></div>
                     <div class="col-md-6">
-                        <label class="form-label"><?= $isGermanPortal ? 'Telefonnummer' : 'Phone number' ?></label>
+                        <label class="form-label">Phone number</label>
                         <div class="input-group">
                             <select name="phone_country_code" class="form-select" style="max-width: 145px">
                                 <option value="+49" <?= $defaultPhoneCode === '+49' ? 'selected' : '' ?>>DE +49</option><option value="+1" <?= $defaultPhoneCode === '+1' ? 'selected' : '' ?>>US/CA +1</option><option value="+44" <?= $defaultPhoneCode === '+44' ? 'selected' : '' ?>>UK +44</option><option value="+41" <?= $defaultPhoneCode === '+41' ? 'selected' : '' ?>>CH +41</option><option value="+43">AT +43</option><option value="+33">FR +33</option><option value="+31">NL +31</option><option value="+32">BE +32</option><option value="+34">ES +34</option><option value="+39">IT +39</option><option value="+351">PT +351</option><option value="+234">NG +234</option>
@@ -250,7 +246,7 @@ $incomeOptions = match ($regionConfig['currency']) {
                             <input name="phone" class="form-control" autocomplete="tel" placeholder="<?= $defaultPhoneCode === '+1' ? '2125550147' : ($defaultPhoneCode === '+44' ? '7700900123' : ($defaultPhoneCode === '+41' ? '791234567' : '15123456789')) ?>" required>
                         </div>
                     </div>
-                    <?php if ($requiresTaxId): ?><div class="col-md-6" data-region-block="tax"><label class="form-label"><?= e($identityLabel) ?></label><input name="tax_id" class="form-control" <?= $isGermanPortal ? 'inputmode="numeric" maxlength="11" data-mask-tax-id' : 'maxlength="32"' ?> placeholder="<?= e($identityPlaceholder) ?>" required></div><?php endif; ?>
+                    <?php if ($requiresTaxId): ?><div class="col-md-6" data-region-block="tax"><label class="form-label"><?= e($identityLabel) ?></label><input name="tax_id" class="form-control" maxlength="32" placeholder="<?= e($identityPlaceholder) ?>" required></div><?php endif; ?>
                     <?php if ($usesIbanOnboarding): ?><div class="col-md-6" data-region-block="iban"><label class="form-label">IBAN optional</label><input name="iban" class="form-control text-uppercase" placeholder="<?= e($ibanPlaceholder) ?>" data-format-iban></div><?php endif; ?>
                     <div class="col-md-6" data-region-block="us" hidden><label class="form-label">SSN</label><input name="ssn" class="form-control" inputmode="numeric" maxlength="11" placeholder="XXX-XX-XXXX" data-mask-ssn></div>
                 </div>

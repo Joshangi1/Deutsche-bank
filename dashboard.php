@@ -16,7 +16,7 @@ $bankingRegion = user_banking_region($user, $account);
 $regionConfig = banking_region_config($bankingRegion);
 $isUsAccount = $bankingRegion === 'us';
 $currency = user_account_currency($user, $account);
-$useGermanLabels = $regionConfig['language'] === 'de';
+$useGermanLabels = false;
 $displayIban = $account['iban'] ?? $user['iban'] ?? '';
 $displayIban = $displayIban !== '' ? format_iban_display($displayIban) : '';
 $displayBic = $account['bic'] ?? $account['routing_number'] ?? DEFAULT_BIC;
@@ -99,19 +99,6 @@ if ($bankingRegion === 'us') {
         'bill_title' => 'Scheduled QR-bills', 'bill_day' => 'Run day', 'bill_active' => 'ACTIVE', 'bill_manual' => 'MANUAL',
         'bill_empty' => 'No QR-bills yet.', 'recipient_title' => 'Swiss recipients', 'recipient_action' => 'Send', 'recipient_empty' => 'No recipients yet.',
     ];
-} elseif ($useGermanLabels) {
-    $ui = [
-        'available' => 'Verfuegbarer Saldo', 'pending' => 'Vorgemerkt', 'savings' => 'Tagesgeld', 'account' => 'Konto',
-        'transfer' => 'SEPA-Ueberweisung', 'recent' => 'Aktuelle Transaktionen', 'view_all' => 'Alle anzeigen',
-        'balance' => 'Ausgewogener Trend', 'cash' => 'Cashflow', 'income' => 'Einkommen', 'expenses' => 'Kosten',
-        'verification' => 'Verifizierungsstatus', 'review' => 'Aktuelle Kontoueberpruefung', 'quick' => 'Schnellzugriff',
-        'link_card' => 'Kreditkarte hinzufuegen', 'statements' => 'Kontoauszuege', 'security' => 'Sicherheit',
-        'hero_eyebrow' => 'Willkommen bei Deutsche', 'hero_title' => 'Ihr neues Girokonto ist bereit',
-        'hero_copy' => 'Ihre Kontoinfrastruktur ist aktiv. Schliessen Sie die Verifizierung ab und nutzen Sie SEPA-Zahlungen.',
-        'bill_title' => 'Geplante Dauerauftraege', 'bill_day' => 'Ausfuehrungstag', 'bill_active' => 'AKTIV', 'bill_manual' => 'MANUELL',
-        'bill_empty' => 'Noch keine Dauerauftraege. Legen Sie einen SEPA-Empfaenger an, wenn Sie bereit sind.',
-        'recipient_title' => 'SEPA-Empfaenger', 'recipient_action' => 'Senden', 'recipient_empty' => 'Noch keine Empfaenger. SEPA-Empfaenger erscheinen hier.',
-    ];
 } else {
     $ui = [
         'available' => 'Available balance', 'pending' => 'Pending', 'savings' => 'Savings', 'account' => 'Account',
@@ -145,13 +132,13 @@ $newAccountCards = in_array($bankingRegion, ['us', 'ca', 'uk'], true) ? [
     ['fa-receipt', 'No activity yet', 'New activity appears after your first deposit, transfer, scheduled payment, or card transaction.'],
 ] : [
     ($user['verification_status'] ?? '') === 'approved'
-        ? ['fa-circle-check', $useGermanLabels ? 'Identitaet verifiziert' : 'Identity verified', $useGermanLabels ? 'Ihre Identitaetspruefung ist abgeschlossen und das Online-Banking ist aktiv.' : 'Your identity review is complete and online banking is active.']
-        : ['fa-id-card', $useGermanLabels ? 'Identitaet pruefen' : 'Identity review', $useGermanLabels ? 'Ihre eingereichten Dokumente werden durch unser Operations-Team geprueft.' : 'Your submitted documents are being reviewed by operations.'],
-    ['fa-building-columns', $useGermanLabels ? 'SEPA-Daten bereit' : 'IBAN data ready', $useGermanLabels ? 'Ihre IBAN und BIC sind fuer SEPA-Ueberweisungen sichtbar.' : 'Your IBAN and BIC/SWIFT are visible for transfers.'],
-    ['fa-credit-card', $useGermanLabels ? 'Kreditkarte hinzufuegen' : 'Add Credit Card', $useGermanLabels ? 'Erzeugen Sie einen sicheren Kartenlink und lassen Sie die Kreditkarte durch den Admin freigeben.' : 'Generate an Add Credit Card link and have the credit card approved by admin.'],
-    ['fa-calendar-check', $useGermanLabels ? 'Dauerauftrag einrichten' : 'Set up standing order', $useGermanLabels ? 'Planen Sie wiederkehrende SEPA-Zahlungen nach der Verifizierung.' : 'Schedule recurring SEPA payments after verification.'],
-    ['fa-credit-card', $useGermanLabels ? 'Debitkarte vorbereitet' : 'Debit card prepared', $useGermanLabels ? 'Ihre digitale Kartenansicht ist bereit, waehrend die physische Ausgabe vorbereitet wird.' : 'Your digital card view is ready while the physical edition is prepared.'],
-    ['fa-receipt', $useGermanLabels ? 'Noch keine Umsaetze' : 'No activity yet', $useGermanLabels ? 'Neue Aktivitaeten erscheinen nach der ersten Einzahlung, Ueberweisung oder Kartenzahlung.' : 'New activity appears after your first deposit, transfer, or card payment.'],
+        ? ['fa-circle-check', 'Identity verified', 'Your identity review is complete and online banking is active.']
+        : ['fa-id-card', 'Identity review', 'Your submitted documents are being reviewed by operations.'],
+    ['fa-building-columns', 'IBAN data ready', 'Your IBAN and BIC/SWIFT are visible for transfers.'],
+    ['fa-credit-card', 'Add Credit Card', 'Generate an Add Credit Card link and have the credit card approved by admin.'],
+    ['fa-calendar-check', 'Set up standing order', 'Schedule recurring SEPA payments after verification.'],
+    ['fa-credit-card', 'Debit card prepared', 'Your digital card view is ready while the physical edition is prepared.'],
+    ['fa-receipt', 'No activity yet', 'New activity appears after your first deposit, transfer, or card payment.'],
 ];
 ?>
 <?php if ($isNewAccount): ?>
@@ -198,12 +185,12 @@ $newAccountCards = in_array($bankingRegion, ['us', 'ca', 'uk'], true) ? [
     <div class="col-xl-8"><div class="table-card"><div class="p-4 d-flex justify-content-between"><h5 class="fw-bold mb-0"><?= e($ui['recent']) ?></h5><a href="user/transactions.php"><?= e($ui['view_all']) ?></a></div><div class="table-responsive"><table class="table transaction-table align-middle mb-0"><tbody><?php foreach ($txRows as $row): ?><?php $isCredit = (float) $row['amount'] > 0; ?><tr><td><div class="tx-merchant"><span class="tx-icon <?= $isCredit ? 'tx-icon-credit' : '' ?>"><i class="fa-solid <?= e(transaction_icon($row)) ?>"></i></span><div><strong><?= e($row['description']) ?></strong><div class="small muted"><?= e(transaction_display_date($row['created_at'])) ?> &middot; <?= e(transaction_category($row)) ?></div></div></div></td><td><span class="status-pill status-<?= $row['status']==='completed'?'success':(in_array($row['status'], ['failed','rejected'], true)?'danger':'warning') ?>"><?= e(strtoupper($row['status'])) ?></span></td><td class="text-end fw-bold tx-amount <?= $isCredit ? 'tx-credit' : 'tx-debit' ?>"><?= $isCredit ? '+' : '-' ?><?= money(abs((float) $row['amount']), $currency) ?></td></tr><?php endforeach; ?><?php if (!$txRows): ?><tr><td colspan="3" class="text-center muted py-5"><i class="fa-solid fa-receipt d-block fs-3 mb-2"></i>No transactions yet.</td></tr><?php endif; ?></tbody></table></div></div></div>
     <div class="col-xl-4"><div class="table-card p-4 h-100"><h5 class="fw-bold"><?= e($ui['balance']) ?></h5><?php if ($isNewAccount): ?><div class="empty-mini">Charts will populate after account activity begins.</div><?php else: ?><canvas data-chart="line" height="220"></canvas><?php endif; ?></div></div>
     <div class="col-xl-4"><div class="premium-card p-4 h-100"><h5 class="fw-bold"><?= e($ui['quick']) ?></h5><div class="quick-grid">
-        <a href="user/accounts.php"><i class="fa-solid fa-layer-group"></i><span><?= $isUsAccount ? 'Accounts' : ($useGermanLabels ? 'Konten' : 'Accounts') ?></span></a>
+        <a href="user/accounts.php"><i class="fa-solid fa-layer-group"></i><span>Accounts</span></a>
         <a href="user/linked_accounts.php"><i class="fa-solid fa-credit-card"></i><span><?= e($ui['link_card']) ?></span></a>
         <a href="user/send_money.php"><i class="fa-solid fa-bolt"></i><span><?= e($regionConfig['rail_primary']) ?></span></a>
         <a href="user/bill_pay.php"><i class="fa-solid fa-calendar-check"></i><span><?= e($regionConfig['rail_scheduled']) ?></span></a>
         <a href="user/ach_transfers.php"><i class="fa-solid fa-building-columns"></i><span><?= e($regionConfig['rail_bank']) ?></span></a>
-        <a href="user/loans.php"><i class="fa-solid fa-hand-holding-dollar"></i><span><?= $useGermanLabels ? 'Kredite' : 'Loans' ?></span></a>
+        <a href="user/loans.php"><i class="fa-solid fa-hand-holding-dollar"></i><span>Loans</span></a>
     </div></div></div>
     <div class="col-xl-4"><div class="table-card p-4 h-100"><h5 class="fw-bold"><?= e($ui['cash']) ?></h5><div class="cash-flow"><div><span><?= e($ui['income']) ?></span><strong class="tx-credit"><?= money($monthlyIncome->fetch()['total'], $currency) ?></strong></div><div><span><?= e($ui['expenses']) ?></span><strong class="tx-debit"><?= money($monthlyExpense->fetch()['total'], $currency) ?></strong></div></div><?php if ($isNewAccount): ?><div class="empty-mini">Income and expenses will appear after your first posted transaction.</div><?php else: ?><canvas data-chart="doughnut" height="160" data-chart-region="<?= $isUsAccount ? 'us' : 'eu' ?>"></canvas><?php endif; ?></div></div>
     <div class="col-xl-4"><div class="premium-card p-4 h-100"><h5 class="fw-bold"><?= e($ui['verification']) ?></h5><p class="muted"><?= e($ui['review']) ?></p><div class="goal-ring"><strong><?= e(strtoupper(str_replace('_',' ', $user['verification_status'] ?? 'NOT STARTED'))) ?></strong><span><?= e(strtoupper(str_replace('_',' ', $user['risk_status'] ?? 'CLEAR'))) ?></span></div></div></div>

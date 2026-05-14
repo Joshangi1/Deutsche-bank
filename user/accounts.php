@@ -25,7 +25,7 @@ $usesIban = in_array($region, ['de', 'ch'], true);
 $currency = user_account_currency($user, $primary);
 $accountOptions = in_array($region, ['us', 'ca'], true)
     ? ['Everyday Checking', 'Savings Account', 'Money Market', 'Business Current Account']
-    : ($region === 'uk' ? ['Current Account', 'Savings Account', 'Business Current Account'] : ['Girokonto', 'Tagesgeld', 'Business Current Account']);
+    : ($region === 'uk' ? ['Current Account', 'Savings Account', 'Business Current Account'] : ['Current Account', 'Savings Account', 'Business Current Account']);
 ?>
 <?php include __DIR__ . '/../includes/user_header.php'; ?>
 <div class="banking-hero mb-4">

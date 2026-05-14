@@ -21,13 +21,12 @@ function lead_nav_item(string $href, string $icon, string $label, bool $active =
 
 function google_translate_widget(): string
 {
-    return '<label class="translate-widget" aria-label="Language selector"><i class="fa-solid fa-language" aria-hidden="true"></i><select class="language-select" data-language-select><option value="de">Deutsch</option><option value="en">English</option><option value="fr">Francais</option><option value="es">Espanol</option><option value="it">Italiano</option><option value="pt">Portugues</option><option value="nl">Nederlands</option><option value="tr">Turkce</option><option value="ar">Arabic</option><option value="hi">Hindi</option><option value="zh-CN">Chinese</option></select></label>';
+    return '<label class="translate-widget" aria-label="Language selector"><i class="fa-solid fa-language" aria-hidden="true"></i><select class="language-select" data-language-select><option value="en">English</option><option value="fr">French</option><option value="es">Spanish</option><option value="it">Italian</option><option value="pt">Portuguese</option><option value="nl">Dutch</option><option value="tr">Turkish</option><option value="ar">Arabic</option><option value="hi">Hindi</option><option value="zh-CN">Chinese</option></select></label>';
 }
 
 function google_translate_script(): string
 {
-    $defaultLanguage = $GLOBALS['pageLanguage'] ?? 'de';
-    $defaultLanguage = preg_match('/^[A-Za-z-]+$/', (string) $defaultLanguage) ? (string) $defaultLanguage : 'de';
+    $defaultLanguage = 'en';
     $forceLanguage = !empty($GLOBALS['forcePageLanguage']) ? 'true' : 'false';
 
     return str_replace(['__DEFAULT_LANGUAGE__', '__FORCE_LANGUAGE__'], [e($defaultLanguage), $forceLanguage], <<<'HTML'
@@ -39,25 +38,24 @@ window.DEUTSCHE_FORCE_LANGUAGE = __FORCE_LANGUAGE__;
 function googleTranslateElementInit() {
     new google.translate.TranslateElement({
         pageLanguage: 'en',
-        includedLanguages: 'ar,de,en,es,fr,hi,it,ja,ko,nl,pt,ru,tr,uk,zh-CN',
+        includedLanguages: 'ar,en,es,fr,hi,it,ja,ko,nl,pt,ru,tr,uk,zh-CN',
         layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
         autoDisplay: false
     }, 'google_translate_element');
 }
 
 (function () {
-    const defaultLanguage = window.DEUTSCHE_DEFAULT_LANGUAGE || 'de';
+    const defaultLanguage = window.DEUTSCHE_DEFAULT_LANGUAGE || 'en';
     const cookieName = 'googtrans';
     const promptKey = 'deutscheLanguagePromptSeen';
     const names = {
-        de: 'Deutsch',
         en: 'English',
-        fr: 'Francais',
-        es: 'Espanol',
-        it: 'Italiano',
-        pt: 'Portugues',
-        nl: 'Nederlands',
-        tr: 'Turkce',
+        fr: 'French',
+        es: 'Spanish',
+        it: 'Italian',
+        pt: 'Portuguese',
+        nl: 'Dutch',
+        tr: 'Turkish',
         ar: 'Arabic',
         hi: 'Hindi',
         'zh-CN': 'Chinese'
@@ -103,13 +101,10 @@ function googleTranslateElementInit() {
         wrapper.tabIndex = -1;
         wrapper.setAttribute('aria-labelledby', 'languagePromptTitle');
         wrapper.setAttribute('aria-hidden', 'true');
-        const isGermanDefault = defaultLanguage === 'de';
-        const title = isGermanDefault ? 'Sprache auswaehlen' : 'Choose language';
-        const body = isGermanDefault
-            ? 'Diese Seite wird automatisch auf Deutsch angezeigt. Sie koennen jederzeit eine andere Sprache waehlen.'
-            : 'This U.S. banking page opens in English. You can choose another language at any time.';
-        const keepLabel = isGermanDefault ? 'Deutsch behalten' : 'Keep English';
-        const applyLabel = isGermanDefault ? 'Sprache anwenden' : 'Apply language';
+        const title = 'Choose language';
+        const body = 'This banking page opens in English. You can choose another language at any time.';
+        const keepLabel = 'Keep English';
+        const applyLabel = 'Apply language';
         wrapper.innerHTML = `
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">

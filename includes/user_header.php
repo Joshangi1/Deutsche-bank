@@ -9,8 +9,8 @@ $accountForRegion = user_account((int) $user['id']);
 $bankingRegion = user_banking_region($user, $accountForRegion);
 $regionConfig = banking_region_config($bankingRegion);
 $isUsExperience = $bankingRegion === 'us';
-$accountLanguage = $regionConfig['language'];
-$useGermanLabels = $accountLanguage === 'de';
+$accountLanguage = 'en';
+$useGermanLabels = false;
 $GLOBALS['pageLanguage'] = $accountLanguage;
 $GLOBALS['disableTranslate'] = true;
 $isRestricted = account_is_restricted($user);
@@ -48,12 +48,12 @@ $notificationPreview = $previewStmt->fetchAll();
     <nav class="nav flex-column">
         <?php $nav = [
             ['dashboard.php','fa-gauge-high','Overview'],
-            ['user/accounts.php','fa-layer-group',$accountLanguage === 'de' ? 'Konten' : 'Accounts'],
+            ['user/accounts.php','fa-layer-group','Accounts'],
             ['user/send_money.php','fa-bolt',$regionConfig['rail_primary']],
             ['user/bill_pay.php','fa-calendar-check',$regionConfig['rail_scheduled']],
             ['user/ach_transfers.php','fa-building-columns',$regionConfig['rail_bank']],
             ['user/linked_accounts.php','fa-credit-card','Manage Credit Cards'],
-            ['user/loans.php','fa-hand-holding-dollar',$accountLanguage === 'de' ? 'Kredite' : 'Loans'],
+            ['user/loans.php','fa-hand-holding-dollar','Loans'],
             ['user/transactions.php','fa-receipt','Transactions'],
             ['user/transfers.php','fa-right-left',$regionConfig['rail_wire']],
             ['user/cards.php','fa-credit-card','Cards'],
@@ -72,7 +72,7 @@ $notificationPreview = $previewStmt->fetchAll();
     </nav>
     <div class="sidebar-session mt-auto">
         <i class="fa-solid fa-shield-halved"></i>
-        <div><strong><?= $useGermanLabels ? 'Sichere Sitzung' : 'Secure Session' ?></strong><span><?= $useGermanLabels ? 'Letzter Login' : 'Last login' ?> <?= e(date('M j, g:i A')) ?></span></div>
+        <div><strong>Secure Session</strong><span>Last login <?= e(date('M j, g:i A')) ?></span></div>
     </div>
 </aside>
 <main class="app-main">
@@ -82,7 +82,7 @@ $notificationPreview = $previewStmt->fetchAll();
             <div><div class="topbar-kicker"><?= e($regionConfig['workspace']) ?></div><h1 class="h3 mb-0 fw-bold"><?= e($pageTitle ?? 'Dashboard') ?></h1><div class="muted">Welcome back, <?= e($user['first_name']) ?></div></div>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <span class="language-static-pill"><i class="fa-solid fa-language"></i><span class="language-static-label"><?= $accountLanguage === 'de' ? 'Deutsch' : 'English' ?></span></span>
+            <span class="language-static-pill"><i class="fa-solid fa-language"></i><span class="language-static-label">English</span></span>
             <div class="dropdown notification-menu">
                 <button class="btn btn-light border position-relative" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="fa-solid fa-bell"></i>

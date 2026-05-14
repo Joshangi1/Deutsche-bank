@@ -6,8 +6,8 @@ $scriptName = basename((string) ($_SERVER['SCRIPT_NAME'] ?? 'login.php'));
 $authRegion = $GLOBALS['authRegion'] ?? (str_contains($scriptName, '_us') ? 'us' : (str_contains($scriptName, '_ca') ? 'ca' : (str_contains($scriptName, '_uk') ? 'uk' : (str_contains($scriptName, '_ch') ? 'ch' : (str_contains($scriptName, '_de') ? 'de' : 'us')))));
 $regionConfig = banking_region_config($authRegion);
 $isUsPortal = $authRegion === 'us';
-$isGermanPortal = $regionConfig['language'] === 'de';
-$pageLanguage = $regionConfig['language'];
+$isGermanPortal = false;
+$pageLanguage = 'en';
 $pageLoginUrl = $regionConfig['login'];
 $pageRegisterUrl = $regionConfig['register'];
 $GLOBALS['pageLanguage'] = $pageLanguage;
@@ -66,7 +66,7 @@ $pageTitle = match ($regionConfig['region']) {
     'ca' => 'Canada Online Banking Login',
     'uk' => 'UK Online Banking Login',
     'ch' => 'Swiss Online Banking Login',
-    default => 'Deutscher Online-Banking-Login',
+    default => 'Germany Online Banking Login',
 };
 $prefillEmail = filter_var($_GET['email'] ?? '', FILTER_VALIDATE_EMAIL) ? strtolower((string) $_GET['email']) : '';
 $loginRailTitle = match ($regionConfig['region']) {
@@ -74,21 +74,21 @@ $loginRailTitle = match ($regionConfig['region']) {
     'ca' => 'Modern access for chequing, cards, Interac, EFT, and wires.',
     'uk' => 'Modern access for current accounts, cards, Faster Payments, and CHAPS.',
     'ch' => 'Modern access for Swiss accounts, cards, SIC, QR-bills, and international transfers.',
-    default => 'Moderner Zugang fuer Girokonto, Karten, SEPA und Ueberweisungen.',
+    default => 'Modern access for German accounts, cards, SEPA, and transfers.',
 };
 $loginHeading = match ($regionConfig['region']) {
     'us' => 'U.S. online banking sign in',
     'ca' => 'Canadian online banking sign in',
     'uk' => 'UK online banking sign in',
     'ch' => 'Swiss online banking sign in',
-    default => 'Deutsches Online-Banking anmelden',
+    default => 'Germany online banking sign in',
 };
 $createAccountLabel = match ($regionConfig['region']) {
     'us' => 'Create U.S. account',
     'ca' => 'Create Canadian account',
     'uk' => 'Create UK account',
     'ch' => 'Create Swiss account',
-    default => 'Deutsches Konto eroeffnen',
+    default => 'Create Germany account',
 };
 include __DIR__ . '/includes/public_header.php';
 ?>
@@ -100,28 +100,28 @@ include __DIR__ . '/includes/public_header.php';
       <div>
         <span class="eyebrow"><?= e($regionConfig['workspace']) ?></span>
         <h2><?= e($loginRailTitle) ?></h2>
-        <p><?= $regionConfig['language'] === 'de' ? 'Melden Sie sich mit Ihren Zugangsdaten an. Transaktionen werden mit Ihrem 4-stelligen Code bestaetigt und durch den Admin geprueft.' : 'Sign in with your profile credentials. Transactions use your 4-digit code and are reviewed by admin before completion.' ?></p>
+        <p>Sign in with your profile credentials. Transactions use your 4-digit code and are reviewed by admin before completion.</p>
       </div>
-      <div class="auth-assurance"><span><i class="fa-solid fa-key"></i> <?= $isGermanPortal ? '4-stelliger Code' : '4-digit code' ?></span><span><i class="fa-solid fa-building-columns"></i> <?= $isGermanPortal ? 'Geschuetzter Arbeitsbereich' : 'Protected dashboard' ?></span><span><i class="fa-solid fa-user-shield"></i> <?= $isGermanPortal ? 'Admin-Freigabe' : 'Admin approval' ?></span></div>
+      <div class="auth-assurance"><span><i class="fa-solid fa-key"></i> 4-digit code</span><span><i class="fa-solid fa-building-columns"></i> Protected dashboard</span><span><i class="fa-solid fa-user-shield"></i> Admin approval</span></div>
     </aside>
     <form class="auth-card" method="post">
       <?= csrf_field() ?>
       <div class="mb-4"><?= lead_logo('dark') ?></div>
-      <span class="auth-kicker"><?= $regionConfig['language'] === 'de' ? 'Willkommen zurueck' : 'Welcome back' ?></span>
+      <span class="auth-kicker">Welcome back</span>
       <h1 class="h3 fw-bold"><?= e($loginHeading) ?></h1>
-      <p class="muted"><?= $regionConfig['language'] === 'de' ? 'Greifen Sie sicher auf Ihr deutsches Konto zu.' : 'Access your accounts with secure online banking.' ?></p>
-      <label class="form-label"><?= $isGermanPortal ? 'E-Mail' : 'Email' ?></label>
+      <p class="muted">Access your accounts with secure online banking.</p>
+      <label class="form-label">Email</label>
       <input name="email" type="text" inputmode="email" autocomplete="email" class="form-control mb-3" value="<?= e($prefillEmail) ?>" required>
-      <label class="form-label"><?= $isGermanPortal ? 'Passwort' : 'Password' ?></label>
+      <label class="form-label">Password</label>
       <div class="secure-input mb-3">
         <input name="password" type="password" class="form-control" required>
-        <button type="button" data-visibility-toggle aria-label="<?= $isGermanPortal ? 'Passwort anzeigen' : 'Show password' ?>"><i class="fa-solid fa-eye"></i></button>
+        <button type="button" data-visibility-toggle aria-label="Show password"><i class="fa-solid fa-eye"></i></button>
       </div>
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <label class="small"><input type="checkbox" name="remember"> <?= $isGermanPortal ? 'Angemeldet bleiben' : 'Remember me' ?></label>
-        <a class="small fw-bold" href="forgot_password.php"><?= $isGermanPortal ? 'Passwort vergessen?' : 'Forgot password?' ?></a>
+        <label class="small"><input type="checkbox" name="remember"> Remember me</label>
+        <a class="small fw-bold" href="forgot_password.php">Forgot password?</a>
       </div>
-      <button class="btn btn-gold w-100"><?= $isGermanPortal ? 'Sicher anmelden' : 'Sign in securely' ?></button>
+      <button class="btn btn-gold w-100">Sign in securely</button>
       <p class="small muted mt-3 mb-0"><?= $regionConfig['language'] === 'de' ? 'Neu hier?' : 'New here?' ?> <a class="fw-bold" href="<?= e($pageRegisterUrl) ?>"><?= e($createAccountLabel) ?></a></p>
     </form>
   </div>

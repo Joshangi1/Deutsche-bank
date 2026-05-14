@@ -648,10 +648,10 @@ function banking_region_config(string $regionOrCountry): array
     };
     $configs = [
         'us' => ['region' => 'us', 'country' => 'United States', 'language' => 'en', 'currency' => 'USD', 'login' => 'login_us.php', 'register' => 'register_us.php', 'account_type' => 'Premium Checking', 'routing' => US_ROUTING_NUMBER, 'rail_primary' => 'Zelle', 'rail_scheduled' => 'Bill Pay', 'rail_bank' => 'ACH Transfers', 'rail_wire' => 'Wire Transfers', 'transfer' => 'Wire transfer', 'workspace' => 'Deutsche US banking', 'account_label' => 'Account', 'routing_label' => 'Routing'],
-        'de' => ['region' => 'de', 'country' => 'Germany', 'language' => 'de', 'currency' => 'EUR', 'login' => 'login_de.php', 'register' => 'register_de.php', 'account_type' => 'Girokonto', 'routing' => DEFAULT_BIC, 'rail_primary' => 'SEPA Instant', 'rail_scheduled' => 'Dauerauftraege', 'rail_bank' => 'SEPA-Ueberweisungen', 'rail_wire' => 'Transfers', 'transfer' => 'SEPA-Ueberweisung', 'workspace' => 'Deutsche European banking', 'account_label' => 'IBAN', 'routing_label' => 'BIC/SWIFT'],
+        'de' => ['region' => 'de', 'country' => 'Germany', 'language' => 'en', 'currency' => 'EUR', 'login' => 'login_de.php', 'register' => 'register_de.php', 'account_type' => 'Current Account', 'routing' => DEFAULT_BIC, 'rail_primary' => 'SEPA Instant', 'rail_scheduled' => 'Standing Orders', 'rail_bank' => 'SEPA Transfers', 'rail_wire' => 'Transfers', 'transfer' => 'SEPA transfer', 'workspace' => 'Deutsche Germany banking', 'account_label' => 'IBAN', 'routing_label' => 'BIC/SWIFT'],
         'ca' => ['region' => 'ca', 'country' => 'Canada', 'language' => 'en', 'currency' => 'CAD', 'login' => 'login_ca.php', 'register' => 'register_ca.php', 'account_type' => 'Premium Chequing', 'routing' => '001000002', 'rail_primary' => 'Interac e-Transfer', 'rail_scheduled' => 'Bill Payments', 'rail_bank' => 'EFT Transfers', 'rail_wire' => 'Wire Transfers', 'transfer' => 'Wire transfer', 'workspace' => 'Deutsche Canada banking', 'account_label' => 'Account', 'routing_label' => 'Institution/Transit'],
         'uk' => ['region' => 'uk', 'country' => 'United Kingdom', 'language' => 'en', 'currency' => 'GBP', 'login' => 'login_uk.php', 'register' => 'register_uk.php', 'account_type' => 'Current Account', 'routing' => '040004', 'rail_primary' => 'Faster Payments', 'rail_scheduled' => 'Direct Debits', 'rail_bank' => 'Standing Orders', 'rail_wire' => 'CHAPS Transfers', 'transfer' => 'CHAPS transfer', 'workspace' => 'Deutsche UK banking', 'account_label' => 'Account', 'routing_label' => 'Sort code'],
-        'ch' => ['region' => 'ch', 'country' => 'Switzerland', 'language' => 'en', 'currency' => 'CHF', 'login' => 'login_ch.php', 'register' => 'register_ch.php', 'account_type' => 'Privatkonto', 'routing' => 'DEUTCHZZXXX', 'rail_primary' => 'SIC Instant', 'rail_scheduled' => 'QR-Bills', 'rail_bank' => 'Swiss Transfers', 'rail_wire' => 'International Transfers', 'transfer' => 'International transfer', 'workspace' => 'Deutsche Switzerland banking', 'account_label' => 'IBAN', 'routing_label' => 'BIC/SWIFT'],
+        'ch' => ['region' => 'ch', 'country' => 'Switzerland', 'language' => 'en', 'currency' => 'CHF', 'login' => 'login_ch.php', 'register' => 'register_ch.php', 'account_type' => 'Private Account', 'routing' => 'DEUTCHZZXXX', 'rail_primary' => 'SIC Instant', 'rail_scheduled' => 'QR-Bills', 'rail_bank' => 'Swiss Transfers', 'rail_wire' => 'International Transfers', 'transfer' => 'International transfer', 'workspace' => 'Deutsche Switzerland banking', 'account_label' => 'IBAN', 'routing_label' => 'BIC/SWIFT'],
     ];
     return $configs[$key] ?? $configs['de'];
 }
@@ -2205,7 +2205,7 @@ function user_accounts(int $userId): array
 function banking_create_user_account(int $userId, string $accountType, array $actor): int
 {
     ensure_banking_schema();
-    $allowed = ['Premium Checking', 'Premium Chequing', 'Everyday Checking', 'Current Account', 'Savings Account', 'Money Market', 'Business Current Account', 'Girokonto', 'Tagesgeld'];
+    $allowed = ['Premium Checking', 'Premium Chequing', 'Everyday Checking', 'Current Account', 'Private Account', 'Savings Account', 'Money Market', 'Business Current Account'];
     $accountType = trim($accountType);
     if (!in_array($accountType, $allowed, true)) {
         $accountType = 'Savings Account';
@@ -2239,7 +2239,7 @@ function banking_create_user_account(int $userId, string $accountType, array $ac
             $accountType = $regionConfig['account_type'];
         }
         if ($accountType === 'Savings Account') {
-            $accountType = $region === 'ch' ? 'Sparkonto' : 'Tagesgeld';
+            $accountType = 'Savings Account';
         }
     } elseif ($region === 'ca' && $accountType === 'Premium Checking') {
         $accountType = 'Premium Chequing';
