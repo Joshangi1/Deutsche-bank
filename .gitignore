@@ -27,6 +27,7 @@ build/
 
 # Local database dumps/backups
 *.sql
+!database/schema.sql
 *.sqlite
 *.db
 *.bak
