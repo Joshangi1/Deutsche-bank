@@ -66,6 +66,30 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    const regionSelect = document.querySelector('[data-home-region]');
+    if (regionSelect) {
+        const copyTarget = document.querySelector('[data-home-region-copy]');
+        const authLinks = document.querySelectorAll('[data-region-auth]');
+        const storedRegion = localStorage.getItem('deutscheBankingRegion');
+        if (storedRegion && regionSelect.querySelector(`option[value="${storedRegion}"]`)) {
+            regionSelect.value = storedRegion;
+        }
+        const applyRegionLinks = () => {
+            const option = regionSelect.selectedOptions[0];
+            if (!option) return;
+            const loginUrl = option.dataset.login || 'login_us.php';
+            const registerUrl = option.dataset.register || 'register_us.php';
+            authLinks.forEach(link => {
+                const target = link.dataset.regionAuth === 'register' ? registerUrl : loginUrl;
+                link.setAttribute('href', target);
+            });
+            if (copyTarget) copyTarget.textContent = option.dataset.copy || '';
+            localStorage.setItem('deutscheBankingRegion', regionSelect.value);
+        };
+        regionSelect.addEventListener('change', applyRegionLinks);
+        applyRegionLinks();
+    }
+
     const codeTimer = document.querySelector('[data-code-timer]');
     if (codeTimer) {
         let seconds = Number(codeTimer.dataset.codeTimer || 300);
