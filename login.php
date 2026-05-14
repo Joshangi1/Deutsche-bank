@@ -6,6 +6,7 @@ $scriptName = basename((string) ($_SERVER['SCRIPT_NAME'] ?? 'login.php'));
 $authRegion = $GLOBALS['authRegion'] ?? (str_contains($scriptName, '_us') ? 'us' : (str_contains($scriptName, '_ca') ? 'ca' : (str_contains($scriptName, '_uk') ? 'uk' : (str_contains($scriptName, '_ch') ? 'ch' : (str_contains($scriptName, '_de') ? 'de' : 'us')))));
 $regionConfig = banking_region_config($authRegion);
 $isUsPortal = $authRegion === 'us';
+$isGermanPortal = $regionConfig['language'] === 'de';
 $pageLanguage = $regionConfig['language'];
 $pageLoginUrl = $regionConfig['login'];
 $pageRegisterUrl = $regionConfig['register'];
@@ -101,7 +102,7 @@ include __DIR__ . '/includes/public_header.php';
         <h2><?= e($loginRailTitle) ?></h2>
         <p><?= $regionConfig['language'] === 'de' ? 'Melden Sie sich mit Ihren Zugangsdaten an. Transaktionen werden mit Ihrem 4-stelligen Code bestaetigt und durch den Admin geprueft.' : 'Sign in with your profile credentials. Transactions use your 4-digit code and are reviewed by admin before completion.' ?></p>
       </div>
-      <div class="auth-assurance"><span><i class="fa-solid fa-key"></i> <?= $isUsPortal ? '4-digit code' : '4-stelliger Code' ?></span><span><i class="fa-solid fa-building-columns"></i> <?= $isUsPortal ? 'Protected dashboard' : 'Geschuetzter Arbeitsbereich' ?></span><span><i class="fa-solid fa-user-shield"></i> <?= $isUsPortal ? 'Admin approval' : 'Admin-Freigabe' ?></span></div>
+      <div class="auth-assurance"><span><i class="fa-solid fa-key"></i> <?= $isGermanPortal ? '4-stelliger Code' : '4-digit code' ?></span><span><i class="fa-solid fa-building-columns"></i> <?= $isGermanPortal ? 'Geschuetzter Arbeitsbereich' : 'Protected dashboard' ?></span><span><i class="fa-solid fa-user-shield"></i> <?= $isGermanPortal ? 'Admin-Freigabe' : 'Admin approval' ?></span></div>
     </aside>
     <form class="auth-card" method="post">
       <?= csrf_field() ?>
@@ -109,18 +110,18 @@ include __DIR__ . '/includes/public_header.php';
       <span class="auth-kicker"><?= $regionConfig['language'] === 'de' ? 'Willkommen zurueck' : 'Welcome back' ?></span>
       <h1 class="h3 fw-bold"><?= e($loginHeading) ?></h1>
       <p class="muted"><?= $regionConfig['language'] === 'de' ? 'Greifen Sie sicher auf Ihr deutsches Konto zu.' : 'Access your accounts with secure online banking.' ?></p>
-      <label class="form-label"><?= $isUsPortal ? 'Email' : 'E-Mail' ?></label>
+      <label class="form-label"><?= $isGermanPortal ? 'E-Mail' : 'Email' ?></label>
       <input name="email" type="text" inputmode="email" autocomplete="email" class="form-control mb-3" value="<?= e($prefillEmail) ?>" required>
-      <label class="form-label"><?= $isUsPortal ? 'Password' : 'Passwort' ?></label>
+      <label class="form-label"><?= $isGermanPortal ? 'Passwort' : 'Password' ?></label>
       <div class="secure-input mb-3">
         <input name="password" type="password" class="form-control" required>
-        <button type="button" data-visibility-toggle aria-label="<?= $isUsPortal ? 'Show password' : 'Passwort anzeigen' ?>"><i class="fa-solid fa-eye"></i></button>
+        <button type="button" data-visibility-toggle aria-label="<?= $isGermanPortal ? 'Passwort anzeigen' : 'Show password' ?>"><i class="fa-solid fa-eye"></i></button>
       </div>
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <label class="small"><input type="checkbox" name="remember"> <?= $isUsPortal ? 'Remember me' : 'Angemeldet bleiben' ?></label>
-        <a class="small fw-bold" href="forgot_password.php"><?= $isUsPortal ? 'Forgot password?' : 'Passwort vergessen?' ?></a>
+        <label class="small"><input type="checkbox" name="remember"> <?= $isGermanPortal ? 'Angemeldet bleiben' : 'Remember me' ?></label>
+        <a class="small fw-bold" href="forgot_password.php"><?= $isGermanPortal ? 'Passwort vergessen?' : 'Forgot password?' ?></a>
       </div>
-      <button class="btn btn-gold w-100"><?= $isUsPortal ? 'Sign in securely' : 'Sicher anmelden' ?></button>
+      <button class="btn btn-gold w-100"><?= $isGermanPortal ? 'Sicher anmelden' : 'Sign in securely' ?></button>
       <p class="small muted mt-3 mb-0"><?= $regionConfig['language'] === 'de' ? 'Neu hier?' : 'New here?' ?> <a class="fw-bold" href="<?= e($pageRegisterUrl) ?>"><?= e($createAccountLabel) ?></a></p>
     </form>
   </div>

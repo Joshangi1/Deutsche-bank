@@ -134,20 +134,20 @@ $statusMeta = match (true) {
     default => ['Active', 'status-success', 'fa-circle'],
 };
 
-$newAccountCards = $isUsAccount ? [
+$newAccountCards = in_array($bankingRegion, ['us', 'ca', 'uk'], true) ? [
     ($user['verification_status'] ?? '') === 'approved'
         ? ['fa-circle-check', 'Identity verified', 'Your identity review is complete and online banking is active.']
         : ['fa-id-card', 'Identity review', 'Your submitted documents are being reviewed by operations.'],
-    ['fa-building-columns', 'Routing ready', 'Your account and routing number are visible for ACH and wire transfers.'],
-    ['fa-bolt', 'Zelle available', 'Add recipients by email or phone after account verification.'],
-    ['fa-file-invoice-dollar', 'Bill Pay ready', 'Set up billers for utilities, rent, subscriptions, and insurance.'],
+    ['fa-building-columns', $regionConfig['routing_label'] . ' ready', 'Your local account details are visible for transfers and account review.'],
+    ['fa-bolt', $regionConfig['rail_primary'] . ' available', 'Add recipients after account verification.'],
+    ['fa-file-invoice-dollar', $regionConfig['rail_scheduled'] . ' ready', 'Set up scheduled payments after verification.'],
     ['fa-credit-card', 'Debit card prepared', 'Your digital card view is ready while the physical card is prepared.'],
-    ['fa-receipt', 'No activity yet', 'New activity appears after your first deposit, bill pay, ACH, wire, or card transaction.'],
+    ['fa-receipt', 'No activity yet', 'New activity appears after your first deposit, transfer, scheduled payment, or card transaction.'],
 ] : [
     ($user['verification_status'] ?? '') === 'approved'
         ? ['fa-circle-check', $useGermanLabels ? 'Identitaet verifiziert' : 'Identity verified', $useGermanLabels ? 'Ihre Identitaetspruefung ist abgeschlossen und das Online-Banking ist aktiv.' : 'Your identity review is complete and online banking is active.']
         : ['fa-id-card', $useGermanLabels ? 'Identitaet pruefen' : 'Identity review', $useGermanLabels ? 'Ihre eingereichten Dokumente werden durch unser Operations-Team geprueft.' : 'Your submitted documents are being reviewed by operations.'],
-    ['fa-building-columns', $useGermanLabels ? 'SEPA-Daten bereit' : 'SEPA data ready', $useGermanLabels ? 'Ihre IBAN und BIC sind fuer SEPA-Ueberweisungen sichtbar.' : 'Your IBAN and BIC are visible for SEPA transfers.'],
+    ['fa-building-columns', $useGermanLabels ? 'SEPA-Daten bereit' : 'IBAN data ready', $useGermanLabels ? 'Ihre IBAN und BIC sind fuer SEPA-Ueberweisungen sichtbar.' : 'Your IBAN and BIC/SWIFT are visible for transfers.'],
     ['fa-credit-card', $useGermanLabels ? 'Kreditkarte hinzufuegen' : 'Add Credit Card', $useGermanLabels ? 'Erzeugen Sie einen sicheren Kartenlink und lassen Sie die Kreditkarte durch den Admin freigeben.' : 'Generate an Add Credit Card link and have the credit card approved by admin.'],
     ['fa-calendar-check', $useGermanLabels ? 'Dauerauftrag einrichten' : 'Set up standing order', $useGermanLabels ? 'Planen Sie wiederkehrende SEPA-Zahlungen nach der Verifizierung.' : 'Schedule recurring SEPA payments after verification.'],
     ['fa-credit-card', $useGermanLabels ? 'Debitkarte vorbereitet' : 'Debit card prepared', $useGermanLabels ? 'Ihre digitale Kartenansicht ist bereit, waehrend die physische Ausgabe vorbereitet wird.' : 'Your digital card view is ready while the physical edition is prepared.'],

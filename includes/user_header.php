@@ -10,6 +10,7 @@ $bankingRegion = user_banking_region($user, $accountForRegion);
 $regionConfig = banking_region_config($bankingRegion);
 $isUsExperience = $bankingRegion === 'us';
 $accountLanguage = $regionConfig['language'];
+$useGermanLabels = $accountLanguage === 'de';
 $GLOBALS['pageLanguage'] = $accountLanguage;
 $GLOBALS['disableTranslate'] = true;
 $isRestricted = account_is_restricted($user);
@@ -71,7 +72,7 @@ $notificationPreview = $previewStmt->fetchAll();
     </nav>
     <div class="sidebar-session mt-auto">
         <i class="fa-solid fa-shield-halved"></i>
-        <div><strong><?= $isUsExperience ? 'Secure Session' : 'Sichere Sitzung' ?></strong><span><?= $isUsExperience ? 'Last login' : 'Letzter Login' ?> <?= e(date('M j, g:i A')) ?></span></div>
+        <div><strong><?= $useGermanLabels ? 'Sichere Sitzung' : 'Secure Session' ?></strong><span><?= $useGermanLabels ? 'Letzter Login' : 'Last login' ?> <?= e(date('M j, g:i A')) ?></span></div>
     </div>
 </aside>
 <main class="app-main">

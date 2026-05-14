@@ -246,12 +246,12 @@ document.addEventListener('DOMContentLoaded', () => {
         let stream = null;
         let running = false;
         let currentStep = 0;
-        const selectedRegion = () => countrySelect?.value === 'United States' ? 'us' : 'eu';
+        const selectedRegion = () => onboardingForm.dataset.authRegion || (countrySelect?.value === 'United States' ? 'us' : 'de');
         const addressInput = onboardingForm.querySelector('[data-address-help]');
         const addressSuggestions = onboardingForm.querySelector('[data-address-suggestions]');
         const addressAssist = onboardingForm.querySelector('[data-address-assist] span');
         const addressExamples = {
-            eu: [
+            de: [
                 { street: 'Hansaallee 3', postal: '40549', city: 'Duesseldorf', state: '' },
                 { street: 'Taunusanlage 12', postal: '60325', city: 'Frankfurt am Main', state: '' },
                 { street: 'Unter den Linden 13', postal: '10117', city: 'Berlin', state: '' },
@@ -266,9 +266,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 { street: '1 Market Street', postal: '94105', city: 'San Francisco', state: 'CA' },
                 { street: '600 Congress Avenue', postal: '78701', city: 'Austin', state: 'TX' },
                 { street: '1201 Third Avenue', postal: '98101', city: 'Seattle', state: 'WA' }
+            ],
+            ca: [
+                { street: '100 King Street West', postal: 'M5X 1A9', city: 'Toronto', state: 'ON' },
+                { street: '200 Bay Street', postal: 'M5J 2J5', city: 'Toronto', state: 'ON' },
+                { street: '595 Burrard Street', postal: 'V7X 1L4', city: 'Vancouver', state: 'BC' },
+                { street: '700 2 Street SW', postal: 'T2P 2W2', city: 'Calgary', state: 'AB' },
+                { street: '1 Place Ville Marie', postal: 'H3B 3Y1', city: 'Montreal', state: 'QC' }
+            ],
+            uk: [
+                { street: '10 Gresham Street', postal: 'EC2V 7JD', city: 'London', state: '' },
+                { street: '25 Bank Street', postal: 'E14 5JP', city: 'London', state: '' },
+                { street: '1 Spinningfields', postal: 'M3 3EB', city: 'Manchester', state: '' },
+                { street: '2 Snow Hill Queensway', postal: 'B4 6GA', city: 'Birmingham', state: '' },
+                { street: '7 Castle Street', postal: 'EH2 3AH', city: 'Edinburgh', state: '' }
+            ],
+            ch: [
+                { street: 'Bahnhofstrasse 45', postal: '8001', city: 'Zurich', state: '' },
+                { street: 'Paradeplatz 8', postal: '8001', city: 'Zurich', state: '' },
+                { street: 'Rue du Rhone 30', postal: '1204', city: 'Geneva', state: '' },
+                { street: 'Aeschenvorstadt 1', postal: '4051', city: 'Basel', state: '' },
+                { street: 'Bundesplatz 3', postal: '3005', city: 'Bern', state: '' }
             ]
         };
-        const addressText = item => selectedRegion() === 'us'
+        const addressText = item => ['us', 'ca'].includes(selectedRegion())
             ? `${item.street}, ${item.city}, ${item.state} ${item.postal}`
             : `${item.street}, ${item.postal} ${item.city}`;
         const fillAddress = item => {
@@ -285,7 +306,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const refreshAddressSuggestions = () => {
             const region = selectedRegion();
             const typed = (addressInput?.value || '').trim().toLowerCase();
-            const matches = addressExamples[region].filter(item => addressText(item).toLowerCase().includes(typed) || typed === '').slice(0, 5);
+            const examples = addressExamples[region] || addressExamples.us;
+            const matches = examples.filter(item => addressText(item).toLowerCase().includes(typed) || typed === '').slice(0, 5);
             if (addressSuggestions) {
                 addressSuggestions.innerHTML = matches.map(item => `<option value="${item.street}" label="${addressText(item)}"></option>`).join('');
             }
@@ -298,7 +320,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const applyAddressSelection = () => {
             const region = selectedRegion();
             const typed = (addressInput?.value || '').trim().toLowerCase();
-            const match = addressExamples[region].find(item => item.street.toLowerCase() === typed || addressText(item).toLowerCase() === typed);
+            const examples = addressExamples[region] || addressExamples.us;
+            const match = examples.find(item => item.street.toLowerCase() === typed || addressText(item).toLowerCase() === typed);
             if (match) fillAddress(match);
         };
         const updateJointAccountFields = () => {
@@ -315,7 +338,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const applyOnboardingRegion = () => {
             const region = selectedRegion();
             onboardingForm.querySelectorAll('[data-region-block]').forEach(block => {
-                const visible = block.dataset.regionBlock === region;
+                const blockRegion = block.dataset.regionBlock;
+                const visible = blockRegion === region
+                    || (blockRegion === 'tax' && region !== 'us')
+                    || (blockRegion === 'iban' && ['de', 'ch'].includes(region));
                 block.hidden = !visible;
                 block.querySelectorAll('input, select, textarea').forEach(field => {
                     field.disabled = !visible;
@@ -326,26 +352,36 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             const phoneCode = onboardingForm.querySelector('[name="phone_country_code"]');
-            if (phoneCode && !onboardingForm.dataset.phoneTouched) phoneCode.value = region === 'us' ? '+1' : '+49';
+            const phoneDefaults = { us: '+1', ca: '+1', uk: '+44', ch: '+41', de: '+49' };
+            if (phoneCode && !onboardingForm.dataset.phoneTouched) phoneCode.value = phoneDefaults[region] || '+1';
             const postal = onboardingForm.querySelector('[name="postal_code"]');
             if (postal) {
-                postal.pattern = region === 'us' ? '\\d{5}(-\\d{4})?' : '\\d{5}';
-                postal.placeholder = region === 'us' ? '10001' : '40549';
+                const postalPatterns = {
+                    us: '\\d{5}(-\\d{4})?',
+                    ca: '[A-Za-z]\\d[A-Za-z][ -]?\\d[A-Za-z]\\d',
+                    uk: '[A-Za-z]{1,2}\\d[A-Za-z\\d]?\\s*\\d[A-Za-z]{2}',
+                    ch: '\\d{4}',
+                    de: '\\d{5}'
+                };
+                const postalPlaceholders = { us: '10001', ca: 'M5V 2T6', uk: 'SW1A 1AA', ch: '8001', de: '40549' };
+                postal.pattern = postalPatterns[region] || postalPatterns.us;
+                postal.placeholder = postalPlaceholders[region] || '10001';
             }
             const addressLabel = onboardingForm.querySelector('[data-address-line-label]');
-            if (addressLabel) addressLabel.textContent = region === 'us' ? 'Street address' : 'Street name and house number';
+            if (addressLabel) addressLabel.textContent = region === 'de' || region === 'ch' ? 'Street name and house number' : 'Street address';
             const postalLabel = onboardingForm.querySelector('[data-postal-label]');
-            if (postalLabel) postalLabel.textContent = region === 'us' ? 'ZIP code' : 'Postal code (PLZ)';
+            if (postalLabel) postalLabel.textContent = region === 'us' ? 'ZIP code' : (region === 'de' ? 'Postal code (PLZ)' : 'Postal code');
             refreshAddressSuggestions();
             const docSelect = onboardingForm.querySelector('[data-document-type-select]');
             if (docSelect) {
                 [...docSelect.options].forEach(option => {
                     const optionRegion = option.dataset.regionOption || 'both';
-                    option.hidden = optionRegion !== 'both' && optionRegion !== region;
+                    const allowedRegions = optionRegion.split(',').map(item => item.trim());
+                    option.hidden = optionRegion !== 'both' && !allowedRegions.includes(region);
                     option.disabled = option.hidden;
                 });
                 if (docSelect.selectedOptions[0]?.disabled) {
-                    docSelect.value = region === 'us' ? 'driver_license' : 'national_id';
+                    docSelect.value = ['de', 'ch'].includes(region) ? 'national_id' : 'driver_license';
                 }
             }
             updateJointAccountFields();
@@ -446,22 +482,23 @@ document.addEventListener('DOMContentLoaded', () => {
             setReview('name', value('full_name'));
             setReview('email', value('email'));
             setReview('phone', phone.trim());
-            setReview('tax_id', region === 'us' ? (ssnDigits ? `***-**-${ssnDigits.slice(-4)}` : '-') : (taxDigits ? `*******${taxDigits.slice(-4)}` : '-'));
-            setReview('address', region === 'us'
-                ? [value('address_line1'), value('address_line2'), `${value('city')}, ${value('state_code')} ${value('postal_code')}`.trim(), 'United States'].filter(Boolean).join(', ')
+            const rawTaxId = value('tax_id').replace(/\s+/g, ' ').trim();
+            setReview('tax_id', region === 'us' ? (ssnDigits ? `***-**-${ssnDigits.slice(-4)}` : '-') : (rawTaxId ? `***${rawTaxId.slice(-4)}` : '-'));
+            setReview('address', ['us', 'ca'].includes(region)
+                ? [value('address_line1'), value('address_line2'), `${value('city')}, ${value('state_code')} ${value('postal_code')}`.trim(), value('country')].filter(Boolean).join(', ')
                 : [value('address_line1'), `${value('postal_code')} ${value('city')}`.trim(), value('country')].filter(Boolean).join(', '));
             const wantsJointAccount = Boolean(onboardingForm.querySelector('[data-joint-account-toggle]')?.checked);
             const routing = value('routing_number');
             const extAccount = value('external_account_number');
             const institution = value('linked_institution_name');
-            setReview('iban', region === 'us'
+            setReview('iban', !['de', 'ch'].includes(region)
                 ? (wantsJointAccount && routing && extAccount ? `${institution || 'External bank'} / ****${extAccount.slice(-4)}` : 'New checking account only')
                 : (value('iban') || 'Generated automatically'));
             setReview('documents', doc ? `${docType}: ${doc}` : 'Not uploaded');
             const identityLabel = onboardingForm.querySelector('[data-review-identity-label]');
-            if (identityLabel) identityLabel.textContent = region === 'us' ? 'SSN' : 'Tax ID';
+            if (identityLabel) identityLabel.textContent = region === 'us' ? 'SSN' : (region === 'ca' ? 'SIN' : (region === 'uk' ? 'National Insurance' : 'Tax ID'));
             const bankLabel = onboardingForm.querySelector('[data-review-bank-label]');
-            if (bankLabel) bankLabel.textContent = region === 'us' ? 'Bank details' : 'IBAN';
+            if (bankLabel) bankLabel.textContent = ['de', 'ch'].includes(region) ? 'IBAN' : 'Bank details';
         };
         const validateStep = () => {
             for (const field of stepFields()) {
@@ -480,8 +517,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const taxId = onboardingForm.querySelector('[name="tax_id"]');
                 const ssn = onboardingForm.querySelector('[name="ssn"]');
                 const iban = onboardingForm.querySelector('[name="iban"]');
-                if (region === 'eu' && taxId && !/^\d{11}$/.test(taxId.value.replace(/\D/g, ''))) {
+                if (region === 'de' && taxId && !/^\d{11}$/.test(taxId.value.replace(/\D/g, ''))) {
                     setTemporaryValidity(taxId, 'Tax ID must contain 11 digits.');
+                    return false;
+                }
+                if (!['us', 'de'].includes(region) && taxId && taxId.value.trim().length < 4) {
+                    setTemporaryValidity(taxId, 'Enter a valid tax or national insurance number.');
                     return false;
                 }
                 if (region === 'us' && ssn && !/^\d{9}$/.test(ssn.value.replace(/\D/g, ''))) {
@@ -489,8 +530,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     return false;
                 }
                 const normalizedIban = iban?.value.replace(/\s+/g, '').toUpperCase() || '';
-                if (region === 'eu' && normalizedIban && !/^DE\d{20}$/.test(normalizedIban)) {
+                if (region === 'de' && normalizedIban && !/^DE\d{20}$/.test(normalizedIban)) {
                     setTemporaryValidity(iban, 'IBAN must start with DE and contain 22 characters.');
+                    return false;
+                }
+                if (region === 'ch' && normalizedIban && !/^CH[0-9A-Z]{19}$/.test(normalizedIban)) {
+                    setTemporaryValidity(iban, 'IBAN must start with CH and contain 21 characters.');
                     return false;
                 }
             }

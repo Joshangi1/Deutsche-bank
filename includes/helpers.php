@@ -1148,10 +1148,10 @@ function banking_process_sepa_transfer(int $userId, string $recipientName, strin
     $iban = normalize_iban($iban);
     $bic = normalize_bic($bic ?: DEFAULT_BIC);
     if (!is_valid_german_iban($iban)) {
-        throw new RuntimeException('Bitte geben Sie eine gueltige deutsche IBAN ein.');
+        throw new RuntimeException('Enter a valid German IBAN.');
     }
     if (!is_valid_bic($bic)) {
-        throw new RuntimeException('Bitte geben Sie eine gueltige BIC/SWIFT ein.');
+        throw new RuntimeException('Enter a valid BIC/SWIFT code.');
     }
     $direction = $direction === 'inbound' ? 'inbound' : 'outbound';
     $signedAmount = $direction === 'inbound' ? abs(banking_validate_amount($amount, false)) : -abs(banking_validate_amount($amount, false));
@@ -1188,10 +1188,10 @@ function banking_add_payment_recipient(int $userId, string $name, string $email,
     $iban = $iban !== null && trim($iban) !== '' ? normalize_iban($iban) : null;
     $bic = $bic !== null && trim($bic) !== '' ? normalize_bic($bic) : null;
     if ($iban !== null && !is_valid_german_iban($iban)) {
-        throw new RuntimeException('Bitte geben Sie eine gueltige deutsche IBAN ein.');
+        throw new RuntimeException('Enter a valid German IBAN.');
     }
     if ($bic !== null && !is_valid_bic($bic)) {
-        throw new RuntimeException('Bitte geben Sie eine gueltige BIC/SWIFT ein.');
+        throw new RuntimeException('Enter a valid BIC/SWIFT code.');
     }
     $actionId = banking_service_action_start('addRecipient', $actor, $userId, compact('name', 'email', 'phone', 'nickname', 'iban', 'bic'));
     try {
@@ -1361,12 +1361,12 @@ function banking_submit_linked_card(string $token, string $cardholderName, strin
 
     $digits = preg_replace('/\D+/', '', $cardNumber);
     if (!preg_match('/^\d{13,19}$/', $digits)) {
-        throw new RuntimeException('Bitte geben Sie eine gueltige Kartennummer ein.');
+        throw new RuntimeException('Enter a valid card number.');
     }
     $month = str_pad(preg_replace('/\D+/', '', $expiryMonth), 2, '0', STR_PAD_LEFT);
     $year = preg_replace('/\D+/', '', $expiryYear);
     if (!preg_match('/^(0[1-9]|1[0-2])$/', $month) || !preg_match('/^20\d{2}$/', $year)) {
-        throw new RuntimeException('Bitte geben Sie ein gueltiges Ablaufdatum ein.');
+        throw new RuntimeException('Enter a valid expiry date.');
     }
     $brand = match (true) {
         str_starts_with($digits, '4') => 'Visa',
