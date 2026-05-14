@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (isset($_POST['populate_history'])) {
         $count = populate_nurse_parent_transactions($uid, 13);
-        banking_emit_event('transaction.seeded', ['count' => $count, 'system_detail' => 'Demo transaction history regenerated through admin workflow.'], banking_actor('admin', (int) $admin['id']), $uid, 'user', $uid);
+        banking_emit_event('transaction.seeded', ['count' => $count, 'system_detail' => 'Transaction history regenerated through admin workflow.'], banking_actor('admin', (int) $admin['id']), $uid, 'user', $uid);
         log_admin((int) $admin['id'], 'populate_transactions', 'Generated ' . $count . ' realistic banking transactions for user ' . $uid, $uid, null, ['count' => $count]);
         flash('success', $count . ' transactions generated across 13 weeks.');
         header('Location: users.php');

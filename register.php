@@ -99,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ->execute([$userId, $linkedInstitution, $jointOwnerName !== '' ? $jointOwnerName : null, substr($externalAccount, -4), $externalRouting]);
                 }
             } else {
-                $accountIban = $iban !== '' ? $iban : ($region === 'ch' ? 'CH9300762011623852957' : demo_german_iban());
+                $accountIban = $iban !== '' ? $iban : ($region === 'ch' ? 'CH9300762011623852957' : generated_german_iban());
                 $acct = substr($accountIban, -10);
                 db()->prepare('INSERT INTO accounts (user_id, account_number, routing_number, iban, bic, account_type, available_balance, pending_balance, savings_balance) VALUES (?,?,?,?,?,?,?,?,?)')->execute([$userId,$acct,$regionConfig['routing'],$accountIban,$regionConfig['routing'],$regionConfig['account_type'],0,0,0]);
             }

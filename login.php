@@ -18,8 +18,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
     $email = strtolower(trim($_POST['email'] ?? ''));
     $password = (string) ($_POST['password'] ?? '');
-    $demoEmail = 'demo.' . $regionConfig['region'] . '@deutsche.local';
-    $demoPassword = 'Deutsche123!';
     $user = null;
     $databaseOnline = true;
 
@@ -34,19 +32,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         unset($GLOBALS['DB_SILENT_FAILURE']);
     }
 
-    if (!$databaseOnline && hash_equals($email, $demoEmail) && hash_equals($password, $demoPassword)) {
-        session_regenerate_id(true);
-        unset($_SESSION['user_id']);
-        $_SESSION['offline_demo_user'] = [
-            'region' => $regionConfig['region'],
-            'first_name' => $isUsPortal ? 'Lincoln' : 'Lukas',
-            'last_name' => $isUsPortal ? 'Martin' : 'Weber',
-            'email' => $demoEmail,
-        ];
-        header('Location: dashboard.php');
-        exit;
-    } elseif (!$databaseOnline) {
-        flash('danger', 'The database is offline. Use the demo login below to preview the dashboard.');
+    if (!$databaseOnline) {
+        flash('danger', 'The database is offline. Please contact support or try again later.');
     } elseif ($user && (int) $user['failed_attempts'] >= 5 && strtotime((string) $user['locked_until']) > time()) {
         flash('danger', 'Account temporarily locked after failed attempts. Try again later.');
     } elseif ($user && password_verify($password, $user['password_hash']) && in_array($user['status'], ['active', 'frozen', 'suspended'], true)) {
@@ -135,10 +122,6 @@ include __DIR__ . '/includes/public_header.php';
       </div>
       <button class="btn btn-gold w-100"><?= $isUsPortal ? 'Sign in securely' : 'Sicher anmelden' ?></button>
       <p class="small muted mt-3 mb-0"><?= $regionConfig['language'] === 'de' ? 'Neu hier?' : 'New here?' ?> <a class="fw-bold" href="<?= e($pageRegisterUrl) ?>"><?= e($createAccountLabel) ?></a></p>
-      <div class="demo-login-note mt-3">
-        <strong><?= $isUsPortal ? 'Demo account' : 'Demo-Konto' ?></strong>
-        <span><?= e('demo.' . $regionConfig['region'] . '@deutsche.local') ?> / Deutsche123!</span>
-      </div>
     </form>
   </div>
 </section>

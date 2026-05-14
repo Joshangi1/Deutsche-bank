@@ -3,15 +3,9 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/helpers.php';
 require_once __DIR__ . '/frontend_components.php';
 $user = require_user();
-$isOfflineDemo = !empty($_SESSION['offline_demo_user']);
-if (!$isOfflineDemo) {
-    ensure_banking_schema();
-    cleanup_customer_notifications((int) $user['id']);
-}
-$accountForRegion = $isOfflineDemo ? [
-    'iban' => (($user['country'] ?? '') === 'Germany') ? 'DE89370400440532013000' : '',
-    'routing_number' => (($user['country'] ?? '') === 'United States') ? US_ROUTING_NUMBER : '',
-] : user_account((int) $user['id']);
+ensure_banking_schema();
+cleanup_customer_notifications((int) $user['id']);
+$accountForRegion = user_account((int) $user['id']);
 $bankingRegion = user_banking_region($user, $accountForRegion);
 $regionConfig = banking_region_config($bankingRegion);
 $isUsExperience = $bankingRegion === 'us';
@@ -19,16 +13,12 @@ $accountLanguage = $regionConfig['language'];
 $GLOBALS['pageLanguage'] = $accountLanguage;
 $GLOBALS['disableTranslate'] = true;
 $isRestricted = account_is_restricted($user);
-$unreadCount = 0;
-$notificationPreview = [];
-if (!$isOfflineDemo) {
-    $unreadStmt = db()->prepare('SELECT COUNT(*) c FROM notifications WHERE user_id=? AND is_read=0');
-    $unreadStmt->execute([$user['id']]);
-    $unreadCount = (int) $unreadStmt->fetch()['c'];
-    $previewStmt = db()->prepare('SELECT * FROM notifications WHERE user_id=? ORDER BY created_at DESC LIMIT 4');
-    $previewStmt->execute([$user['id']]);
-    $notificationPreview = $previewStmt->fetchAll();
-}
+$unreadStmt = db()->prepare('SELECT COUNT(*) c FROM notifications WHERE user_id=? AND is_read=0');
+$unreadStmt->execute([$user['id']]);
+$unreadCount = (int) $unreadStmt->fetch()['c'];
+$previewStmt = db()->prepare('SELECT * FROM notifications WHERE user_id=? ORDER BY created_at DESC LIMIT 4');
+$previewStmt->execute([$user['id']]);
+$notificationPreview = $previewStmt->fetchAll();
 ?>
 <!doctype html>
 <html lang="<?= e($accountLanguage) ?>" class="notranslate" translate="no">

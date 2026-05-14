@@ -1,9 +1,9 @@
 <?php
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/helpers.php';
-$demoAdminEmail = 'admin@deutsche.local';
-$demoAdminPassword = 'Deutsche123!';
-function ensure_demo_admin_login(string $email, string $password): void
+$defaultAdminEmail = 'admin@deutsche.local';
+$defaultAdminPassword = 'Deutsche123!';
+function ensure_default_admin_login(string $email, string $password): void
 {
     $stmt = db()->prepare('SELECT id, password_hash FROM admins WHERE email=? LIMIT 1');
     $stmt->execute([$email]);
@@ -18,7 +18,7 @@ function ensure_demo_admin_login(string $email, string $password): void
             ->execute(['Deutsche Admin', password_hash($password, PASSWORD_BCRYPT), 'Super Admin', $admin['id']]);
     }
 }
-ensure_demo_admin_login($demoAdminEmail, $demoAdminPassword);
+ensure_default_admin_login($defaultAdminEmail, $defaultAdminPassword);
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
     $stmt = db()->prepare('SELECT * FROM admins WHERE email=? LIMIT 1');

@@ -3,65 +3,6 @@ $pageTitle = 'Account Overview';
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/helpers.php';
 require_once __DIR__ . '/includes/frontend_components.php';
-
-if (!empty($_SESSION['offline_demo_user'])) {
-    $demo = $_SESSION['offline_demo_user'];
-    $isUsAccount = ($demo['region'] ?? 'us') === 'us';
-    $currency = $isUsAccount ? 'USD' : 'EUR';
-    $balance = $isUsAccount ? 89772.00 : 82640.00;
-    $pending = $isUsAccount ? 250.00 : 250.00;
-    $accountLabel = $isUsAccount ? 'Premium Checking' : 'Premium-Girokonto';
-    $accountNumber = $isUsAccount ? '4078' : '0705';
-    $sidebar = $isUsAccount
-        ? [['fa-gauge-high','Overview'],['fa-bolt','Zelle'],['fa-calendar-check','Bill Pay'],['fa-building-columns','ACH Transfers'],['fa-credit-card','Manage Credit Cards'],['fa-right-left','Wire Transfers'],['fa-file-lines','Statements'],['fa-user-shield','Profile']]
-        : [['fa-gauge-high','Uebersicht'],['fa-bolt','SEPA Instant'],['fa-calendar-check','Dauerauftraege'],['fa-building-columns','SEPA-Ueberweisungen'],['fa-credit-card','Kreditkarten'],['fa-right-left','Transfers'],['fa-file-lines','Kontoauszuege'],['fa-user-shield','Profil']];
-    ?>
-    <!doctype html>
-    <html lang="<?= $isUsAccount ? 'en' : 'de' ?>" class="notranslate" translate="no">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="google" content="notranslate">
-        <title>Demo Dashboard | Deutsche</title>
-        <link rel="icon" href="<?= url('assets/icons/favicon.svg') ?>" type="image/svg+xml">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
-        <link href="<?= url('assets/css/styles.css') ?>?v=<?= filemtime(__DIR__ . '/assets/css/styles.css') ?>" rel="stylesheet">
-    </head>
-    <body class="notranslate" translate="no">
-    <div class="app-shell">
-        <aside class="sidebar">
-            <a class="sidebar-brand" href="<?= url('dashboard.php') ?>"><?= lead_logo('light') ?></a>
-            <nav class="nav flex-column">
-                <?php foreach ($sidebar as $index => $item): ?>
-                    <span class="nav-link <?= $index === 0 ? 'active' : '' ?>"><i class="fa-solid <?= e($item[0]) ?>"></i><span><?= e($item[1]) ?></span></span>
-                <?php endforeach; ?>
-            </nav>
-            <div class="sidebar-session mt-auto"><i class="fa-solid fa-shield-halved"></i><div><strong>Demo Session</strong><span>No database required</span></div></div>
-        </aside>
-        <main class="app-main">
-            <div class="topbar">
-                <div><div class="topbar-kicker"><?= $isUsAccount ? 'Deutsche US banking' : 'Deutsche European banking' ?></div><h1 class="h3 mb-0 fw-bold"><?= $isUsAccount ? 'Account Overview' : 'Kontouebersicht' ?></h1><div class="muted">Welcome back, <?= e($demo['first_name']) ?></div></div>
-                <div class="d-flex align-items-center gap-2"><span class="language-static-pill"><i class="fa-solid fa-language"></i><?= $isUsAccount ? 'English' : 'Deutsch' ?></span><a class="btn btn-outline-danger" href="<?= url('logout.php') ?>"><i class="fa-solid fa-arrow-right-from-bracket me-1"></i>Sign out</a></div>
-            </div>
-            <div class="banking-hero mb-4"><div><div class="eyebrow">Demo mode</div><h2><?= $isUsAccount ? 'Your U.S. banking workspace is ready' : 'Ihr europaeischer Banking-Arbeitsbereich ist bereit' ?></h2><p><?= $isUsAccount ? 'ACH, Zelle, Bill Pay, wire transfers, and credit-card tools are visible in this demo.' : 'SEPA, IBAN, BIC/SWIFT und Kreditkartenfunktionen sind in dieser Demo sichtbar.' ?></p></div><i class="fa-solid fa-circle-check"></i></div>
-            <div class="row g-4">
-                <div class="col-xl-8"><div class="balance-card"><div class="row g-4 position-relative"><div class="col-md-7"><div class="text-white-50 mb-2"><?= $isUsAccount ? 'Available balance' : 'Verfuegbarer Saldo' ?> <span class="account-status-pill status-success ms-2"><i class="fa-solid fa-circle"></i>Demo</span></div><div class="display-5 fw-bold"><?= money($balance, $currency) ?></div><div class="mt-4 d-flex gap-4"><div><div class="text-white-50 small">Pending</div><strong><?= money($pending, $currency) ?></strong></div><div><div class="text-white-50 small"><?= $isUsAccount ? 'Savings' : 'Tagesgeld' ?></div><strong><?= money(4200, $currency) ?></strong></div></div></div><div class="col-md-5"><div class="text-white-50 small"><?= $isUsAccount ? 'Account' : 'Konto' ?></div><h5><?= e($accountLabel) ?></h5><?php if ($isUsAccount): ?><p class="mb-1">Account &bull;&bull;&bull;&bull; <?= e($accountNumber) ?></p><p>Routing 071923846</p><?php else: ?><p class="mb-1">IBAN DE89 3704 0044 0532 0130 00</p><p>BIC/SWIFT DEUTDEFFXXX</p><?php endif; ?><span class="btn btn-gold"><?= $isUsAccount ? 'Wire transfer' : 'SEPA-Ueberweisung' ?></span></div></div></div></div>
-                <div class="col-xl-4"><div class="virtual-card"><div class="d-flex justify-content-between"><strong>Deutsche</strong><i class="fa-brands fa-cc-visa fa-2x"></i></div><div class="fs-4 fw-bold">4582 **** **** <?= $isUsAccount ? '7771' : '4144' ?></div><div class="d-flex justify-content-between"><span><?= e(strtoupper($demo['first_name'] . ' ' . $demo['last_name'])) ?></span><span>ACTIVE</span></div></div></div>
-                <div class="col-xl-8"><div class="table-card"><div class="p-4 d-flex justify-content-between"><h5 class="fw-bold mb-0">Recent transactions</h5><span>Demo</span></div><table class="table transaction-table align-middle mb-0"><tbody><tr><td><div class="tx-merchant"><span class="tx-icon tx-icon-credit"><i class="fa-solid fa-arrow-down"></i></span><div><strong>Referral Signup Bonus</strong><div class="small muted">Pending admin approval</div></div></div></td><td><span class="status-pill status-warning">PENDING</span></td><td class="text-end fw-bold tx-credit">+<?= money(250, $currency) ?></td></tr><tr><td><div class="tx-merchant"><span class="tx-icon tx-icon-credit"><i class="fa-solid fa-credit-card"></i></span><div><strong>Funds added through approved credit card</strong><div class="small muted">Completed demo transaction</div></div></div></td><td><span class="status-pill status-success">COMPLETED</span></td><td class="text-end fw-bold tx-credit">+<?= money(1250, $currency) ?></td></tr></tbody></table></div></div>
-                <div class="col-xl-4"><div class="table-card p-4 h-100"><h5 class="fw-bold">Balance trend</h5><canvas data-chart="line" height="220"></canvas></div></div>
-                <div class="col-12"><div class="premium-card p-4"><h5 class="fw-bold">Demo credentials</h5><p class="muted mb-0"><?= e($demo['email']) ?> / Deutsche123!. MySQL is offline, so this demo dashboard is running without database reads.</p></div></div>
-            </div>
-        </main>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="<?= url('assets/js/app.js') ?>?v=<?= filemtime(__DIR__ . '/assets/js/app.js') ?>"></script>
-    </body>
-    </html>
-    <?php
-    exit;
-}
 include __DIR__ . '/includes/user_header.php';
 
 $account = user_account((int) $user['id']);

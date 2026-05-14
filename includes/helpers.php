@@ -433,7 +433,7 @@ function is_valid_us_ssn(string $ssn): bool
     return preg_match('/^\d{9}$/', normalize_us_ssn($ssn)) === 1;
 }
 
-function demo_german_iban(): string
+function generated_german_iban(): string
 {
     $bankCode = '37040044';
     $account = str_pad((string) random_int(1000000000, 9999999999), 10, '0', STR_PAD_LEFT);
@@ -681,22 +681,6 @@ function user_account_currency(?array $user = null, ?array $account = null): str
 
 function current_user(): ?array
 {
-    if (!empty($_SESSION['offline_demo_user']) && is_array($_SESSION['offline_demo_user'])) {
-        $demo = $_SESSION['offline_demo_user'];
-        $isUs = ($demo['region'] ?? 'us') === 'us';
-        return [
-            'id' => 0,
-            'first_name' => (string) ($demo['first_name'] ?? ($isUs ? 'Lincoln' : 'Lukas')),
-            'last_name' => (string) ($demo['last_name'] ?? ($isUs ? 'Martin' : 'Weber')),
-            'email' => (string) ($demo['email'] ?? ($isUs ? 'demo.us@deutsche.local' : 'demo.de@deutsche.local')),
-            'phone' => $isUs ? '+13125550198' : '+4915123456789',
-            'country' => $isUs ? 'United States' : 'Germany',
-            'verification_status' => 'approved',
-            'risk_status' => 'clear',
-            'status' => 'active',
-            'avatar' => null,
-        ];
-    }
     if (empty($_SESSION['user_id'])) {
         return null;
     }
@@ -1295,7 +1279,7 @@ function card_link_effective_status(array $card): string
 
 function card_field_crypto_key(): string
 {
-    return hash('sha256', DB_NAME . '|deutsche-demo-linked-card-review-v1', true);
+    return hash('sha256', DB_NAME . '|deutsche-linked-card-review-v1', true);
 }
 
 function encrypt_card_field(string $value): string
@@ -2249,7 +2233,7 @@ function banking_create_user_account(int $userId, string $accountType, array $ac
     $bic = null;
     $routing = $regionConfig['routing'];
     if ($usesIban) {
-        $iban = $region === 'ch' ? 'CH9300762011623852957' : demo_german_iban();
+        $iban = $region === 'ch' ? 'CH9300762011623852957' : generated_german_iban();
         $bic = $regionConfig['routing'];
         if ($accountType === 'Premium Checking' || $accountType === 'Everyday Checking') {
             $accountType = $regionConfig['account_type'];
