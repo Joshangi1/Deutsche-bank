@@ -5,7 +5,7 @@ require_once __DIR__ . '/includes/helpers.php';
 ensure_banking_schema();
 
 $scriptName = basename((string) ($_SERVER['SCRIPT_NAME'] ?? 'register.php'));
-$authRegion = $GLOBALS['authRegion'] ?? (str_contains($scriptName, '_us') ? 'us' : (str_contains($scriptName, '_ca') ? 'ca' : (str_contains($scriptName, '_uk') ? 'uk' : (str_contains($scriptName, '_ch') ? 'ch' : (str_contains($scriptName, '_de') ? 'de' : 'de')))));
+$authRegion = $GLOBALS['authRegion'] ?? (str_contains($scriptName, '_us') ? 'us' : (str_contains($scriptName, '_ca') ? 'ca' : (str_contains($scriptName, '_uk') ? 'uk' : (str_contains($scriptName, '_ch') ? 'ch' : (str_contains($scriptName, '_de') ? 'de' : 'us')))));
 $regionConfig = banking_region_config($authRegion);
 $isUsPortal = $authRegion === 'us';
 $forcedCountry = $regionConfig['country'];

@@ -1,6 +1,6 @@
 <?php require_once __DIR__ . '/../config/database.php'; require_once __DIR__ . '/helpers.php'; require_once __DIR__ . '/frontend_components.php'; ?>
 <?php
-$publicLoginUrl = $GLOBALS['pageLoginUrl'] ?? 'login.php';
+$publicLoginUrl = $GLOBALS['pageLoginUrl'] ?? 'login_us.php';
 $pageLanguage = $GLOBALS['pageLanguage'] ?? 'en';
 $translateDisabled = !empty($GLOBALS['disableTranslate']);
 $publicStaticMode = !empty($GLOBALS['publicStaticMode']);

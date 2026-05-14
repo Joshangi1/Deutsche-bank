@@ -2,6 +2,8 @@
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/helpers.php';
 $pageTitle = 'Deutsche | Programmable Banking';
+$GLOBALS['pageLanguage'] = 'en';
+$GLOBALS['pageLoginUrl'] = 'login_us.php';
 $GLOBALS['publicStaticMode'] = true;
 include __DIR__ . '/includes/public_header.php';
 ?>
@@ -11,7 +13,7 @@ include __DIR__ . '/includes/public_header.php';
             <div class="col-lg-7">
                 <h1>A partner you can bank on.</h1>
                 <p class="mt-4">Programmable financial services built to support any use case, quickly.</p>
-                <div class="d-flex flex-wrap gap-3 mt-5"><a class="btn btn-primary-pill btn-lg" href="login.php">Sign in</a><a class="btn btn-light btn-lg border" href="register.php">Open account</a></div>
+                <div class="d-flex flex-wrap gap-3 mt-5"><a class="btn btn-primary-pill btn-lg" href="login_us.php">Sign in</a><a class="btn btn-light btn-lg border" href="register_us.php">Open account</a></div>
                 <div class="hero-panel">
                     <p><strong>Reinventing Modern Banking.</strong> From regulatory oversight to modern account tools, our role is to resolve friction behind the scenes so you can focus on creating meaningful financial experiences.</p>
                 </div>
