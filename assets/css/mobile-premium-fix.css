@@ -1157,6 +1157,3 @@ body,
   width: 18px;
   flex-shrink: 0;
 }
-
-/* Language pill — hidden completely */
-.language-static-pill { display: none !important; }

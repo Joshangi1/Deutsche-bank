@@ -25,13 +25,17 @@ $notificationPreview = $previewStmt->fetchAll();
 <html lang="<?= e($accountLanguage) ?>" class="notranslate" translate="no">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="google" content="notranslate">
     <title><?= e($pageTitle ?? 'Member Dashboard') ?> | <?= e(UI_BRAND_NAME) ?></title>
     <link rel="icon" href="<?= url('assets/icons/favicon.svg') ?>" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
     <link href="<?= url('assets/css/styles.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/styles.css') ?>" rel="stylesheet">
+    <link href="<?= url('assets/css/premium-banking.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/premium-banking.css') ?>" rel="stylesheet">
     <link href="<?= url('assets/css/mobile-premium-fix.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/mobile-premium-fix.css') ?>" rel="stylesheet">
     <script>
         (function () {
@@ -44,6 +48,10 @@ $notificationPreview = $previewStmt->fetchAll();
 </head>
 <body class="notranslate" translate="no">
 <div class="app-shell">
+
+<!-- ═══════════════════════════════════════════
+     SIDEBAR
+     ═══════════════════════════════════════════ -->
 <aside class="sidebar">
     <a class="sidebar-brand" href="<?= url('dashboard.php') ?>"><?= lead_logo('light') ?></a>
     <nav class="nav flex-column">
@@ -75,13 +83,9 @@ $notificationPreview = $previewStmt->fetchAll();
         <i class="fa-solid fa-shield-halved"></i>
         <div><strong>Secure Session</strong><span>Last login <?= e(date('M j, g:i A')) ?></span></div>
     </div>
-    <div class="sidebar-signout-wrap">
-        <a class="sidebar-signout-btn" href="<?= url('logout.php') ?>">
-            <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign out
-        </a>
-    </div>
 </aside>
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   var sidebar = document.querySelector('.sidebar');
@@ -97,14 +101,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function openSidebar() {
     sidebar.classList.add('open');
-    overlay.classList.add('open');
+    overlay.classList.add('open', 'show');
     document.body.classList.add('sidebar-open');
     setExpanded(true);
   }
 
   function closeSidebar() {
     sidebar.classList.remove('open');
-    overlay.classList.remove('open');
+    overlay.classList.remove('open', 'show');
     document.body.classList.remove('sidebar-open');
     setExpanded(false);
   }
@@ -127,43 +131,102 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 </script>
+
+<!-- ═══════════════════════════════════════════
+     MAIN CONTENT
+     ═══════════════════════════════════════════ -->
 <main class="app-main">
+
+    <!-- ── TOPBAR ── -->
     <div class="topbar">
-        <div class="d-flex align-items-center gap-3">
-            <button class="btn btn-navy mobile-toggle" data-toggle-sidebar aria-label="Open menu" aria-controls="sidebarOverlay"><i class="fa-solid fa-bars"></i></button>
-            <div><div class="topbar-kicker"><?= e($regionConfig['workspace']) ?></div><h1 class="h3 mb-0 fw-bold"><?= e($pageTitle ?? 'Dashboard') ?></h1><div class="muted">Welcome back, <?= e($user['first_name']) ?></div></div>
+
+        <!-- LEFT: hamburger + title -->
+        <div class="d-flex align-items-center">
+            <button class="btn btn-navy mobile-toggle me-2" data-toggle-sidebar aria-label="Open menu" aria-controls="sidebarOverlay">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div>
+                <span class="topbar-kicker"><?= e($regionConfig['workspace']) ?></span>
+                <h1 class="h3 mb-0 fw-bold"><?= e($pageTitle ?? 'Dashboard') ?></h1>
+                <span class="muted">Welcome back, <?= e($user['first_name']) ?></span>
+            </div>
         </div>
-        <div class="d-flex align-items-center gap-2">
-            <div class="dropdown notification-menu">
-                <button class="btn btn-light border position-relative" data-bs-toggle="dropdown" aria-expanded="false">
+
+        <!-- RIGHT: actions — never overlap, always in one row -->
+        <div class="d-flex align-items-center">
+
+            <!-- Language -->
+            <span class="language-static-pill me-1" title="Language: English">
+                <i class="fa-solid fa-language"></i>
+                <span class="language-static-label">EN</span>
+            </span>
+
+            <!-- Notifications -->
+            <div class="dropdown notification-menu me-1">
+                <button class="btn btn-light border position-relative"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                        aria-label="Notifications">
                     <i class="fa-solid fa-bell"></i>
-                    <?php if ($unreadCount > 0): ?><span class="unread-dot"><?= $unreadCount > 9 ? '9+' : $unreadCount ?></span><?php endif; ?>
+                    <?php if ($unreadCount > 0): ?>
+                        <span class="unread-dot"><?= $unreadCount > 9 ? '9+' : $unreadCount ?></span>
+                    <?php endif; ?>
                 </button>
                 <div class="dropdown-menu dropdown-menu-end notification-dropdown p-0">
                     <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
-                        <strong>Alerts</strong><a class="small fw-bold" href="<?= url('user/notifications.php') ?>">View all</a>
+                        <strong>Alerts</strong>
+                        <a class="small fw-bold" href="<?= url('user/notifications.php') ?>">View all</a>
                     </div>
                     <?php foreach ($notificationPreview as $notice): ?>
+                        <?php $noticeCategory = $notice['category'] ?? 'account'; ?>
                         <a class="dropdown-item notification-preview" href="<?= url('user/notifications.php') ?>">
-                            <?php $noticeCategory = $notice['category'] ?? 'account'; ?>
-                            <span class="tx-icon tx-icon-credit"><i class="fa-solid <?= $noticeCategory==='security'?'fa-shield-halved':($noticeCategory==='transfer'?'fa-right-left':'fa-bell') ?>"></i></span>
-                            <span><strong><?= e($notice['title']) ?></strong><small><?= e($notice['message']) ?></small></span>
+                            <span class="tx-icon tx-icon-credit">
+                                <i class="fa-solid <?= $noticeCategory==='security'?'fa-shield-halved':($noticeCategory==='transfer'?'fa-right-left':'fa-bell') ?>"></i>
+                            </span>
+                            <span>
+                                <strong><?= e($notice['title']) ?></strong>
+                                <small><?= e($notice['message']) ?></small>
+                            </span>
                         </a>
                     <?php endforeach; ?>
-                    <?php if (!$notificationPreview): ?><div class="p-3 muted small">No notifications yet.</div><?php endif; ?>
+                    <?php if (!$notificationPreview): ?>
+                        <div class="p-3 muted small">No notifications yet.</div>
+                    <?php endif; ?>
                 </div>
             </div>
-            <img class="avatar-sm" src="<?= e(avatar_url($user['avatar'] ?? null)) ?>" alt="Profile picture">
+
+            <!-- Avatar -->
+            <img class="avatar-sm me-1"
+                 src="<?= e(avatar_url($user['avatar'] ?? null)) ?>"
+                 alt="<?= e($user['first_name']) ?>'s profile picture">
+
+            <!-- Sign out -->
+            <a class="btn btn-outline-danger" href="<?= url('logout.php') ?>" title="Sign out" aria-label="Sign out">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            </a>
         </div>
-    </div>
+    </div><!-- /topbar -->
+
+    <!-- Restriction banner -->
     <?php if ($isRestricted): ?>
         <div class="restriction-banner">
             <div class="restriction-icon"><i class="fa-solid fa-shield-halved"></i></div>
             <div>
                 <strong>Account access temporarily restricted</strong>
                 <p><?= e(restricted_account_message()) ?></p>
-                <div class="d-flex flex-wrap gap-2"><a class="btn btn-sm btn-light border" href="<?= url('user/support.php') ?>"><i class="fa-solid fa-headset me-1"></i>Contact support</a><a class="btn btn-sm btn-light border" href="<?= url('user/security_center.php') ?>"><i class="fa-solid fa-lock me-1"></i>Review security</a></div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a class="btn btn-sm btn-light border" href="<?= url('user/support.php') ?>">
+                        <i class="fa-solid fa-headset me-1"></i>Contact support
+                    </a>
+                    <a class="btn btn-sm btn-light border" href="<?= url('user/security_center.php') ?>">
+                        <i class="fa-solid fa-lock me-1"></i>Review security
+                    </a>
+                </div>
             </div>
         </div>
     <?php endif; ?>
-    <?php foreach (flashes() as $f): ?><div class="alert alert-<?= e($f['type']) ?>"><?= e($f['message']) ?></div><?php endforeach; ?>
+
+    <!-- Flash messages -->
+    <?php foreach (flashes() as $f): ?>
+        <div class="alert alert-<?= e($f['type']) ?>"><?= e($f['message']) ?></div>
+    <?php endforeach; ?>
