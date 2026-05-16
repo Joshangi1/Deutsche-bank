@@ -32,6 +32,7 @@ $notificationPreview = $previewStmt->fetchAll();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
     <link href="<?= url('assets/css/styles.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/styles.css') ?>" rel="stylesheet">
+    <link href="<?= url('assets/css/mobile-premium-fix.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/mobile-premium-fix.css') ?>" rel="stylesheet">
     <script>
         (function () {
             document.cookie = 'googtrans=;path=/;expires=Thu, 01 Jan 1970 00:00:00 GMT';
@@ -74,15 +75,65 @@ $notificationPreview = $previewStmt->fetchAll();
         <i class="fa-solid fa-shield-halved"></i>
         <div><strong>Secure Session</strong><span>Last login <?= e(date('M j, g:i A')) ?></span></div>
     </div>
+    <div class="sidebar-signout-wrap">
+        <a class="sidebar-signout-btn" href="<?= url('logout.php') ?>">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign out
+        </a>
+    </div>
 </aside>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var sidebar = document.querySelector('.sidebar');
+  var overlay = document.getElementById('sidebarOverlay');
+  var toggles = document.querySelectorAll('[data-toggle-sidebar]');
+  if (!sidebar || !overlay) return;
+
+  function setExpanded(value) {
+    toggles.forEach(function (btn) {
+      btn.setAttribute('aria-expanded', value ? 'true' : 'false');
+    });
+  }
+
+  function openSidebar() {
+    sidebar.classList.add('open');
+    overlay.classList.add('open');
+    document.body.classList.add('sidebar-open');
+    setExpanded(true);
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+    document.body.classList.remove('sidebar-open');
+    setExpanded(false);
+  }
+
+  toggles.forEach(function (btn) {
+    btn.setAttribute('aria-expanded', 'false');
+    btn.addEventListener('click', function (event) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+    }, true);
+  });
+
+  overlay.addEventListener('click', closeSidebar);
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') closeSidebar();
+  });
+  window.addEventListener('resize', function () {
+    if (window.matchMedia('(min-width: 992px)').matches) closeSidebar();
+  });
+});
+</script>
 <main class="app-main">
     <div class="topbar">
         <div class="d-flex align-items-center gap-3">
-            <button class="btn btn-navy mobile-toggle" data-toggle-sidebar><i class="fa-solid fa-bars"></i></button>
+            <button class="btn btn-navy mobile-toggle" data-toggle-sidebar aria-label="Open menu" aria-controls="sidebarOverlay"><i class="fa-solid fa-bars"></i></button>
             <div><div class="topbar-kicker"><?= e($regionConfig['workspace']) ?></div><h1 class="h3 mb-0 fw-bold"><?= e($pageTitle ?? 'Dashboard') ?></h1><div class="muted">Welcome back, <?= e($user['first_name']) ?></div></div>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <span class="language-static-pill"><i class="fa-solid fa-language"></i><span class="language-static-label">English</span></span>
             <div class="dropdown notification-menu">
                 <button class="btn btn-light border position-relative" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="fa-solid fa-bell"></i>
@@ -103,7 +154,6 @@ $notificationPreview = $previewStmt->fetchAll();
                 </div>
             </div>
             <img class="avatar-sm" src="<?= e(avatar_url($user['avatar'] ?? null)) ?>" alt="Profile picture">
-            <a class="btn btn-outline-danger" href="<?= url('logout.php') ?>"><i class="fa-solid fa-arrow-right-from-bracket me-1"></i>Sign out</a>
         </div>
     </div>
     <?php if ($isRestricted): ?>

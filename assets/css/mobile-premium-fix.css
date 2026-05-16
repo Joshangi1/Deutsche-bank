@@ -1,0 +1,1162 @@
+/* ============================================================
+   DEUTSCHE BANKING — PREMIUM MOBILE UI FIX
+   Target: dashboard.php + user_header.php mobile layout
+   Fixes: overlapping header, font quality, card spacing,
+          z-index stacking, balance card, credit card component
+   ============================================================ */
+
+/* ── FONT IMPORT ── */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+/* ── ROOT TOKENS ── */
+:root {
+  --font-primary: 'Manrope', 'SF Pro Display', 'Helvetica Neue', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Spacing scale */
+  --space-2:  2px;
+  --space-4:  4px;
+  --space-6:  6px;
+  --space-8:  8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-28: 28px;
+  --space-32: 32px;
+
+  /* Brand */
+  --brand-navy:      #0018a8;
+  --brand-navy-deep: #00106f;
+  --brand-cyan:      #dbe6ff;
+
+  /* Card gradient */
+  --card-grad: linear-gradient(145deg, #001299 0%, #0022d4 45%, #0a1f6b 100%);
+  --card-grad-surface: linear-gradient(145deg, rgba(255,255,255,0.10) 0%, transparent 60%);
+
+  /* Surface */
+  --surface-bg: #f5f6f9;
+  --surface-card: #ffffff;
+
+  /* Text */
+  --text-primary:   #0a0f1e;
+  --text-secondary: #5a6270;
+  --text-muted:     #8a93a0;
+  --text-oncard:    rgba(255,255,255,0.75);
+
+  /* Shadows */
+  --shadow-card:   0 8px 32px rgba(0,18,168,0.13), 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-header: 0 1px 0 rgba(0,0,0,0.06);
+
+  /* Radius */
+  --radius-sm:  10px;
+  --radius-md:  16px;
+  --radius-lg:  20px;
+  --radius-xl:  24px;
+
+  /* Header height — reserve this so content never hides behind it */
+  --header-h: 72px;
+}
+
+/* ── GLOBAL FONT OVERRIDE ── */
+body,
+.app-main,
+.sidebar,
+h1, h2, h3, h4, h5, h6,
+p, span, div, button, input, select, label {
+  font-family: var(--font-primary) !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ── APP SHELL ── */
+.app-shell {
+  background: var(--surface-bg);
+  min-height: 100vh;
+}
+
+/* ── APP MAIN ── */
+.app-main {
+  background: var(--surface-bg);
+  /* Sidebar offset handled by existing rules for desktop */
+}
+
+/* ════════════════════════════════════════════
+   TOPBAR — Complete mobile rebuild
+   ════════════════════════════════════════════ */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  padding: 0 var(--space-16);
+  min-height: var(--header-h);
+
+  /* Single-row flex — never wrap or grid */
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: var(--space-12) !important;
+  flex-wrap: nowrap !important;
+
+  /* Reset any grid that was applied */
+  grid-template-columns: unset !important;
+}
+
+/* Left cluster: hamburger + title */
+.topbar > .d-flex:first-child {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: var(--space-12) !important;
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+/* Title text block */
+.topbar > .d-flex:first-child > div {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.topbar-kicker {
+  display: block;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--brand-navy) !important;
+  opacity: 0.85;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.topbar h1.h3 {
+  font-size: 18px !important;
+  font-weight: 800 !important;
+  color: var(--text-primary) !important;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: 0 !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.topbar .muted {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  color: var(--text-secondary) !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+/* Right cluster: actions */
+.topbar > .d-flex:last-child {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: var(--space-6) !important;
+  flex-shrink: 0;
+  flex-wrap: nowrap !important;
+
+  /* Reset grid layout */
+  grid-template-columns: unset !important;
+  width: auto !important;
+}
+
+/* ── Hamburger / mobile toggle ── */
+.mobile-toggle {
+  display: none; /* shown below in mobile query */
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  padding: 0 !important;
+  border-radius: 12px !important;
+  background: rgba(0,18,168,0.07) !important;
+  border: none !important;
+  color: var(--brand-navy) !important;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: none !important;
+}
+
+/* ── Language pill ── */
+.language-static-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  padding: 0 !important;
+  border-radius: 12px !important;
+  border: 1.5px solid rgba(0,18,168,0.12) !important;
+  background: #fff !important;
+  color: var(--brand-navy) !important;
+  font-size: 16px !important;
+  box-shadow: none !important;
+  flex-shrink: 0;
+}
+.language-static-label { display: none !important; }
+
+/* ── Notification bell ── */
+.notification-menu > .btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  padding: 0 !important;
+  border-radius: 12px !important;
+  border: 1.5px solid rgba(0,0,0,0.08) !important;
+  background: #fff !important;
+  color: var(--text-primary) !important;
+  font-size: 16px !important;
+  box-shadow: none !important;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.unread-dot {
+  top: -5px !important;
+  right: -5px !important;
+  min-width: 18px !important;
+  height: 18px !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  border-radius: 999px !important;
+  padding: 0 4px !important;
+}
+
+/* ── Avatar ── */
+.avatar-sm {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  border-radius: 50% !important;
+  border: 2px solid rgba(0,18,168,0.20) !important;
+  object-fit: cover !important;
+  flex-shrink: 0;
+  box-shadow: none !important;
+  display: block !important;
+}
+
+/* ── Sign out button ── */
+.topbar .btn-outline-danger {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  padding: 0 !important;
+  border-radius: 12px !important;
+  border: 1.5px solid rgba(180,35,49,0.20) !important;
+  background: rgba(180,35,49,0.05) !important;
+  color: #b42331 !important;
+  font-size: 0 !important; /* hide text, keep icon */
+  flex-shrink: 0;
+  box-shadow: none !important;
+}
+.topbar .btn-outline-danger i {
+  font-size: 15px !important;
+  margin: 0 !important;
+  color: #b42331 !important;
+}
+
+/* ════════════════════════════════════════════
+   MAIN CONTENT AREA
+   ════════════════════════════════════════════ */
+.app-main {
+  padding: var(--space-16) var(--space-16) 40px !important;
+  overflow-x: hidden;
+}
+
+/* Content should start below the sticky header with breathing room */
+.app-main > *:first-child {
+  margin-top: 0;
+}
+
+/* Restriction banner — keep it readable */
+.restriction-banner {
+  margin-bottom: var(--space-16) !important;
+  border-radius: var(--radius-md) !important;
+}
+
+/* ════════════════════════════════════════════
+   BALANCE CARD — Premium rebuild
+   ════════════════════════════════════════════ */
+.balance-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-xl) !important;
+  padding: var(--space-24) var(--space-24) var(--space-20) !important;
+  background: var(--card-grad) !important;
+  box-shadow: 0 16px 48px rgba(0,18,168,0.22), 0 4px 16px rgba(0,0,0,0.10) !important;
+  color: #fff;
+  min-height: unset !important;
+}
+
+/* Decorative orb */
+.balance-card::before {
+  content: '';
+  position: absolute;
+  top: -60px;
+  right: -60px;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.07);
+  pointer-events: none;
+}
+.balance-card::after {
+  content: '';
+  position: absolute;
+  bottom: -40px;
+  left: -20px;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+  pointer-events: none;
+}
+
+/* Label row */
+.balance-card .text-white-50 {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.65) !important;
+}
+
+/* Account status pill inside card */
+.balance-card .account-status-pill {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  padding: 3px 10px !important;
+  border-radius: 999px !important;
+}
+
+/* Balance amount */
+.balance-card .display-5 {
+  font-size: clamp(28px, 8vw, 38px) !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.03em !important;
+  line-height: 1.15 !important;
+  color: #fff !important;
+  margin-top: var(--space-8) !important;
+  margin-bottom: var(--space-16) !important;
+}
+
+/* Sub-balances row */
+.balance-card .mt-4.d-flex {
+  margin-top: var(--space-4) !important;
+  gap: var(--space-24) !important;
+}
+
+.balance-card .mt-4.d-flex > div .text-white-50.small {
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55) !important;
+}
+
+.balance-card .mt-4.d-flex > div strong {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: #fff !important;
+  display: block;
+  margin-top: 2px;
+}
+
+/* Right column — account info */
+.balance-card .col-md-5 h5 {
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  color: #fff !important;
+  margin-bottom: var(--space-4) !important;
+}
+
+.balance-card .col-md-5 p {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  color: rgba(255,255,255,0.65) !important;
+  margin-bottom: 3px !important;
+  letter-spacing: 0.01em;
+}
+
+/* Wire transfer button */
+.balance-card .btn-gold {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-top: var(--space-16) !important;
+  width: 100%;
+  padding: 13px 20px !important;
+  border-radius: var(--radius-md) !important;
+  background: rgba(255,255,255,0.18) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1.5px solid rgba(255,255,255,0.25) !important;
+  color: #fff !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.01em;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.10) !important;
+  transition: background 0.2s ease, border-color 0.2s ease !important;
+}
+
+.balance-card .btn-gold:hover,
+.balance-card .btn-gold:active {
+  background: rgba(255,255,255,0.26) !important;
+  border-color: rgba(255,255,255,0.40) !important;
+  color: #fff !important;
+  transform: none !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
+}
+
+/* Stack balance card columns on mobile */
+@media (max-width: 767px) {
+  .balance-card .row {
+    flex-direction: column !important;
+  }
+  .balance-card .col-md-7,
+  .balance-card .col-md-5 {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .balance-card .col-md-5 {
+    margin-top: var(--space-16) !important;
+    padding-top: var(--space-16) !important;
+    border-top: 1px solid rgba(255,255,255,0.12) !important;
+  }
+  .balance-card .col-md-5 h5 {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.65) !important;
+    margin-bottom: var(--space-8) !important;
+  }
+}
+
+/* ════════════════════════════════════════════
+   VIRTUAL / CREDIT CARD COMPONENT
+   ════════════════════════════════════════════ */
+.virtual-card,
+.col-xl-4 .virtual-card {
+  aspect-ratio: 1.586 / 1 !important;
+  border-radius: var(--radius-xl) !important;
+  padding: var(--space-20) var(--space-20) var(--space-16) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  color: #fff;
+  background: linear-gradient(135deg, #001299 0%, #0033ee 55%, #112277 100%) !important;
+  box-shadow: 0 12px 40px rgba(0,18,168,0.30), 0 4px 12px rgba(0,0,0,0.12) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Shimmer overlay */
+.virtual-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 50%);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Card row: brand name + scheme logo */
+.virtual-card > div:first-child {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+.virtual-card > div:first-child strong {
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.04em;
+  color: #fff !important;
+}
+
+.virtual-card > div:first-child i {
+  font-size: 26px !important;
+  color: rgba(255,255,255,0.90) !important;
+}
+
+/* Card number */
+.virtual-card .fs-4 {
+  font-size: clamp(15px, 4vw, 18px) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.18em !important;
+  color: #fff !important;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+}
+
+/* Bottom row: name + status */
+.virtual-card > div:last-child {
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: space-between !important;
+}
+
+.virtual-card > div:last-child span:first-child {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.10em;
+  color: rgba(255,255,255,0.85) !important;
+  text-transform: uppercase;
+}
+
+.virtual-card > div:last-child span:last-child {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.10em;
+  color: rgba(255,255,255,0.60) !important;
+  text-transform: uppercase;
+}
+
+/* ════════════════════════════════════════════
+   DASHBOARD CARDS & GRID
+   ════════════════════════════════════════════ */
+.premium-card {
+  background: var(--surface-card) !important;
+  border: 1px solid rgba(0,0,0,0.07) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06) !important;
+  transition: box-shadow 0.25s ease, transform 0.25s ease !important;
+}
+
+.premium-card:hover {
+  box-shadow: 0 6px 28px rgba(0,18,168,0.10) !important;
+  transform: translateY(-1px) !important;
+}
+
+.table-card {
+  background: var(--surface-card) !important;
+  border: 1px solid rgba(0,0,0,0.07) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06) !important;
+}
+
+/* Card heading text */
+.premium-card h5,
+.table-card h5 {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: var(--text-primary) !important;
+  letter-spacing: -0.01em;
+}
+
+.premium-card .muted,
+.table-card .muted {
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: var(--text-secondary) !important;
+}
+
+/* Row gutters */
+.row.g-4 {
+  --bs-gutter-x: 14px !important;
+  --bs-gutter-y: 14px !important;
+}
+
+/* ════════════════════════════════════════════
+   TRANSACTIONS TABLE
+   ════════════════════════════════════════════ */
+.transaction-table > :not(caption) > * > * {
+  padding: 12px 16px !important;
+}
+
+.tx-merchant strong {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: var(--text-primary) !important;
+}
+
+.tx-merchant .small.muted {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  color: var(--text-muted) !important;
+  margin-top: 2px;
+}
+
+.tx-amount {
+  font-size: 14px !important;
+  font-weight: 700 !important;
+}
+
+.tx-credit { color: #12865a !important; }
+.tx-debit  { color: var(--text-primary) !important; }
+
+/* ════════════════════════════════════════════
+   STATUS PILLS
+   ════════════════════════════════════════════ */
+.status-pill,
+.category-badge {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.06em !important;
+  padding: 4px 10px !important;
+  border-radius: 999px !important;
+}
+
+/* ════════════════════════════════════════════
+   ICON CHIPS
+   ════════════════════════════════════════════ */
+.tx-icon,
+.icon-chip {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  border-radius: 12px !important;
+  display: grid !important;
+  place-items: center !important;
+  background: rgba(0,18,168,0.07) !important;
+  color: var(--brand-navy) !important;
+  border: none !important;
+}
+
+.tx-icon-credit {
+  background: rgba(18,134,90,0.10) !important;
+  color: #12865a !important;
+}
+
+/* ════════════════════════════════════════════
+   QUICK ACCESS GRID
+   ════════════════════════════════════════════ */
+.quick-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: var(--space-8) !important;
+}
+
+.quick-grid a {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: var(--space-6) !important;
+  padding: var(--space-12) !important;
+  border-radius: var(--radius-md) !important;
+  background: rgba(0,18,168,0.04) !important;
+  border: 1px solid rgba(0,18,168,0.08) !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: var(--text-primary) !important;
+  text-decoration: none !important;
+  transition: background 0.18s ease, border-color 0.18s ease !important;
+}
+
+.quick-grid a:hover {
+  background: rgba(0,18,168,0.09) !important;
+  border-color: rgba(0,18,168,0.18) !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.quick-grid i {
+  font-size: 18px !important;
+  color: var(--brand-navy) !important;
+}
+
+/* ════════════════════════════════════════════
+   BANKING HERO BANNER
+   ════════════════════════════════════════════ */
+.banking-hero {
+  border-radius: var(--radius-lg) !important;
+  padding: var(--space-20) var(--space-20) !important;
+  background: linear-gradient(135deg, var(--brand-navy) 0%, #001a9e 50%, #0a1f6b 100%) !important;
+  box-shadow: 0 4px 24px rgba(0,18,168,0.18) !important;
+}
+
+.banking-hero h2 {
+  font-size: 20px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.02em !important;
+  margin-bottom: var(--space-4) !important;
+  color: #fff !important;
+}
+
+.banking-hero p {
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: rgba(255,255,255,0.72) !important;
+  max-width: 100% !important;
+  line-height: 1.5 !important;
+}
+
+.banking-hero .eyebrow {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.12em !important;
+  color: rgba(255,255,255,0.60) !important;
+}
+
+.banking-hero > i {
+  font-size: 2rem !important;
+  opacity: 0.35 !important;
+}
+
+/* ════════════════════════════════════════════
+   CASH FLOW WIDGET
+   ════════════════════════════════════════════ */
+.cash-flow {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: var(--space-8) !important;
+  margin-bottom: var(--space-16) !important;
+}
+
+.cash-flow > div {
+  padding: var(--space-12) !important;
+  border-radius: var(--radius-md) !important;
+  background: var(--surface-bg) !important;
+  border: 1px solid rgba(0,0,0,0.06) !important;
+}
+
+.cash-flow span {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  color: var(--text-muted) !important;
+  display: block !important;
+  margin-bottom: 4px !important;
+}
+
+.cash-flow strong {
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  display: block !important;
+}
+
+/* ════════════════════════════════════════════
+   GOAL / VERIFICATION RING
+   ════════════════════════════════════════════ */
+.goal-ring {
+  padding: var(--space-16) !important;
+  border-radius: var(--radius-md) !important;
+  background: var(--surface-bg) !important;
+  border: 1px solid rgba(0,0,0,0.06) !important;
+}
+
+.goal-ring strong {
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  color: var(--text-primary) !important;
+  display: block !important;
+}
+
+.goal-ring span {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: var(--text-muted) !important;
+  margin-top: 4px !important;
+  display: block !important;
+}
+
+/* ════════════════════════════════════════════
+   METRIC CARDS
+   ════════════════════════════════════════════ */
+.metric {
+  font-size: 22px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.02em !important;
+  color: var(--text-primary) !important;
+}
+
+/* ════════════════════════════════════════════
+   NOTIFICATIONS DROPDOWN
+   ════════════════════════════════════════════ */
+.notification-dropdown {
+  width: min(340px, calc(100vw - 24px)) !important;
+  border-radius: var(--radius-md) !important;
+  border: 1px solid rgba(0,0,0,0.08) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12) !important;
+}
+
+.notification-preview {
+  padding: var(--space-12) var(--space-16) !important;
+}
+
+.notification-preview strong {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+}
+
+.notification-preview small {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  color: var(--text-muted) !important;
+}
+
+/* ════════════════════════════════════════════
+   BUTTONS — Global cleanup
+   ════════════════════════════════════════════ */
+.btn {
+  font-family: var(--font-primary) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.01em;
+  border-radius: var(--radius-md) !important;
+  min-height: 44px !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-navy,
+.btn-gold {
+  background: var(--brand-navy) !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 4px 16px rgba(0,18,168,0.22) !important;
+}
+
+.btn-navy:hover,
+.btn-gold:hover {
+  background: var(--brand-navy-deep) !important;
+  color: #fff !important;
+  box-shadow: 0 6px 24px rgba(0,18,168,0.30) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* ════════════════════════════════════════════
+   FORM CONTROLS
+   ════════════════════════════════════════════ */
+.form-control,
+.form-select {
+  font-family: var(--font-primary) !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  border-radius: var(--radius-md) !important;
+  border: 1.5px solid rgba(0,0,0,0.12) !important;
+  min-height: 46px !important;
+  padding: 10px 14px !important;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--brand-navy) !important;
+  box-shadow: 0 0 0 3px rgba(0,18,168,0.10) !important;
+}
+
+.form-label {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  color: var(--text-secondary) !important;
+  margin-bottom: 6px !important;
+}
+
+/* ════════════════════════════════════════════
+   SIDEBAR — polish
+   ════════════════════════════════════════════ */
+.sidebar .nav-link {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  border-radius: 10px !important;
+  padding: 10px 12px !important;
+  min-height: 40px !important;
+}
+
+.sidebar .nav-link span {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+
+/* ════════════════════════════════════════════
+   ALERT FLASHES
+   ════════════════════════════════════════════ */
+.alert {
+  border-radius: var(--radius-md) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  border: none !important;
+  padding: var(--space-12) var(--space-16) !important;
+}
+
+/* ════════════════════════════════════════════
+   MOBILE — 991px and below
+   ════════════════════════════════════════════ */
+@media (max-width: 991px) {
+  /* Show hamburger */
+  .mobile-toggle {
+    display: inline-flex !important;
+  }
+
+  /* App main — full width, no left offset */
+  .app-main {
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding: var(--space-12) var(--space-12) 40px !important;
+  }
+
+  /* Topbar sticks cleanly */
+  .topbar {
+    padding: 0 var(--space-12) !important;
+    min-height: 64px !important;
+  }
+
+  /* Title on smaller screens */
+  .topbar h1.h3 {
+    font-size: 16px !important;
+  }
+
+  /* Remove left margin from title when hamburger is present */
+  .topbar > .d-flex:first-child {
+    gap: var(--space-10) !important;
+  }
+
+  /* Banking hero hides icon on mobile */
+  .banking-hero > i {
+    display: none !important;
+  }
+
+  /* Balance card row stack */
+  .balance-card .row {
+    flex-direction: column !important;
+  }
+  .balance-card .col-md-7,
+  .balance-card .col-md-5 {
+    width: 100% !important;
+    flex: none !important;
+    max-width: 100% !important;
+  }
+}
+
+/* ════════════════════════════════════════════
+   MOBILE — 575px and below (small phones)
+   ════════════════════════════════════════════ */
+@media (max-width: 575px) {
+  .topbar {
+    min-height: 60px !important;
+    padding: 0 var(--space-12) !important;
+    gap: var(--space-8) !important;
+  }
+
+  .topbar h1.h3 {
+    font-size: 15px !important;
+  }
+
+  .topbar-kicker {
+    font-size: 9px !important;
+  }
+
+  .topbar .muted {
+    display: none !important; /* hide "Welcome back" on tiny screens — use kicker */
+  }
+
+  /* Right cluster: 4 icon buttons max, each 38px */
+  .topbar > .d-flex:last-child {
+    gap: var(--space-4) !important;
+  }
+
+  .language-static-pill,
+  .notification-menu > .btn,
+  .topbar .btn-outline-danger,
+  .mobile-toggle {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    border-radius: 10px !important;
+  }
+
+  .avatar-sm {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    border-radius: 10px !important;
+  }
+
+  /* App main tighter */
+  .app-main {
+    padding: var(--space-8) var(--space-8) 40px !important;
+  }
+
+  /* Balance display size */
+  .balance-card .display-5 {
+    font-size: clamp(24px, 9vw, 32px) !important;
+  }
+
+  /* Balance card padding */
+  .balance-card {
+    padding: var(--space-20) var(--space-16) var(--space-16) !important;
+  }
+
+  /* Row gutters tighter */
+  .row.g-4 {
+    --bs-gutter-x: 8px !important;
+    --bs-gutter-y: 8px !important;
+  }
+
+  /* Quick grid — 2-col always */
+  .quick-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Cash flow — 2-col */
+  .cash-flow,
+  .timeline-card {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Admin edit grid — single col */
+  .admin-edit-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Operations nav — 1 col */
+  .operations-section-nav {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+/* ════════════════════════════════════════════
+   360px — absolute smallest
+   ════════════════════════════════════════════ */
+@media (max-width: 360px) {
+  .topbar {
+    min-height: 56px !important;
+    padding: 0 var(--space-8) !important;
+  }
+
+  .topbar h1.h3 {
+    font-size: 14px !important;
+  }
+
+  .language-static-pill,
+  .notification-menu > .btn,
+  .topbar .btn-outline-danger,
+  .mobile-toggle,
+  .avatar-sm {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    border-radius: 9px !important;
+  }
+
+  .balance-card .display-5 {
+    font-size: 22px !important;
+  }
+
+  .quick-grid a {
+    padding: var(--space-8) !important;
+    font-size: 11px !important;
+  }
+
+  .quick-grid i {
+    font-size: 16px !important;
+  }
+}
+
+/* ════════════════════════════════════════════
+   NO HORIZONTAL SCROLL — safety net
+   ════════════════════════════════════════════ */
+body,
+.app-shell,
+.app-main {
+  overflow-x: hidden !important;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* ════════════════════════════════════════════
+   Z-INDEX FIX — CORRECTED STACKING ORDER
+   sidebar (1000) > overlay (999) > topbar (100)
+   ════════════════════════════════════════════ */
+.topbar              { z-index: 100  !important; } /* header BELOW sidebar */
+.sidebar             { z-index: 1000 !important; } /* sidebar ON TOP of everything */
+.balance-card        { z-index: 1   !important; }
+.premium-card        { z-index: 1   !important; }
+.table-card          { z-index: 1   !important; }
+.dropdown-menu       { z-index: 200 !important; }
+.notification-menu   { z-index: 200 !important; }
+.biometric-overlay   { z-index: 3000 !important; }
+
+/* Sidebar overlay — sits between sidebar and everything else */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,10,40,0.52);
+  z-index: 999 !important;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  opacity: 0;
+  transition: opacity 0.30s ease;
+}
+.sidebar-overlay.open {
+  display: block;
+  opacity: 1;
+}
+
+/* Sidebar slide animation — closed by default on mobile */
+@media (max-width: 991px) {
+  .sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    height: 100vh !important;
+    transform: translateX(-100%);
+    transition: transform 0.32s cubic-bezier(0.4,0,0.2,1) !important;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .sidebar.open {
+    transform: translateX(0) !important;
+  }
+  body.sidebar-open {
+    overflow: hidden;
+  }
+}
+
+/* Sign out — sidebar footer */
+.sidebar-signout-wrap {
+  border-top: 1px solid rgba(255,255,255,0.09);
+  padding: 12px 8px;
+  margin-top: 4px;
+}
+.sidebar-signout-btn {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  width: 100% !important;
+  padding: 11px 14px !important;
+  border-radius: 10px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: rgba(210, 70, 70, 0.90) !important;
+  text-decoration: none !important;
+  transition: background 0.15s ease, color 0.15s ease !important;
+  font-family: var(--font-primary) !important;
+}
+.sidebar-signout-btn:hover {
+  background: rgba(200, 50, 50, 0.12) !important;
+  color: #e05555 !important;
+}
+.sidebar-signout-btn i {
+  font-size: 15px !important;
+  width: 18px;
+  flex-shrink: 0;
+}
+
+/* Language pill — hidden completely */
+.language-static-pill { display: none !important; }
