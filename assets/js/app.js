@@ -470,18 +470,42 @@ document.addEventListener('DOMContentLoaded', () => {
             if (nextBtn) nextBtn.textContent = currentStep === panels.length - 1 ? 'Submit Application' : 'Continue';
             onboardingForm.querySelector('.onboarding-card-modern')?.scrollTo({ top: 0, behavior: 'smooth' });
         };
-        const stepFields = () => [...(panels[currentStep]?.querySelectorAll('input, select, textarea') || [])].filter(field => field.type !== 'hidden' && !field.disabled);
+        const isUsableField = field => field.type !== 'hidden' && !field.disabled && !field.closest('[hidden]');
+        const stepFields = () => [...(panels[currentStep]?.querySelectorAll('input, select, textarea') || [])].filter(isUsableField);
+        const fieldShell = field => field.closest('.col-12, .col-md-8, .col-md-7, .col-md-6, .col-md-5, .col-md-4, .col-md-3') || field.parentElement;
+        const fieldLabel = field => fieldShell(field)?.querySelector('.form-label')?.textContent?.trim() || 'This field';
+        const fieldErrorNode = field => {
+            const shell = fieldShell(field);
+            if (!shell) return null;
+            let node = shell.querySelector(':scope > .field-error');
+            if (!node) {
+                node = document.createElement('div');
+                node.className = 'field-error';
+                shell.appendChild(node);
+            }
+            return node;
+        };
+        const showFieldError = (field, message) => {
+            if (!field) return;
+            field.classList.add('is-invalid');
+            const node = fieldErrorNode(field);
+            if (node) node.textContent = message;
+        };
+        const clearFieldError = field => {
+            if (!field) return;
+            field.classList.remove('is-invalid');
+            const node = fieldShell(field)?.querySelector(':scope > .field-error');
+            if (node && !node.dataset.serverError) node.textContent = '';
+        };
         const setTemporaryValidity = (field, message) => {
             if (!field) return;
             if (stepMessage) stepMessage.textContent = message;
+            showFieldError(field, message);
             field.scrollIntoView({ behavior: 'smooth', block: 'center' });
             field.focus({ preventScroll: true });
-            field.setCustomValidity(message);
-            field.reportValidity();
-            window.setTimeout(() => field.setCustomValidity(''), 1200);
         };
         const passwordRules = password => ({
-            length: password.length >= 6,
+            length: password.length >= 8,
             upper: /[A-Z]/.test(password),
             lower: /[a-z]/.test(password),
             number: /\d/.test(password),
@@ -504,6 +528,46 @@ document.addEventListener('DOMContentLoaded', () => {
                     : '';
             }
             return requiredOk;
+        };
+        const fieldValidationMessage = field => {
+            const name = field.name || '';
+            const value = field.type === 'checkbox' ? field.checked : field.value.trim();
+            if (field.required && !value) {
+                if (name === 'full_name') return 'Enter your full name.';
+                if (name === 'email') return 'Enter a valid email address.';
+                if (name === 'phone') return 'Enter a valid phone number with country code.';
+                if (name === 'password') return 'Password must be at least 8 characters.';
+                if (name === 'confirm_password') return 'Passwords do not match.';
+                if (name === 'identity_document') return 'Upload one identity document.';
+                if (name === 'terms') return 'Please accept the terms to continue.';
+                return `${fieldLabel(field)} is required.`;
+            }
+            if (name === 'full_name' && (value.length < 3 || value.length > 120 || value.split(/\s+/).length < 2)) return 'Enter your full name.';
+            if (name === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Enter a valid email address.';
+            if (name === 'phone') {
+                const code = onboardingForm.querySelector('[name="phone_country_code"]')?.value || '';
+                const normalized = value.startsWith('+') ? value : `${code}${value.replace(/^0+/, '')}`;
+                if (!/^\+[1-9]\d{7,14}$/.test(normalized.replace(/[^\d+]/g, ''))) return 'Enter a valid phone number with country code.';
+            }
+            if (name === 'password' && value.length < 8) return 'Password must be at least 8 characters.';
+            if (name === 'confirm_password') {
+                const password = onboardingForm.querySelector('[data-password-field]')?.value || '';
+                if (!value || value !== password) return 'Passwords do not match.';
+            }
+            if (name === 'postal_code' && field.pattern && value && !(new RegExp(`^(?:${field.pattern})$`, 'i')).test(value)) return 'Enter a valid postal code.';
+            if (name === 'state_code' && selectedRegion() === 'us' && !/^[A-Za-z]{2}$/.test(value)) return 'Enter a valid 2-letter state code.';
+            if (name === 'transaction_pin' && !/^\d{4}$/.test(value)) return 'Create a 4-digit transaction code.';
+            return '';
+        };
+        const validateField = (field, quiet = false) => {
+            if (!field || !isUsableField(field)) return true;
+            const message = fieldValidationMessage(field);
+            if (message) {
+                if (!quiet || field.dataset.touched === '1' || field.classList.contains('is-invalid')) showFieldError(field, message);
+                return false;
+            }
+            clearFieldError(field);
+            return true;
         };
         const updateReview = () => {
             const value = name => onboardingForm.querySelector(`[name="${name}"]`)?.value?.trim() || '';
@@ -538,14 +602,13 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         const validateStep = () => {
             for (const field of stepFields()) {
-                if (!field.checkValidity()) {
-                    const label = field.closest('.col-12, .col-md-6, .col-md-5, .col-md-4, .col-md-3')?.querySelector('.form-label')?.textContent?.trim();
-                    setTemporaryValidity(field, label ? `Complete ${label.toLowerCase()} to continue.` : 'Complete this field to continue.');
+                if (!validateField(field)) {
+                    setTemporaryValidity(field, fieldValidationMessage(field) || `${fieldLabel(field)} is required.`);
                     return false;
                 }
             }
             if (currentStep === 2 && !updatePasswordUi()) {
-                setTemporaryValidity(onboardingForm.querySelector('[data-confirm-password]'), 'Use at least 6 characters and make sure both passwords match.');
+                setTemporaryValidity(onboardingForm.querySelector('[data-confirm-password]'), 'Use at least 8 characters and make sure both passwords match.');
                 return false;
             }
             if (currentStep === 0) {
@@ -663,6 +726,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 button.innerHTML = `<i class="fa-solid ${visible ? 'fa-eye' : 'fa-eye-slash'}"></i>`;
             });
         });
+        onboardingForm.querySelectorAll('input, select, textarea').forEach(field => {
+            if (!isUsableField(field)) return;
+            field.addEventListener('blur', () => {
+                field.dataset.touched = '1';
+                validateField(field);
+                if (field.matches('[data-password-field], [data-confirm-password]')) updatePasswordUi();
+            });
+            field.addEventListener('input', () => {
+                if (field.matches('[data-password-field], [data-confirm-password]')) updatePasswordUi();
+                validateField(field, true);
+            });
+            field.addEventListener('change', () => {
+                field.dataset.touched = '1';
+                validateField(field);
+            });
+        });
         onboardingForm.querySelectorAll('[data-password-field], [data-confirm-password]').forEach(input => input.addEventListener('input', updatePasswordUi));
         onboardingForm.querySelector('[name="phone_country_code"]')?.addEventListener('change', () => { onboardingForm.dataset.phoneTouched = '1'; });
         addressInput?.addEventListener('input', refreshAddressSuggestions);
@@ -689,6 +768,13 @@ document.addEventListener('DOMContentLoaded', () => {
         backBtn?.addEventListener('click', () => setStep(currentStep - 1));
         onboardingForm.addEventListener('input', () => {
             if (currentStep === panels.length - 1) updateReview();
+        });
+        onboardingForm.addEventListener('submit', event => {
+            const invalid = [...onboardingForm.querySelectorAll('input, select, textarea')].filter(isUsableField).find(field => !validateField(field));
+            if (invalid) {
+                event.preventDefault();
+                setTemporaryValidity(invalid, fieldValidationMessage(invalid) || `${fieldLabel(invalid)} is required.`);
+            }
         });
         cancel?.addEventListener('click', () => {
             running = false;

@@ -25,6 +25,8 @@ $GLOBALS['pageLanguage'] = $pageLanguage;
 $GLOBALS['pageLoginUrl'] = $pageLoginUrl;
 $GLOBALS['forcePageLanguage'] = true;
 $GLOBALS['disableTranslate'] = true;
+$signupErrors = [];
+$oldSignup = $_POST ?? [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
@@ -76,7 +78,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $documentType = in_array(($_POST['document_type'] ?? ''), $allowedDocuments, true) ? (string) $_POST['document_type'] : $allowedDocuments[0];
     $hasKycUpload = !empty($_FILES['identity_document']['name']);
     $hasBiometricCapture = trim($biometricCaptures['forward']) !== '';
-    $passwordOk = strlen($password) >= 6 && hash_equals($password, $confirmPassword);
     $identityOk = $isUsOnboarding ? is_valid_us_ssn($ssnDigits) : ($region === 'de' ? is_valid_german_tax_id($taxId) : strlen($taxId) >= 4);
     $bankingOk = !$usesIbanOnboarding
         ? (!$linkJointAccount || ($linkedInstitution !== '' && preg_match('/^\d{9}$/', $externalRouting) && preg_match('/^\d{4,17}$/', $externalAccount)))
@@ -89,7 +90,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         default => preg_match('/^\d{5}$/', $postal),
     };
     $stateOk = $region === 'us' ? preg_match('/^[A-Z]{2}$/', $state) : true;
-    if ($first && $last && filter_var($email, FILTER_VALIDATE_EMAIL) && is_valid_sms_phone($phone) && $passwordOk && $identityOk && $bankingOk && preg_match('/^\d{4}$/', $transactionPin) && $dob && $address1 && $city && $postalOk && $stateOk && $country && $hasKycUpload && $hasBiometricCapture) {
+    if ($fullName === '' || strlen($fullName) < 3 || strlen($fullName) > 120 || !$first || !$last) {
+        $signupErrors['full_name'] = 'Enter your full name.';
+    }
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $signupErrors['email'] = 'Enter a valid email address.';
+    }
+    if ($phoneRaw === '' || !is_valid_sms_phone($phone)) {
+        $signupErrors['phone'] = 'Enter a valid phone number with country code.';
+    }
+    if (strlen($password) < 8) {
+        $signupErrors['password'] = 'Password must be at least 8 characters.';
+    }
+    if ($confirmPassword === '' || !hash_equals($password, $confirmPassword)) {
+        $signupErrors['confirm_password'] = 'Passwords do not match.';
+    }
+    if ($dob === '') {
+        $signupErrors['date_of_birth'] = 'Enter your date of birth.';
+    }
+    if ($country === '') {
+        $signupErrors['country'] = 'Select your country.';
+    }
+    if (!$identityOk) {
+        $signupErrors[$isUsOnboarding ? 'ssn' : 'tax_id'] = $isUsOnboarding ? 'Enter a valid 9-digit SSN.' : 'Enter a valid identity or tax number.';
+    }
+    if (!$bankingOk) {
+        if ($usesIbanOnboarding) {
+            $signupErrors['iban'] = $region === 'ch' ? 'Enter a valid Swiss IBAN or leave it blank.' : 'Enter a valid German IBAN or leave it blank.';
+        } else {
+            if ($linkJointAccount && $linkedInstitution === '') $signupErrors['linked_institution_name'] = 'Enter the external bank name.';
+            if ($linkJointAccount && !preg_match('/^\d{9}$/', $externalRouting)) $signupErrors['routing_number'] = 'Routing number must contain 9 digits.';
+            if ($linkJointAccount && !preg_match('/^\d{4,17}$/', $externalAccount)) $signupErrors['external_account_number'] = 'Account number must contain 4 to 17 digits.';
+        }
+    }
+    if (!preg_match('/^\d{4}$/', $transactionPin)) {
+        $signupErrors['transaction_pin'] = 'Create a 4-digit transaction code.';
+    }
+    if ($address1 === '') {
+        $signupErrors['address_line1'] = 'Enter your residential address.';
+    }
+    if ($city === '') {
+        $signupErrors['city'] = 'Enter your city.';
+    }
+    if (!$postalOk) {
+        $signupErrors['postal_code'] = 'Enter a valid postal code.';
+    }
+    if (!$stateOk) {
+        $signupErrors['state_code'] = 'Enter a valid 2-letter state code.';
+    }
+    if (!$hasKycUpload) {
+        $signupErrors['identity_document'] = 'Upload one identity document.';
+    }
+    if (!$hasBiometricCapture) {
+        $signupErrors['biometric'] = 'Complete biometric verification before submitting.';
+    }
+
+    if (!$signupErrors) {
         $hash = password_hash($password, PASSWORD_BCRYPT);
         try {
             db()->beginTransaction();
@@ -128,9 +184,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             flash('danger', 'We could not complete the application. The email may already be registered or the upload may be invalid.');
         }
     } else {
-        flash('danger', 'Please complete each step and use valid identity, address, phone, and banking details for the selected country.');
+        flash('danger', 'Please review the highlighted fields before continuing.');
     }
 }
+$fieldClass = static fn (string $name): string => isset($signupErrors[$name]) ? ' is-invalid' : '';
+$fieldValue = static fn (string $name, string $default = ''): string => (string) ($oldSignup[$name] ?? $default);
+$fieldErrorHtml = static function (string $name) use (&$signupErrors): string {
+    return isset($signupErrors[$name]) ? '<div class="field-error">' . e($signupErrors[$name]) . '</div>' : '';
+};
 $postalPattern = match ($authRegion) {
     'us' => '\d{5}(-\d{4})?',
     'ca' => '[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d',
@@ -234,21 +295,22 @@ $incomeOptions = match ($regionConfig['currency']) {
                             <div><strong><?= e($forcedCountry) ?></strong><span><?= e($regionConfig['rail_primary'] . ', ' . $regionConfig['rail_bank'] . ', ' . $regionConfig['rail_wire'] . ' and local account details.') ?></span></div>
                         </div>
                     </div>
-                    <div class="col-md-8"><label class="form-label">Full legal name</label><input name="full_name" class="form-control" autocomplete="name" required></div>
-                    <div class="col-md-4"><label class="form-label">Date of birth</label><input name="date_of_birth" type="date" class="form-control" required></div>
-                    <div class="col-md-6"><label class="form-label">Email address</label><input name="email" type="email" class="form-control" autocomplete="email" required></div>
+                    <div class="col-md-8"><label class="form-label">Full legal name</label><input name="full_name" class="form-control<?= e($fieldClass('full_name')) ?>" autocomplete="name" minlength="3" maxlength="120" value="<?= e($fieldValue('full_name')) ?>" required><?= $fieldErrorHtml('full_name') ?></div>
+                    <div class="col-md-4"><label class="form-label">Date of birth</label><input name="date_of_birth" type="date" class="form-control<?= e($fieldClass('date_of_birth')) ?>" value="<?= e($fieldValue('date_of_birth')) ?>" required><?= $fieldErrorHtml('date_of_birth') ?></div>
+                    <div class="col-md-6"><label class="form-label">Email address</label><input name="email" type="email" class="form-control<?= e($fieldClass('email')) ?>" autocomplete="email" value="<?= e($fieldValue('email')) ?>" required><?= $fieldErrorHtml('email') ?></div>
                     <div class="col-md-6">
                         <label class="form-label">Phone number</label>
                         <div class="input-group">
                             <select name="phone_country_code" class="form-select" style="max-width: 145px">
                                 <option value="+49" <?= $defaultPhoneCode === '+49' ? 'selected' : '' ?>>DE +49</option><option value="+1" <?= $defaultPhoneCode === '+1' ? 'selected' : '' ?>>US/CA +1</option><option value="+44" <?= $defaultPhoneCode === '+44' ? 'selected' : '' ?>>UK +44</option><option value="+41" <?= $defaultPhoneCode === '+41' ? 'selected' : '' ?>>CH +41</option><option value="+43">AT +43</option><option value="+33">FR +33</option><option value="+31">NL +31</option><option value="+32">BE +32</option><option value="+34">ES +34</option><option value="+39">IT +39</option><option value="+351">PT +351</option><option value="+234">NG +234</option>
                             </select>
-                            <input name="phone" class="form-control" autocomplete="tel" placeholder="<?= $defaultPhoneCode === '+1' ? '2125550147' : ($defaultPhoneCode === '+44' ? '7700900123' : ($defaultPhoneCode === '+41' ? '791234567' : '15123456789')) ?>" required>
+                            <input name="phone" class="form-control<?= e($fieldClass('phone')) ?>" autocomplete="tel" placeholder="<?= $defaultPhoneCode === '+1' ? '2125550147' : ($defaultPhoneCode === '+44' ? '7700900123' : ($defaultPhoneCode === '+41' ? '791234567' : '15123456789')) ?>" value="<?= e($fieldValue('phone')) ?>" required>
                         </div>
+                        <?= $fieldErrorHtml('phone') ?>
                     </div>
-                    <?php if ($requiresTaxId): ?><div class="col-md-6" data-region-block="tax"><label class="form-label"><?= e($identityLabel) ?></label><input name="tax_id" class="form-control" maxlength="32" placeholder="<?= e($identityPlaceholder) ?>" required></div><?php endif; ?>
-                    <?php if ($usesIbanOnboarding): ?><div class="col-md-6" data-region-block="iban"><label class="form-label">IBAN optional</label><input name="iban" class="form-control text-uppercase" placeholder="<?= e($ibanPlaceholder) ?>" data-format-iban></div><?php endif; ?>
-                    <div class="col-md-6" data-region-block="us" hidden><label class="form-label">SSN</label><input name="ssn" class="form-control" inputmode="numeric" maxlength="11" placeholder="XXX-XX-XXXX" data-mask-ssn></div>
+                    <?php if ($requiresTaxId): ?><div class="col-md-6" data-region-block="tax"><label class="form-label"><?= e($identityLabel) ?></label><input name="tax_id" class="form-control<?= e($fieldClass('tax_id')) ?>" maxlength="32" placeholder="<?= e($identityPlaceholder) ?>" value="<?= e($fieldValue('tax_id')) ?>" required><?= $fieldErrorHtml('tax_id') ?></div><?php endif; ?>
+                    <?php if ($usesIbanOnboarding): ?><div class="col-md-6" data-region-block="iban"><label class="form-label">IBAN optional</label><input name="iban" class="form-control text-uppercase<?= e($fieldClass('iban')) ?>" placeholder="<?= e($ibanPlaceholder) ?>" value="<?= e($fieldValue('iban')) ?>" data-format-iban><?= $fieldErrorHtml('iban') ?></div><?php endif; ?>
+                    <div class="col-md-6" data-region-block="us" hidden><label class="form-label">SSN</label><input name="ssn" class="form-control<?= e($fieldClass('ssn')) ?>" inputmode="numeric" maxlength="11" placeholder="XXX-XX-XXXX" value="<?= e($fieldValue('ssn')) ?>" data-mask-ssn><?= $fieldErrorHtml('ssn') ?></div>
                 </div>
             </section>
 
@@ -257,17 +319,18 @@ $incomeOptions = match ($regionConfig['currency']) {
                 <div class="row g-3">
                     <div class="col-12">
                         <label class="form-label" data-address-line-label>Street name and house number</label>
-                        <input name="address_line1" class="form-control" autocomplete="address-line1" placeholder="Hansaallee 3" list="addressSuggestions" data-address-help required>
+                        <input name="address_line1" class="form-control<?= e($fieldClass('address_line1')) ?>" autocomplete="address-line1" placeholder="Hansaallee 3" list="addressSuggestions" value="<?= e($fieldValue('address_line1')) ?>" data-address-help required>
+                        <?= $fieldErrorHtml('address_line1') ?>
                         <datalist id="addressSuggestions" data-address-suggestions></datalist>
                         <div class="address-assist-panel" data-address-assist>
                             <i class="fa-solid fa-location-dot"></i>
                             <span>Start typing an address to see matching examples.</span>
                         </div>
                     </div>
-                    <div class="col-12" data-region-block="us" hidden><label class="form-label">Apartment, suite, unit</label><input name="address_line2" class="form-control" autocomplete="address-line2"></div>
-                    <div class="col-md-4"><label class="form-label" data-postal-label><?= $isUsPortal ? 'ZIP code' : 'Postal code' ?></label><input name="postal_code" class="form-control" maxlength="10" pattern="<?= e($postalPattern) ?>" placeholder="<?= e($postalPlaceholder) ?>" autocomplete="postal-code" required></div>
-                    <div class="col-md-4"><label class="form-label">City</label><input name="city" class="form-control" autocomplete="address-level2" placeholder="Duesseldorf" required></div>
-                    <div class="col-md-4" data-region-block="us" hidden><label class="form-label">State</label><input name="state_code" maxlength="2" class="form-control text-uppercase" autocomplete="address-level1" placeholder="NY"></div>
+                    <div class="col-12" data-region-block="us" hidden><label class="form-label">Apartment, suite, unit</label><input name="address_line2" class="form-control" autocomplete="address-line2" value="<?= e($fieldValue('address_line2')) ?>"></div>
+                    <div class="col-md-4"><label class="form-label" data-postal-label><?= $isUsPortal ? 'ZIP code' : 'Postal code' ?></label><input name="postal_code" class="form-control<?= e($fieldClass('postal_code')) ?>" maxlength="10" pattern="<?= e($postalPattern) ?>" placeholder="<?= e($postalPlaceholder) ?>" autocomplete="postal-code" value="<?= e($fieldValue('postal_code')) ?>" required><?= $fieldErrorHtml('postal_code') ?></div>
+                    <div class="col-md-4"><label class="form-label">City</label><input name="city" class="form-control<?= e($fieldClass('city')) ?>" autocomplete="address-level2" placeholder="Duesseldorf" value="<?= e($fieldValue('city')) ?>" required><?= $fieldErrorHtml('city') ?></div>
+                    <div class="col-md-4" data-region-block="us" hidden><label class="form-label">State</label><input name="state_code" maxlength="2" class="form-control text-uppercase<?= e($fieldClass('state_code')) ?>" autocomplete="address-level1" placeholder="NY" value="<?= e($fieldValue('state_code')) ?>"><?= $fieldErrorHtml('state_code') ?></div>
                     <div class="col-md-4"><label class="form-label">Country</label><input class="form-control" value="<?= e($forcedCountry) ?>" disabled></div>
                 </div>
             </section>
@@ -277,16 +340,18 @@ $incomeOptions = match ($regionConfig['currency']) {
                 <div class="row g-3">
                     <div class="col-12">
                         <label class="form-label">Password</label>
-                        <div class="secure-input"><input name="password" type="password" minlength="6" class="form-control" data-password-field required><button type="button" data-visibility-toggle aria-label="Show password"><i class="fa-solid fa-eye"></i></button></div>
+                        <div class="secure-input"><input name="password" type="password" minlength="8" class="form-control<?= e($fieldClass('password')) ?>" data-password-field required><button type="button" data-visibility-toggle aria-label="Show password"><i class="fa-solid fa-eye"></i></button></div>
+                        <?= $fieldErrorHtml('password') ?>
                     </div>
                     <div class="col-12">
                         <label class="form-label">Confirm password</label>
-                        <div class="secure-input"><input name="confirm_password" type="password" minlength="6" class="form-control" data-confirm-password required><button type="button" data-visibility-toggle aria-label="Show password"><i class="fa-solid fa-eye"></i></button></div>
+                        <div class="secure-input"><input name="confirm_password" type="password" minlength="8" class="form-control<?= e($fieldClass('confirm_password')) ?>" data-confirm-password required><button type="button" data-visibility-toggle aria-label="Show password"><i class="fa-solid fa-eye"></i></button></div>
+                        <?= $fieldErrorHtml('confirm_password') ?>
                     </div>
                     <div class="col-12">
                         <div class="password-meter"><span data-password-meter></span></div>
                         <div class="password-rules">
-                            <span data-password-rule="length">6+ characters</span>
+                            <span data-password-rule="length">8+ characters</span>
                             <span data-password-rule="upper">Uppercase suggested</span>
                             <span data-password-rule="lower">Lowercase suggested</span>
                             <span data-password-rule="number">Number suggested</span>
@@ -297,7 +362,8 @@ $incomeOptions = match ($regionConfig['currency']) {
                     </div>
                     <div class="col-12">
                         <label class="form-label">4-digit transaction code</label>
-                        <div class="secure-input"><input name="transaction_pin" type="password" inputmode="numeric" minlength="4" maxlength="4" pattern="\d{4}" class="form-control" placeholder="Create a 4-digit code" data-pin-field required><button type="button" data-visibility-toggle aria-label="Show code"><i class="fa-solid fa-eye"></i></button></div>
+                        <div class="secure-input"><input name="transaction_pin" type="password" inputmode="numeric" minlength="4" maxlength="4" pattern="\d{4}" class="form-control<?= e($fieldClass('transaction_pin')) ?>" placeholder="Create a 4-digit code" data-pin-field required><button type="button" data-visibility-toggle aria-label="Show code"><i class="fa-solid fa-eye"></i></button></div>
+                        <?= $fieldErrorHtml('transaction_pin') ?>
                     </div>
                 </div>
             </section>
@@ -318,10 +384,10 @@ $incomeOptions = match ($regionConfig['currency']) {
                     </div>
                     <div class="col-12" data-region-block="us" data-joint-account-fields hidden>
                         <div class="row g-3 linked-account-inline">
-                            <div class="col-md-6"><label class="form-label">External bank name</label><input name="linked_institution_name" class="form-control" placeholder="Bank name"></div>
-                            <div class="col-md-6"><label class="form-label">Joint owner name</label><input name="joint_owner_name" class="form-control" placeholder="Optional joint owner"></div>
-                            <div class="col-md-6"><label class="form-label">Routing number</label><input name="routing_number" class="form-control" inputmode="numeric" maxlength="9" placeholder="071923846"></div>
-                            <div class="col-md-6"><label class="form-label">Account number</label><input name="external_account_number" class="form-control" inputmode="numeric" maxlength="17" placeholder="External account number"></div>
+                            <div class="col-md-6"><label class="form-label">External bank name</label><input name="linked_institution_name" class="form-control<?= e($fieldClass('linked_institution_name')) ?>" placeholder="Bank name" value="<?= e($fieldValue('linked_institution_name')) ?>"><?= $fieldErrorHtml('linked_institution_name') ?></div>
+                            <div class="col-md-6"><label class="form-label">Joint owner name</label><input name="joint_owner_name" class="form-control" placeholder="Optional joint owner" value="<?= e($fieldValue('joint_owner_name')) ?>"></div>
+                            <div class="col-md-6"><label class="form-label">Routing number</label><input name="routing_number" class="form-control<?= e($fieldClass('routing_number')) ?>" inputmode="numeric" maxlength="9" placeholder="071923846" value="<?= e($fieldValue('routing_number')) ?>"><?= $fieldErrorHtml('routing_number') ?></div>
+                            <div class="col-md-6"><label class="form-label">Account number</label><input name="external_account_number" class="form-control<?= e($fieldClass('external_account_number')) ?>" inputmode="numeric" maxlength="17" placeholder="External account number" value="<?= e($fieldValue('external_account_number')) ?>"><?= $fieldErrorHtml('external_account_number') ?></div>
                         </div>
                     </div>
                 </div>
@@ -332,7 +398,7 @@ $incomeOptions = match ($regionConfig['currency']) {
                 <div class="kyc-upload-panel mb-3"><strong>Accepted documents</strong><span class="muted small">National ID or passport as image or PDF.</span></div>
                 <div class="row g-3">
                     <div class="col-md-5"><label class="form-label">Document type</label><select name="document_type" class="form-select" data-document-type-select><option value="national_id" data-region-option="de,ch">National ID</option><option value="passport" data-region-option="both">Passport</option><option value="id_card" data-region-option="us,ca,uk">Government ID</option><option value="driver_license" data-region-option="us,ca,uk">Driver license</option></select></div>
-                    <div class="col-md-7"><label class="form-label">Upload document</label><input name="identity_document" type="file" accept="image/*,.pdf" class="form-control" data-document-upload required></div>
+                    <div class="col-md-7"><label class="form-label">Upload document</label><input name="identity_document" type="file" accept="image/*,.pdf" class="form-control<?= e($fieldClass('identity_document')) ?>" data-document-upload required><?= $fieldErrorHtml('identity_document') ?></div>
                     <div class="col-12"><div class="upload-progress"><span></span></div></div>
                 </div>
             </section>
@@ -348,7 +414,7 @@ $incomeOptions = match ($regionConfig['currency']) {
                     <div><span data-review-bank-label>IBAN</span><strong data-review="iban">Automatic</strong></div>
                     <div><span>Document</span><strong data-review="documents">-</strong></div>
                 </div>
-                <div class="verification-ready"><i class="fa-solid fa-shield-check"></i><div><strong>Biometric verification complete</strong><span>Your face check will be submitted with this application for pending review.</span></div></div>
+                <div class="verification-ready <?= e($fieldClass('biometric')) ?>"><i class="fa-solid fa-shield-check"></i><div><strong>Biometric verification complete</strong><span>Your face check will be submitted with this application for pending review.</span><?= $fieldErrorHtml('biometric') ?></div></div>
                 <input type="hidden" name="biometric_forward" data-biometric-input="forward">
                 <input type="hidden" name="biometric_left" data-biometric-input="left">
                 <input type="hidden" name="biometric_right" data-biometric-input="right">

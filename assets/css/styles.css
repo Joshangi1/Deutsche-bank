@@ -1987,3 +1987,27 @@ body { top: 0 !important; }
   background: rgba(220, 80, 70, 0.12);
   color: #ff9a9a;
 }
+
+/* Clean inline validation for signup/onboarding forms */
+.form-control.is-invalid,
+.form-select.is-invalid,
+.secure-input .form-control.is-invalid,
+.verification-ready.is-invalid {
+  border-color: rgba(196, 49, 49, 0.55) !important;
+  box-shadow: 0 0 0 3px rgba(196, 49, 49, 0.08) !important;
+}
+.field-error {
+  margin-top: 6px;
+  color: #b42331;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+.input-group + .field-error,
+.secure-input + .field-error {
+  margin-top: 7px;
+}
+.verification-ready.is-invalid {
+  border-radius: 14px;
+  padding: 12px;
+}
