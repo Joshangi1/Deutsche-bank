@@ -38,8 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($user && (int) $user['failed_attempts'] >= 5 && strtotime((string) $user['locked_until']) > time()) {
         flash('danger', 'Account temporarily locked after failed attempts. Try again later.');
     } elseif ($user && password_verify($password, $user['password_hash']) && in_array($user['status'], ['active', 'frozen', 'suspended'], true)) {
-        session_regenerate_id(true);
-        $_SESSION['user_id'] = (int) $user['id'];
+        start_authenticated_session('user', (int) $user['id']);
         db()->prepare('UPDATE users SET failed_attempts=0, locked_until=NULL, last_login=NOW() WHERE id=?')->execute([$user['id']]);
         if (($user['status'] ?? 'active') !== 'active') {
             notify_customer_event((int) $user['id'], 'account_restricted');

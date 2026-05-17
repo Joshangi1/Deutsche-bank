@@ -45,6 +45,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['balance'])) {
         $beforeAccount = user_account($uid);
         if ($beforeAccount) {
+            banking_update_account_identity($uid, [
+                'account_number' => (string) ($_POST['account_number'] ?? $beforeAccount['account_number']),
+                'routing_number' => (string) ($_POST['routing_number'] ?? $beforeAccount['routing_number']),
+                'iban' => (string) ($_POST['iban'] ?? ($beforeAccount['iban'] ?? '')),
+                'bic' => (string) ($_POST['bic'] ?? ($beforeAccount['bic'] ?? '')),
+                'account_type' => (string) ($_POST['account_type'] ?? $beforeAccount['account_type']),
+            ]);
             banking_update_balance($uid, [
                 'available_balance' => (float) $_POST['available_balance'] - (float) $beforeAccount['available_balance'],
                 'pending_balance' => (float) $_POST['pending_balance'] - (float) $beforeAccount['pending_balance'],
@@ -55,13 +62,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    if (isset($_POST['save_banking_details'])) {
+        $account = user_account($uid);
+        save_user_banking_details(
+            $uid,
+            (string) ($_POST['banking_country'] ?? ''),
+            $account ? (int) $account['id'] : null,
+            $_POST['banking_details'] ?? []
+        );
+        log_admin((int) $admin['id'], 'banking_details_edit', 'Edited banking details for user ' . $uid, $uid);
+    }
+
     flash('success', 'User updated.');
     header('Location: users.php');
     exit;
 }
 
 $q = '%' . ($_GET['q'] ?? '') . '%';
-$stmt = db()->prepare('SELECT u.*, a.available_balance, a.pending_balance, a.savings_balance, a.account_type FROM users u LEFT JOIN accounts a ON a.user_id=u.id WHERE u.email LIKE ? OR u.first_name LIKE ? OR u.last_name LIKE ? ORDER BY u.created_at DESC');
+$stmt = db()->prepare('SELECT u.*, a.id AS account_id, a.available_balance, a.pending_balance, a.savings_balance, a.account_type, a.account_number, a.routing_number, a.iban, a.bic FROM users u LEFT JOIN accounts a ON a.user_id=u.id WHERE u.email LIKE ? OR u.first_name LIKE ? OR u.last_name LIKE ? ORDER BY u.created_at DESC');
 $stmt->execute([$q, $q, $q]);
 ?>
 <?php include __DIR__ . '/../includes/admin_header.php'; ?>
@@ -78,6 +96,25 @@ $stmt->execute([$q, $q, $q]);
             <thead><tr><th>Member</th><th>Status</th><th>Verification</th><th>Balances</th><th>Admin controls</th></tr></thead>
             <tbody>
             <?php foreach ($stmt as $u): ?>
+                <?php
+                    $userAccount = [
+                        'id' => $u['account_id'],
+                        'account_number' => $u['account_number'],
+                        'routing_number' => $u['routing_number'],
+                        'iban' => $u['iban'],
+                        'bic' => $u['bic'],
+                        'account_type' => $u['account_type'],
+                    ];
+                    $userRegion = user_banking_region($u, $userAccount);
+                    $bankingDetails = user_banking_details((int) $u['id'], $u, $userAccount, false);
+                    $detailRows = array_merge($bankingDetails, array_fill(0, 3, [
+                        'id' => '',
+                        'detail_label' => '',
+                        'detail_value' => '',
+                        'display_order' => count($bankingDetails) + 1,
+                        'is_copyable' => 1,
+                    ]));
+                ?>
                 <tr>
                     <td>
                         <div class="d-flex align-items-center gap-3">
@@ -102,7 +139,36 @@ $stmt->execute([$q, $q, $q]);
                             <div class="col-md-2"><input name="pending_balance" class="form-control form-control-sm" value="<?= e($u['pending_balance']) ?>"></div>
                             <div class="col-md-2"><input name="savings_balance" class="form-control form-control-sm" value="<?= e($u['savings_balance']) ?>"></div>
                             <div class="col-md-3"><input name="account_type" class="form-control form-control-sm" value="<?= e($u['account_type']) ?>"></div>
+                            <div class="col-md-3"><input name="account_number" class="form-control form-control-sm" placeholder="Account number" value="<?= e($u['account_number'] ?? '') ?>"></div>
+                            <div class="col-md-3"><input name="routing_number" class="form-control form-control-sm" placeholder="Routing / Sort / Transit" value="<?= e($u['routing_number'] ?? '') ?>"></div>
+                            <div class="col-md-3"><input name="iban" class="form-control form-control-sm" placeholder="IBAN" value="<?= e(format_iban_display($u['iban'] ?? '')) ?>"></div>
+                            <div class="col-md-3"><input name="bic" class="form-control form-control-sm" placeholder="BIC / SWIFT" value="<?= e($u['bic'] ?? '') ?>"></div>
                             <div class="col-md-2 d-grid"><button name="profile" value="1" class="btn btn-sm btn-gold">Save all</button><input type="hidden" name="balance" value="1"></div>
+                        </form>
+                        <form method="post" class="mt-3 banking-details-admin">
+                            <?= csrf_field() ?>
+                            <input type="hidden" name="user_id" value="<?= (int) $u['id'] ?>">
+                            <input type="hidden" name="banking_country" value="<?= e($userRegion) ?>">
+                            <div class="small fw-bold mb-2">Payment receiving details</div>
+                            <?php foreach ($detailRows as $idx => $detail): ?>
+                                <div class="row g-2 align-items-center mb-2">
+                                    <input type="hidden" name="banking_details[<?= $idx ?>][id]" value="<?= e((string) ($detail['id'] ?? '')) ?>">
+                                    <div class="col-md-3"><input name="banking_details[<?= $idx ?>][detail_label]" class="form-control form-control-sm" placeholder="Label, e.g. Routing Number" value="<?= e($detail['detail_label'] ?? '') ?>"></div>
+                                    <div class="col-md-5"><input name="banking_details[<?= $idx ?>][detail_value]" class="form-control form-control-sm" placeholder="Full value users can copy" value="<?= e($detail['detail_value'] ?? '') ?>"></div>
+                                    <div class="col-md-1"><input name="banking_details[<?= $idx ?>][display_order]" class="form-control form-control-sm" value="<?= e((string) ($detail['display_order'] ?? ($idx + 1))) ?>"></div>
+                                    <div class="col-md-2 form-check small">
+                                        <input type="hidden" name="banking_details[<?= $idx ?>][is_copyable]" value="0">
+                                        <input class="form-check-input" type="checkbox" name="banking_details[<?= $idx ?>][is_copyable]" value="1" <?= !empty($detail['is_copyable']) ? 'checked' : '' ?>>
+                                        <label class="form-check-label">Copy</label>
+                                    </div>
+                                    <div class="col-md-1 form-check small">
+                                        <?php if (!empty($detail['id'])): ?>
+                                            <input class="form-check-input" type="checkbox" name="banking_details[<?= $idx ?>][delete]" value="1" title="Delete">
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                            <button name="save_banking_details" value="1" class="btn btn-sm btn-light border">Save banking details</button>
                         </form>
                         <form method="post" class="mt-2">
                             <?= csrf_field() ?>

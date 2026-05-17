@@ -1157,3 +1157,266 @@ body,
   width: 18px;
   flex-shrink: 0;
 }
+
+/* Account/payment receiving details */
+.account-details-card {
+  background: var(--surface, #fff);
+  border: 1px solid rgba(10,22,40,0.10);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(10,22,40,0.06);
+}
+.account-detail-list {
+  display: grid;
+  gap: 0;
+}
+.account-detail-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.8fr) minmax(0, 1.4fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 18px;
+  border-top: 1px solid rgba(10,22,40,0.08);
+}
+.account-detail-label {
+  color: var(--text-secondary, #6b7280);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.account-detail-value {
+  color: var(--text-primary, #0d1b2e);
+  font-size: 14px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+.copy-detail-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 7px 10px;
+  border: 1px solid rgba(10,22,40,0.12);
+  border-radius: 8px;
+  background: #fff;
+  color: #0a1628;
+  font-size: 12px;
+  font-weight: 800;
+}
+.copy-detail-btn.copied {
+  border-color: rgba(26,138,74,0.28);
+  background: #edf7f0;
+  color: #1a6b3a;
+}
+.copyable-account-detail .copy-detail-btn {
+  margin-top: 8px;
+}
+
+@media (max-width: 767px) {
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
+  .app-main {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  .topbar {
+    min-height: 64px !important;
+    height: 64px !important;
+    padding: 0 14px !important;
+    gap: 10px !important;
+    border-bottom: 1px solid rgba(10,22,40,0.10);
+    box-shadow: 0 1px 0 rgba(10,22,40,0.04);
+  }
+
+  .topbar > .d-flex:first-child {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    gap: 12px !important;
+  }
+
+  .mobile-toggle {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    border-radius: 10px !important;
+    padding: 0 !important;
+    flex-shrink: 0 !important;
+  }
+
+  .topbar-kicker {
+    color: #6b7a93 !important;
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.65px !important;
+    text-transform: uppercase !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .topbar h1.h3 {
+    color: #0d1b2e !important;
+    font-size: 17px !important;
+    line-height: 1.15 !important;
+    letter-spacing: 0 !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .topbar .muted,
+  .topbar .language-static-pill,
+  .topbar .btn-outline-danger {
+    display: none !important;
+  }
+
+  .topbar > .d-flex:last-child {
+    flex: 0 0 auto !important;
+    gap: 6px !important;
+  }
+
+  .notification-menu > .btn,
+  .avatar-sm {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+  }
+
+  .dashboard-grid {
+    --bs-gutter-y: 14px;
+  }
+  .dashboard-balance-section { order: 1; }
+  .dashboard-quick-section { order: 2; }
+  .dashboard-card-section { order: 3; }
+  .dashboard-details-section { order: 4; }
+  .dashboard-transactions-section { order: 5; }
+  .dashboard-cash-section { order: 6; }
+  .dashboard-verification-section { order: 7; }
+  .dashboard-chart-section { order: 8; }
+
+  .banking-hero {
+    padding: 18px !important;
+    margin-bottom: 14px !important;
+    border-radius: 16px !important;
+  }
+  .banking-hero h2 {
+    font-size: 20px !important;
+    line-height: 1.18 !important;
+  }
+
+  .balance-card {
+    border-radius: 16px !important;
+    padding: 22px 18px !important;
+    min-height: 0 !important;
+    margin-bottom: 0 !important;
+  }
+  .balance-card .display-5 {
+    font-size: 34px !important;
+    line-height: 1.08 !important;
+  }
+  .balance-card .row {
+    --bs-gutter-y: 18px;
+  }
+  .balance-card h5 {
+    font-size: 19px !important;
+  }
+
+  .virtual-card {
+    aspect-ratio: 1.586 !important;
+    min-height: 0 !important;
+    padding: 20px !important;
+    border-radius: 16px !important;
+  }
+  .virtual-card .fs-4 {
+    font-size: 18px !important;
+    letter-spacing: 2px !important;
+  }
+
+  .premium-card,
+  .table-card,
+  .account-details-card {
+    border-radius: 16px !important;
+  }
+  .premium-card.p-4,
+  .table-card.p-4 {
+    padding: 18px !important;
+  }
+
+  .quick-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+  .quick-grid a {
+    min-height: 74px !important;
+    padding: 12px !important;
+    border-radius: 12px !important;
+  }
+  .quick-grid i {
+    font-size: 18px !important;
+  }
+
+  .account-detail-row {
+    grid-template-columns: 1fr auto;
+    gap: 8px 10px;
+    padding: 13px 14px;
+  }
+  .account-detail-label {
+    grid-column: 1 / -1;
+  }
+  .account-detail-value {
+    font-size: 13px;
+  }
+  .copy-detail-btn span {
+    display: none;
+  }
+
+  .transaction-table tr {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px 10px;
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(10,22,40,0.08);
+  }
+  .transaction-table td {
+    display: block;
+    border: 0 !important;
+    padding: 0 !important;
+  }
+  .transaction-table td:nth-child(2) {
+    grid-column: 1;
+  }
+  .transaction-table td:nth-child(3) {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+    white-space: nowrap;
+  }
+
+  canvas[data-chart] {
+    max-height: 180px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .topbar {
+    padding: 0 10px !important;
+  }
+  .topbar h1.h3 {
+    font-size: 15px !important;
+  }
+  .notification-menu > .btn {
+    display: none !important;
+  }
+  .balance-card .display-5 {
+    font-size: 30px !important;
+  }
+}

@@ -53,13 +53,15 @@ $accountOptions = in_array($region, ['us', 'ca'], true)
                         <div class="account-detail-grid">
                             <div><span>Available</span><strong><?= money($account['available_balance'], $currency) ?></strong></div>
                             <div><span>Pending</span><strong><?= money($account['pending_balance'], $currency) ?></strong></div>
-                            <?php if (!$usesIban): ?>
-                                <div><span><?= e($regionConfig['account_label']) ?></span><strong><?= e(mask_account((string) $account['account_number'])) ?></strong></div>
-                                <div><span><?= e($regionConfig['routing_label']) ?></span><strong><?= e($account['routing_number'] ?: $regionConfig['routing']) ?></strong></div>
-                            <?php else: ?>
-                                <div><span>IBAN</span><strong><?= e(format_iban_display($account['iban'] ?? '')) ?></strong></div>
-                                <div><span>BIC/SWIFT</span><strong><?= e($account['bic'] ?: DEFAULT_BIC) ?></strong></div>
-                            <?php endif; ?>
+                            <?php foreach (user_banking_details((int) $user['id'], $user, $account, true) as $detail): ?>
+                                <div class="copyable-account-detail">
+                                    <span><?= e($detail['detail_label']) ?></span>
+                                    <strong><?= e($detail['detail_value']) ?></strong>
+                                    <?php if (!array_key_exists('is_copyable', $detail) || (int) $detail['is_copyable'] === 1): ?>
+                                        <button type="button" class="copy-detail-btn" data-copy-text="<?= e($detail['detail_value']) ?>" aria-label="Copy <?= e($detail['detail_label']) ?>"><i class="fa-regular fa-copy"></i><span>Copy</span></button>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endforeach; ?>
                         </div>
                     </div>
                 </div>

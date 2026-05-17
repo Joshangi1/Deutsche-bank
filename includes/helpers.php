@@ -14,6 +14,7 @@ const APP_NAME = 'Deutsche';
 const ROUTING_NUMBER = 'DEUTDEFFXXX';
 const DEFAULT_BIC = 'DEUTDEFFXXX';
 const US_ROUTING_NUMBER = '071923846';
+const SESSION_IDLE_TIMEOUT = 600;
 
 function ensure_banking_schema(): void
 {
@@ -292,6 +293,22 @@ function ensure_banking_schema(): void
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             INDEX idx_pr_user (user_id),
             INDEX idx_pr_token (token_hash)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci',
+        'user_banking_details' => 'CREATE TABLE IF NOT EXISTS user_banking_details (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            account_id INT DEFAULT NULL,
+            country VARCHAR(40) NOT NULL,
+            detail_label VARCHAR(120) NOT NULL,
+            detail_value VARCHAR(255) NOT NULL,
+            display_order INT DEFAULT 0,
+            is_copyable TINYINT(1) DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            INDEX idx_user_banking_details_user (user_id, country, display_order),
+            INDEX idx_user_banking_details_account (account_id),
+            CONSTRAINT user_banking_details_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            CONSTRAINT user_banking_details_account_fk FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE SET NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci',
     ];
 
@@ -679,6 +696,116 @@ function user_account_currency(?array $user = null, ?array $account = null): str
     return banking_region_config(user_banking_region($user, $account))['currency'];
 }
 
+function default_banking_detail_rows(array $user, ?array $account): array
+{
+    $region = user_banking_region($user, $account);
+    $config = banking_region_config($region);
+    $accountNumber = trim((string) ($account['account_number'] ?? ''));
+    $routing = trim((string) ($account['routing_number'] ?? $config['routing']));
+    $iban = trim((string) ($account['iban'] ?? $user['iban'] ?? ''));
+    $bic = trim((string) ($account['bic'] ?? ($region === 'us' || $region === 'ca' || $region === 'uk' ? '' : DEFAULT_BIC)));
+    $rows = [];
+
+    $push = static function (string $label, string $value, bool $copyable = true) use (&$rows): void {
+        $value = trim($value);
+        if ($value === '') {
+            return;
+        }
+        $rows[] = ['id' => null, 'detail_label' => $label, 'detail_value' => $value, 'is_copyable' => $copyable];
+    };
+
+    $push('Account Type', (string) ($account['account_type'] ?? $config['account_type']), false);
+    if (in_array($region, ['de', 'ch'], true)) {
+        $push($region === 'ch' ? 'Swiss IBAN' : 'IBAN', $iban !== '' ? format_iban_display($iban) : '');
+        $push('BIC / SWIFT', $bic);
+    } elseif ($region === 'uk') {
+        $push('Account Number', $accountNumber);
+        $push('Sort Code', $routing);
+        $push('IBAN', $iban !== '' ? format_iban_display($iban) : '');
+        $push('SWIFT / BIC', $bic);
+    } elseif ($region === 'ca') {
+        $push('Institution / Transit', $routing);
+        $push('Account Number', $accountNumber);
+        $push('SWIFT / BIC', $bic);
+    } else {
+        $push('Account Number', $accountNumber);
+        $push('Routing Number', $routing);
+    }
+
+    return $rows;
+}
+
+function user_banking_details(int $userId, ?array $user = null, ?array $account = null, bool $withFallback = true): array
+{
+    ensure_banking_schema();
+    if (!$user) {
+        $stmt = db()->prepare('SELECT * FROM users WHERE id=? LIMIT 1');
+        $stmt->execute([$userId]);
+        $user = $stmt->fetch() ?: [];
+    }
+    $account = $account ?: user_account($userId);
+    $region = user_banking_region($user, $account);
+    $accountId = $account['id'] ?? null;
+    $sql = 'SELECT * FROM user_banking_details WHERE user_id=? AND country=?';
+    $params = [$userId, $region];
+    if ($accountId) {
+        $sql .= ' AND (account_id IS NULL OR account_id=?)';
+        $params[] = (int) $accountId;
+    }
+    $sql .= ' ORDER BY display_order ASC, id ASC';
+    $stmt = db()->prepare($sql);
+    $stmt->execute($params);
+    $rows = $stmt->fetchAll();
+    return $rows || !$withFallback ? $rows : default_banking_detail_rows($user, $account);
+}
+
+function save_user_banking_details(int $userId, string $country, ?int $accountId, array $rows): void
+{
+    ensure_banking_schema();
+    $country = banking_region_config($country)['region'];
+    foreach ($rows as $index => $row) {
+        $id = (int) ($row['id'] ?? 0);
+        $label = trim((string) ($row['detail_label'] ?? ''));
+        $value = trim((string) ($row['detail_value'] ?? ''));
+        $displayOrder = (int) ($row['display_order'] ?? ($index + 1));
+        $isCopyable = !empty($row['is_copyable']) ? 1 : 0;
+        $delete = !empty($row['delete']);
+
+        if ($id > 0 && $delete) {
+            db()->prepare('DELETE FROM user_banking_details WHERE id=? AND user_id=?')->execute([$id, $userId]);
+            continue;
+        }
+        if ($label === '' || $value === '') {
+            continue;
+        }
+        if ($id > 0) {
+            db()->prepare('UPDATE user_banking_details SET country=?, account_id=?, detail_label=?, detail_value=?, display_order=?, is_copyable=? WHERE id=? AND user_id=?')
+                ->execute([$country, $accountId, $label, $value, $displayOrder, $isCopyable, $id, $userId]);
+        } else {
+            db()->prepare('INSERT INTO user_banking_details (user_id, account_id, country, detail_label, detail_value, display_order, is_copyable) VALUES (?,?,?,?,?,?,?)')
+                ->execute([$userId, $accountId, $country, $label, $value, $displayOrder, $isCopyable]);
+        }
+    }
+}
+
+function banking_update_account_identity(int $userId, array $data): void
+{
+    $account = user_account($userId);
+    if (!$account) {
+        return;
+    }
+    db()->prepare('UPDATE accounts SET account_number=?, routing_number=?, iban=?, bic=?, account_type=? WHERE id=? AND user_id=?')
+        ->execute([
+            trim((string) ($data['account_number'] ?? $account['account_number'])),
+            trim((string) ($data['routing_number'] ?? $account['routing_number'])),
+            normalize_iban((string) ($data['iban'] ?? $account['iban'] ?? '')) ?: null,
+            normalize_bic((string) ($data['bic'] ?? $account['bic'] ?? '')) ?: null,
+            trim((string) ($data['account_type'] ?? $account['account_type'])) ?: $account['account_type'],
+            (int) $account['id'],
+            $userId,
+        ]);
+}
+
 function current_user(): ?array
 {
     if (empty($_SESSION['user_id'])) {
@@ -696,6 +823,52 @@ function current_user(): ?array
     }
 }
 
+function clear_current_session(): void
+{
+    $_SESSION = [];
+    if (ini_get('session.use_cookies')) {
+        $params = session_get_cookie_params();
+        setcookie(
+            session_name(),
+            '',
+            time() - 42000,
+            $params['path'] ?? '/',
+            $params['domain'] ?? '',
+            (bool) ($params['secure'] ?? false),
+            (bool) ($params['httponly'] ?? true)
+        );
+    }
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_destroy();
+    }
+}
+
+function start_authenticated_session(string $guard, int $id): void
+{
+    session_regenerate_id(true);
+    unset($_SESSION['user_id'], $_SESSION['admin_id']);
+    $_SESSION[$guard === 'admin' ? 'admin_id' : 'user_id'] = $id;
+    $_SESSION['auth_guard'] = $guard;
+    $_SESSION['last_activity'] = time();
+}
+
+function enforce_session_activity(string $guard): void
+{
+    $sessionKey = $guard === 'admin' ? 'admin_id' : 'user_id';
+    if (empty($_SESSION[$sessionKey])) {
+        return;
+    }
+
+    $lastActivity = (int) ($_SESSION['last_activity'] ?? time());
+    if ((time() - $lastActivity) > SESSION_IDLE_TIMEOUT) {
+        clear_current_session();
+        header('Location: ' . url($guard === 'admin' ? 'admin/login.php?timeout=1' : 'login.php?timeout=1'));
+        exit;
+    }
+
+    $_SESSION['last_activity'] = time();
+}
+
 function current_admin(): ?array
 {
     if (empty($_SESSION['admin_id'])) {
@@ -708,6 +881,7 @@ function current_admin(): ?array
 
 function require_user(): array
 {
+    enforce_session_activity('user');
     $user = current_user();
     if ($user) {
         return $user;
@@ -727,6 +901,7 @@ function require_user(): array
 function require_admin(): array
 {
     ensure_banking_schema();
+    enforce_session_activity('admin');
     $admin = current_admin();
     if (!$admin) {
         header('Location: ' . url('admin/login.php'));
