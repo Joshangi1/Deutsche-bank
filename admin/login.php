@@ -7,7 +7,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute([strtolower(trim($_POST['email'] ?? ''))]);
     $admin = $stmt->fetch();
     if ($admin && password_verify((string)$_POST['password'], $admin['password_hash'])) {
-        session_regenerate_id(true); $_SESSION['admin_id'] = (int)$admin['id'];
+        start_authenticated_session('admin', (int) $admin['id']);
         log_admin((int)$admin['id'], 'login', 'Admin signed in');
         header('Location: index.php'); exit;
     }

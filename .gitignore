@@ -28,6 +28,7 @@ build/
 # Local database dumps/backups
 *.sql
 !database/schema.sql
+!database/user_banking_details.sql
 *.sqlite
 *.db
 *.bak

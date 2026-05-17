@@ -1,4 +1,40 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const timeoutSeconds = Number(document.body?.dataset.sessionTimeout || 0);
+    const timeoutLogoutUrl = document.body?.dataset.sessionLogoutUrl || '';
+    if (timeoutSeconds > 0 && timeoutLogoutUrl) {
+        let timeoutHandle = null;
+        const resetInactivityTimer = () => {
+            window.clearTimeout(timeoutHandle);
+            timeoutHandle = window.setTimeout(() => {
+                window.location.href = timeoutLogoutUrl;
+            }, timeoutSeconds * 1000);
+        };
+        ['click', 'keydown', 'mousemove', 'scroll', 'touchstart'].forEach(eventName => {
+            document.addEventListener(eventName, resetInactivityTimer, { passive: true });
+        });
+        window.addEventListener('pageshow', resetInactivityTimer);
+        window.addEventListener('focus', resetInactivityTimer);
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) resetInactivityTimer();
+        });
+        if (window.fetch) {
+            const originalFetch = window.fetch.bind(window);
+            window.fetch = (...args) => {
+                resetInactivityTimer();
+                return originalFetch(...args).finally(resetInactivityTimer);
+            };
+        }
+        if (window.XMLHttpRequest) {
+            const originalOpen = window.XMLHttpRequest.prototype.open;
+            window.XMLHttpRequest.prototype.open = function (...args) {
+                this.addEventListener('loadend', resetInactivityTimer);
+                resetInactivityTimer();
+                return originalOpen.apply(this, args);
+            };
+        }
+        resetInactivityTimer();
+    }
+
     document.querySelectorAll('[data-visibility-toggle]').forEach(button => {
         if (button.dataset.visibilityReady === '1') return;
         button.dataset.visibilityReady = '1';

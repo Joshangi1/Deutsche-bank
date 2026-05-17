@@ -16,6 +16,6 @@ if (!empty($_SESSION['user_id'])) {
     }
 }
 
-session_destroy();
+clear_current_session();
 header('Location: ' . $redirect);
 exit;

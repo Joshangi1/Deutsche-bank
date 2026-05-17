@@ -25,7 +25,7 @@ $admin = require_admin();
         })();
     </script>
 </head>
-<body class="notranslate" translate="no">
+<body class="notranslate" translate="no" data-session-timeout="<?= SESSION_IDLE_TIMEOUT ?>" data-session-logout-url="<?= e(url('admin/logout.php')) ?>">
 <div class="app-shell">
 <aside class="sidebar">
     <a class="sidebar-brand" href="<?= url('admin/index.php') ?>"><?= lead_logo('light') ?><span class="admin-brand-label">Admin</span></a>
@@ -50,6 +50,11 @@ $admin = require_admin();
         <?php foreach ($nav as $item): ?><a class="nav-link <?= str_ends_with($_SERVER['SCRIPT_NAME'], $item[0]) ? 'active' : '' ?>" href="<?= url($item[0]) ?>"><i class="fa-solid <?= $item[1] ?>"></i><span><?= e($item[2]) ?></span></a><?php endforeach; ?>
     </nav>
     <div class="mt-auto small text-white-50"><?= e($admin['role']) ?> permissions<br><?= e($admin['email']) ?></div>
+    <div class="sidebar-signout-wrap">
+        <a class="sidebar-signout-btn" href="<?= url('admin/logout.php') ?>">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i><span>Sign Out</span>
+        </a>
+    </div>
 </aside>
 <main class="app-main">
     <div class="topbar">

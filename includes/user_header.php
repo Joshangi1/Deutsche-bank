@@ -46,7 +46,7 @@ $notificationPreview = $previewStmt->fetchAll();
         })();
     </script>
 </head>
-<body class="notranslate" translate="no">
+<body class="notranslate" translate="no" data-session-timeout="<?= SESSION_IDLE_TIMEOUT ?>" data-session-logout-url="<?= e(url('logout.php')) ?>">
 <div class="app-shell">
 
 <!-- ═══════════════════════════════════════════
@@ -82,6 +82,11 @@ $notificationPreview = $previewStmt->fetchAll();
     <div class="sidebar-session mt-auto">
         <i class="fa-solid fa-shield-halved"></i>
         <div><strong>Secure Session</strong><span>Last login <?= e(date('M j, g:i A')) ?></span></div>
+    </div>
+    <div class="sidebar-signout-wrap">
+        <a class="sidebar-signout-btn" href="<?= url('logout.php') ?>">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i><span>Sign Out</span>
+        </a>
     </div>
 </aside>
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
