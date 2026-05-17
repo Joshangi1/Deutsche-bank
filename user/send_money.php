@@ -91,6 +91,7 @@ $review = $_SESSION['instant_payment_review'] ?? null;
     </div>
     <i class="fa-solid fa-bolt"></i>
 </div>
+<?= deposit_protection_badge($user, $account, 'mb-4') ?>
 <div class="row g-4">
     <div class="col-xl-7">
         <form class="premium-card p-4" method="post">

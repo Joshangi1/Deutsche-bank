@@ -14,6 +14,8 @@ $GLOBALS['pageLanguage'] = $pageLanguage;
 $GLOBALS['pageLoginUrl'] = $pageLoginUrl;
 $GLOBALS['forcePageLanguage'] = true;
 $GLOBALS['disableTranslate'] = true;
+$loginErrors = [];
+$oldLogin = $_POST ?? [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
@@ -22,41 +24,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = null;
     $databaseOnline = true;
 
-    try {
-        $GLOBALS['DB_SILENT_FAILURE'] = true;
-        $stmt = db()->prepare('SELECT * FROM users WHERE email = ? LIMIT 1');
-        $stmt->execute([$email]);
-        $user = $stmt->fetch();
-    } catch (Throwable $e) {
-        $databaseOnline = false;
-    } finally {
-        unset($GLOBALS['DB_SILENT_FAILURE']);
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $loginErrors['email'] = 'Enter a valid email address.';
+    }
+    if ($password === '') {
+        $loginErrors['password'] = 'Enter your password.';
     }
 
-    if (!$databaseOnline) {
-        flash('danger', 'The database is offline. Please contact support or try again later.');
-    } elseif ($user && (int) $user['failed_attempts'] >= 5 && strtotime((string) $user['locked_until']) > time()) {
-        flash('danger', 'Account temporarily locked after failed attempts. Try again later.');
-    } elseif ($user && password_verify($password, $user['password_hash']) && in_array($user['status'], ['active', 'frozen', 'suspended'], true)) {
-        start_authenticated_session('user', (int) $user['id']);
-        db()->prepare('UPDATE users SET failed_attempts=0, locked_until=NULL, last_login=NOW() WHERE id=?')->execute([$user['id']]);
-        if (($user['status'] ?? 'active') !== 'active') {
-            notify_customer_event((int) $user['id'], 'account_restricted');
+    if (!$loginErrors) {
+        try {
+            $GLOBALS['DB_SILENT_FAILURE'] = true;
+            $stmt = db()->prepare('SELECT * FROM users WHERE email = ? LIMIT 1');
+            $stmt->execute([$email]);
+            $user = $stmt->fetch();
+        } catch (Throwable $e) {
+            $databaseOnline = false;
+        } finally {
+            unset($GLOBALS['DB_SILENT_FAILURE']);
         }
-        header('Location: dashboard.php');
-        exit;
-    } else {
-        if ($user) {
-            $attempts = (int) $user['failed_attempts'] + 1;
-            $locked = $attempts >= 5 ? date('Y-m-d H:i:s', time() + 900) : null;
-            db()->prepare('UPDATE users SET failed_attempts=?, locked_until=? WHERE id=?')->execute([$attempts, $locked, $user['id']]);
-            if ($attempts >= 3) {
-                db()->prepare('INSERT INTO security_events (user_id, event_type, title, details, device, ip_address, severity) VALUES (?, "login_warning", "Unsuccessful sign-in attempts", "Multiple unsuccessful sign-in attempts were detected.", ?, ?, "warning")')
-                    ->execute([$user['id'], $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown device', $_SERVER['REMOTE_ADDR'] ?? 'local']);
-                notify_customer_event((int) $user['id'], 'security_alert', ['message' => 'Multiple unsuccessful sign-in attempts were detected.']);
+
+        if (!$databaseOnline) {
+            flash('danger', 'The database is offline. Please contact support or try again later.');
+        } elseif ($user && (int) $user['failed_attempts'] >= 5 && strtotime((string) $user['locked_until']) > time()) {
+            flash('danger', 'Account temporarily locked after failed attempts. Try again later.');
+        } elseif ($user && password_verify($password, $user['password_hash']) && in_array($user['status'], ['active', 'frozen', 'suspended'], true)) {
+            start_authenticated_session('user', (int) $user['id']);
+            db()->prepare('UPDATE users SET failed_attempts=0, locked_until=NULL, last_login=NOW() WHERE id=?')->execute([$user['id']]);
+            if (($user['status'] ?? 'active') !== 'active') {
+                notify_customer_event((int) $user['id'], 'account_restricted');
             }
+            header('Location: dashboard.php');
+            exit;
+        } else {
+            if ($user) {
+                $attempts = (int) $user['failed_attempts'] + 1;
+                $locked = $attempts >= 5 ? date('Y-m-d H:i:s', time() + 900) : null;
+                db()->prepare('UPDATE users SET failed_attempts=?, locked_until=? WHERE id=?')->execute([$attempts, $locked, $user['id']]);
+                if ($attempts >= 3) {
+                    db()->prepare('INSERT INTO security_events (user_id, event_type, title, details, device, ip_address, severity) VALUES (?, "login_warning", "Unsuccessful sign-in attempts", "Multiple unsuccessful sign-in attempts were detected.", ?, ?, "warning")')
+                        ->execute([$user['id'], $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown device', $_SERVER['REMOTE_ADDR'] ?? 'local']);
+                    notify_customer_event((int) $user['id'], 'security_alert', ['message' => 'Multiple unsuccessful sign-in attempts were detected.']);
+                }
+            }
+            $loginErrors['email'] = 'Check the email address.';
+            $loginErrors['password'] = 'Check the password for this account.';
+            flash('danger', 'Invalid email, password, or unavailable account.');
         }
-        flash('danger', 'Invalid email, password, or unavailable account.');
+    } else {
+        flash('danger', 'Please review the highlighted fields before continuing.');
     }
 }
 
@@ -89,6 +104,10 @@ $createAccountLabel = match ($regionConfig['region']) {
     'ch' => 'Create Swiss account',
     default => 'Create Germany account',
 };
+$loginFieldClass = static fn (string $name): string => isset($loginErrors[$name]) ? ' is-invalid' : '';
+$loginFieldError = static function (string $name) use (&$loginErrors): string {
+    return isset($loginErrors[$name]) ? '<div class="field-error">' . e($loginErrors[$name]) . '</div>' : '';
+};
 include __DIR__ . '/includes/public_header.php';
 ?>
 
@@ -103,19 +122,21 @@ include __DIR__ . '/includes/public_header.php';
       </div>
       <div class="auth-assurance"><span><i class="fa-solid fa-key"></i> 4-digit code</span><span><i class="fa-solid fa-building-columns"></i> Protected dashboard</span><span><i class="fa-solid fa-user-shield"></i> Admin approval</span></div>
     </aside>
-    <form class="auth-card" method="post">
+    <form class="auth-card" method="post" data-auth-validation novalidate>
       <?= csrf_field() ?>
       <div class="mb-4"><?= lead_logo('dark') ?></div>
       <span class="auth-kicker">Welcome back</span>
       <h1 class="h3 fw-bold"><?= e($loginHeading) ?></h1>
       <p class="muted">Access your accounts with secure online banking.</p>
       <label class="form-label">Email</label>
-      <input name="email" type="text" inputmode="email" autocomplete="email" class="form-control mb-3" value="<?= e($prefillEmail) ?>" required>
+      <input name="email" type="email" inputmode="email" autocomplete="email" class="form-control<?= e($loginFieldClass('email')) ?> mb-3" value="<?= e((string) ($oldLogin['email'] ?? $prefillEmail)) ?>" required>
+      <?= $loginFieldError('email') ?>
       <label class="form-label">Password</label>
       <div class="secure-input mb-3">
-        <input name="password" type="password" class="form-control" required>
+        <input name="password" type="password" class="form-control<?= e($loginFieldClass('password')) ?>" autocomplete="current-password" required>
         <button type="button" data-visibility-toggle aria-label="Show password"><i class="fa-solid fa-eye"></i></button>
       </div>
+      <?= $loginFieldError('password') ?>
       <div class="d-flex justify-content-between align-items-center mb-3">
         <label class="small"><input type="checkbox" name="remember"> Remember me</label>
         <a class="small fw-bold" href="forgot_password.php">Forgot password?</a>

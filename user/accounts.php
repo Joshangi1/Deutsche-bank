@@ -36,6 +36,7 @@ $accountOptions = in_array($region, ['us', 'ca'], true)
     </div>
     <i class="fa-solid fa-layer-group"></i>
 </div>
+<?= deposit_protection_badge($user, $primary, 'mb-4') ?>
 <div class="row g-4">
     <div class="col-xl-8">
         <div class="row g-3">

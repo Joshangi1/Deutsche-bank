@@ -47,6 +47,62 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    document.querySelectorAll('[data-auth-validation]').forEach(form => {
+        const errorNode = field => {
+            const secureInput = field.closest('.secure-input');
+            let node = secureInput ? secureInput.nextElementSibling : field.nextElementSibling;
+            if (!node) {
+                node = document.createElement('div');
+                node.className = 'field-error';
+                secureInput ? secureInput.after(node) : field.after(node);
+            } else if (!node.classList.contains('field-error')) {
+                const created = document.createElement('div');
+                created.className = 'field-error';
+                node.before(created);
+                node = created;
+            }
+            return node;
+        };
+        const messageFor = field => {
+            const value = field.value.trim();
+            if (field.required && !value) return field.name === 'password' ? 'Enter your password.' : 'Enter a valid email address.';
+            if (field.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Enter a valid email address.';
+            return '';
+        };
+        const validate = (field, quiet = false) => {
+            const message = messageFor(field);
+            if (message) {
+                if (!quiet || field.dataset.touched === '1') {
+                    field.classList.add('is-invalid');
+                    const node = errorNode(field);
+                    if (node) node.textContent = message;
+                }
+                return false;
+            }
+            field.classList.remove('is-invalid');
+            const node = errorNode(field);
+            if (node) node.textContent = '';
+            return true;
+        };
+        form.querySelectorAll('input[required]').forEach(field => {
+            field.addEventListener('blur', () => {
+                field.dataset.touched = '1';
+                validate(field);
+            });
+            field.addEventListener('input', () => validate(field, true));
+        });
+        form.addEventListener('submit', event => {
+            let firstInvalid = null;
+            form.querySelectorAll('input[required]').forEach(field => {
+                if (!validate(field) && !firstInvalid) firstInvalid = field;
+            });
+            if (firstInvalid) {
+                event.preventDefault();
+                firstInvalid.focus();
+            }
+        });
+    });
+
     document.querySelectorAll('[data-toggle-sidebar]').forEach(btn => {
         btn.addEventListener('click', () => document.querySelector('.sidebar')?.classList.toggle('open'));
     });
