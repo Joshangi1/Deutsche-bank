@@ -24,9 +24,10 @@ function deposit_protection_config_for_user(array $user, ?array $account = null)
     $configPath = __DIR__ . '/../config/deposit_protection.php';
     $config = is_file($configPath) ? require $configPath : [];
     $default = $config['default'] ?? [
-        'agency' => 'Protected Deposits',
-        'name' => 'Applicable National Banking Regulations',
-        'text' => 'Deposits may be protected under applicable national banking and financial regulations.',
+        'enabled' => false,
+        'agency' => 'Account Protection',
+        'name' => 'Security & Account Disclosures',
+        'text' => 'Account protection and regulatory disclosures depend on your selected country and account type. Please review the applicable terms and disclosures.',
     ];
     $countries = is_array($config['countries'] ?? null) ? $config['countries'] : [];
 
@@ -49,7 +50,8 @@ function deposit_protection_config_for_user(array $user, ?array $account = null)
         $matchesProfileCountry = $country !== '' && in_array($country, $aliases, true);
         $matchesFallbackRegion = $country === '' && $region === strtolower((string) $key);
         if ($matchesProfileCountry || $matchesFallbackRegion) {
-            return array_merge($default, $item, ['key' => (string) $key]);
+            $candidate = array_merge($default, $item, ['key' => (string) $key]);
+            return !empty($candidate['enabled']) ? $candidate : array_merge($default, ['key' => 'default']);
         }
     }
 
@@ -59,7 +61,7 @@ function deposit_protection_config_for_user(array $user, ?array $account = null)
 function deposit_protection_badge(array $user, ?array $account = null, string $className = ''): string
 {
     $protection = deposit_protection_config_for_user($user, $account);
-    $classes = trim('deposit-protection-badge ' . $className);
+    $classes = trim('deposit-protection-badge ' . (!empty($protection['enabled']) ? 'is-verified-agency ' : 'is-neutral-disclosure ') . $className);
     return '<section class="' . e($classes) . '" aria-label="Deposit protection information">'
         . '<div class="deposit-protection-agency">' . e((string) $protection['agency']) . '</div>'
         . '<div class="deposit-protection-copy"><strong>' . e((string) $protection['name']) . '</strong><p>' . e((string) $protection['text']) . '</p></div>'
