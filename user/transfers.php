@@ -92,6 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $review = $_SESSION['transfer_review'] ?? null;
 ?>
 <?php include __DIR__ . '/../includes/user_header.php'; ?>
+<?= deposit_protection_badge($user, $account, 'mb-4') ?>
 <div class="row g-4">
     <div class="col-lg-7">
         <form class="premium-card p-4" method="post">

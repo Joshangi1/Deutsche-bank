@@ -145,6 +145,7 @@ $newAccountCards = in_array($bankingRegion, ['us', 'ca', 'uk'], true) ? [
 <?php if ($isNewAccount): ?>
 <div class="banking-hero mb-4"><div><div class="eyebrow"><?= e($ui['hero_eyebrow']) ?></div><h2><?= e($ui['hero_title']) ?></h2><p><?= e($ui['hero_copy']) ?></p></div><i class="fa-solid fa-circle-check"></i></div>
 <?php endif; ?>
+<?= deposit_protection_badge($user, $account, 'mb-4') ?>
 <div class="row g-4 dashboard-grid">
     <div class="col-xl-8 dashboard-balance-section">
         <div class="balance-card">

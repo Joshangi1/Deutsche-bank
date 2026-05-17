@@ -21,6 +21,7 @@ $editableSettings = [
     'support_email' => 'Support email',
     'footer_summary' => 'Footer summary',
     'announcement' => 'Member announcement',
+    'deposit_protection_overrides' => 'Deposit protection country overrides (JSON)',
     'theme_navy' => 'Primary dark color',
     'theme_gold' => 'Blue accent color',
 ];
@@ -50,10 +51,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
     <div class="row g-3">
         <?php foreach ($editableSettings as $key => $label): ?>
-            <div class="<?= in_array($key, ['home_hero_subtitle','home_services_copy','contact_intro','footer_summary','announcement'], true) ? 'col-12' : 'col-md-6' ?>">
+            <div class="<?= in_array($key, ['home_hero_subtitle','home_services_copy','contact_intro','footer_summary','announcement','deposit_protection_overrides'], true) ? 'col-12' : 'col-md-6' ?>">
                 <label class="form-label"><?= e($label) ?></label>
-                <?php if (in_array($key, ['home_hero_subtitle','home_services_copy','contact_intro','footer_summary','announcement'], true)): ?>
-                    <textarea name="<?= e($key) ?>" class="form-control" rows="3"><?= e(setting($key)) ?></textarea>
+                <?php if (in_array($key, ['home_hero_subtitle','home_services_copy','contact_intro','footer_summary','announcement','deposit_protection_overrides'], true)): ?>
+                    <textarea name="<?= e($key) ?>" class="form-control" rows="<?= $key === 'deposit_protection_overrides' ? 5 : 3 ?>" placeholder="<?= $key === 'deposit_protection_overrides' ? e('{"us":{"agency":"FDIC","name":"Federal Deposit Insurance Corporation","text":"Custom wording"}}') : '' ?>"><?= e(setting($key)) ?></textarea>
+                    <?php if ($key === 'deposit_protection_overrides'): ?><div class="small muted mt-2">Optional. Leave blank to use config/deposit_protection.php.</div><?php endif; ?>
                 <?php elseif (str_ends_with($key, '_color') || str_starts_with($key, 'theme_')): ?>
                     <input name="<?= e($key) ?>" type="color" class="form-control form-control-color" value="<?= e(setting($key, '#071b35')) ?>">
                 <?php else: ?>

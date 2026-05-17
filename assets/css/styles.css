@@ -1987,3 +1987,80 @@ body { top: 0 !important; }
   background: rgba(220, 80, 70, 0.12);
   color: #ff9a9a;
 }
+
+/* Clean inline validation for signup/onboarding forms */
+.form-control.is-invalid,
+.form-select.is-invalid,
+.secure-input .form-control.is-invalid,
+.verification-ready.is-invalid {
+  border-color: rgba(196, 49, 49, 0.55) !important;
+  box-shadow: 0 0 0 3px rgba(196, 49, 49, 0.08) !important;
+}
+.field-error {
+  margin-top: 6px;
+  color: #b42331;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+.input-group + .field-error,
+.secure-input + .field-error {
+  margin-top: 7px;
+}
+.verification-ready.is-invalid {
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.deposit-protection-badge {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 8px;
+  background: linear-gradient(135deg, #ffffff 0%, #f5f7fb 100%);
+  padding: 1rem 1.15rem;
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.07);
+}
+.deposit-protection-agency {
+  flex: 0 0 auto;
+  min-width: 126px;
+  border-right: 1px solid rgba(15, 23, 42, 0.12);
+  padding-right: 1rem;
+  color: var(--lead-blue);
+  font-size: 2.15rem;
+  line-height: 1;
+  font-weight: 850;
+  letter-spacing: 0;
+}
+.deposit-protection-copy strong {
+  display: block;
+  color: var(--ink);
+  font-size: .9rem;
+  font-weight: 820;
+  margin-bottom: .2rem;
+}
+.deposit-protection-copy p {
+  margin: 0;
+  color: var(--muted);
+  font-size: .88rem;
+  line-height: 1.45;
+}
+
+@media (max-width: 640px) {
+  .deposit-protection-badge {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: .65rem;
+    padding: .95rem;
+  }
+  .deposit-protection-agency {
+    min-width: 0;
+    width: 100%;
+    border-right: 0;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.12);
+    padding-right: 0;
+    padding-bottom: .65rem;
+    font-size: 1.8rem;
+  }
+}

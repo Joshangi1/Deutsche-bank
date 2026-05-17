@@ -640,6 +640,7 @@ INSERT INTO `settings` (`setting_key`, `setting_value`) VALUES
 ('support_email', 'support@deutsche.local'),
 ('footer_summary', 'Secure online banking tools for modern account management.'),
 ('announcement', ''),
+('deposit_protection_overrides', ''),
 ('theme_navy', '#111827'),
 ('theme_gold', '#0018a8')
 ON DUPLICATE KEY UPDATE `setting_value` = VALUES(`setting_value`);

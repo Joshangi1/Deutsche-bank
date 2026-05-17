@@ -44,6 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 <?php include __DIR__ . '/../includes/user_header.php'; ?>
+<?= deposit_protection_badge($user, user_account((int) $user['id']), 'mb-4') ?>
 <div class="row g-4">
     <div class="col-lg-6">
         <form class="premium-card p-4" method="post" enctype="multipart/form-data">

@@ -19,6 +19,53 @@ function lead_nav_item(string $href, string $icon, string $label, bool $active =
     return '<a class="' . e($classes) . '" href="' . e($url) . '"' . $attrs . '><i class="fa-solid ' . e($icon) . '"></i><span>' . e($label) . '</span>' . $lock . '</a>';
 }
 
+function deposit_protection_config_for_user(array $user, ?array $account = null): array
+{
+    $configPath = __DIR__ . '/../config/deposit_protection.php';
+    $config = is_file($configPath) ? require $configPath : [];
+    $default = $config['default'] ?? [
+        'agency' => 'Protected Deposits',
+        'name' => 'Applicable National Banking Regulations',
+        'text' => 'Deposits may be protected under applicable national banking and financial regulations.',
+    ];
+    $countries = is_array($config['countries'] ?? null) ? $config['countries'] : [];
+
+    $overrideJson = setting('deposit_protection_overrides', '');
+    if ($overrideJson !== '') {
+        $overrides = json_decode($overrideJson, true);
+        if (is_array($overrides)) {
+            foreach ($overrides as $key => $value) {
+                if (is_array($value)) {
+                    $countries[strtolower((string) $key)] = array_merge($countries[strtolower((string) $key)] ?? [], $value);
+                }
+            }
+        }
+    }
+
+    $country = strtolower(trim((string) ($user['country'] ?? '')));
+    $region = user_banking_region($user, $account);
+    foreach ($countries as $key => $item) {
+        $aliases = array_map('strtolower', array_merge([(string) $key], $item['aliases'] ?? []));
+        $matchesProfileCountry = $country !== '' && in_array($country, $aliases, true);
+        $matchesFallbackRegion = $country === '' && $region === strtolower((string) $key);
+        if ($matchesProfileCountry || $matchesFallbackRegion) {
+            return array_merge($default, $item, ['key' => (string) $key]);
+        }
+    }
+
+    return array_merge($default, ['key' => 'default']);
+}
+
+function deposit_protection_badge(array $user, ?array $account = null, string $className = ''): string
+{
+    $protection = deposit_protection_config_for_user($user, $account);
+    $classes = trim('deposit-protection-badge ' . $className);
+    return '<section class="' . e($classes) . '" aria-label="Deposit protection information">'
+        . '<div class="deposit-protection-agency">' . e((string) $protection['agency']) . '</div>'
+        . '<div class="deposit-protection-copy"><strong>' . e((string) $protection['name']) . '</strong><p>' . e((string) $protection['text']) . '</p></div>'
+        . '</section>';
+}
+
 function google_translate_widget(): string
 {
     return '<label class="translate-widget" aria-label="Language selector"><i class="fa-solid fa-language" aria-hidden="true"></i><select class="language-select" data-language-select><option value="en">English</option><option value="fr">French</option><option value="es">Spanish</option><option value="it">Italian</option><option value="pt">Portuguese</option><option value="nl">Dutch</option><option value="tr">Turkish</option><option value="ar">Arabic</option><option value="hi">Hindi</option><option value="zh-CN">Chinese</option></select></label>';
