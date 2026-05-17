@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deutsche Bank — Dashboard (Mobile Fix)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+/* ============================================================
+   DEUTSCHE BANK — MOBILE DASHBOARD FIX
+   Drop this CSS into your existing stylesheet, replacing any
+   conflicting mobile header/sidebar rules.
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --db-navy:       #0a1628;
+  --db-navy-mid:   #0f2040;
+  --db-navy-light: #1a3560;
+  --db-blue:       #003d8f;
+  --db-gold:       #c8a55a;
+  --db-gold-light: #e6c97a;
+  --db-white:      #ffffff;
+  --db-off-white:  #f7f8fa;
+  --db-surface:    #eef1f6;
+  --db-text:       #0d1b2e;
+  --db-text-muted: #6b7a93;
+  --db-border:     rgba(10,22,40,0.10);
+  --db-success:    #1a8a4a;
+  --db-danger:     #c0392b;
+  --db-warning:    #c8830a;
+
+  --header-h: 64px;
+  --sidebar-w: 280px;
+  --font: 'Manrope', 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --shadow-card: 0 2px 12px rgba(10,22,40,0.08), 0 1px 3px rgba(10,22,40,0.05);
+  --shadow-sidebar: 4px 0 40px rgba(10,22,40,0.35);
+}
+
+html, body {
+  font-family: var(--font);
+  background: var(--db-off-white);
+  color: var(--db-text);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* ============================================================
+   STACKING CONTEXT — THE CORE FIX
+   Sidebar must be z-index: 1000+
+   Header must be z-index: 100 (BELOW sidebar)
+   Overlay must be z-index: 999 (between page & sidebar)
+   ============================================================ */
+
+/* SIDEBAR — TOP LAYER */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-w);
+  height: 100vh;
+  background: var(--db-navy);
+  z-index: 1000;                /* ABOVE everything */
+  transform: translateX(-100%);
+  transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sidebar.open {
+  transform: translateX(0);
+  box-shadow: var(--shadow-sidebar);
+}
+
+/* OVERLAY — below sidebar, above everything else */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(10,22,40,0.55);
+  z-index: 999;                 /* BELOW sidebar, ABOVE header+content */
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  opacity: 0;
+  transition: opacity 0.32s ease;
+}
+.sidebar-overlay.active {
+  display: block;
+  opacity: 1;
+}
+
+/* HEADER — BELOW sidebar overlay */
+.top-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--header-h);
+  background: var(--db-white);
+  border-bottom: 1px solid var(--db-border);
+  z-index: 100;                 /* BELOW sidebar & overlay */
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+}
+
+/* Page content shifts down below header */
+.page-body {
+  padding-top: calc(var(--header-h) + 20px);
+  padding-bottom: 40px;
+  min-height: 100vh;
+}
+
+/* ============================================================
+   TOP HEADER — CLEAN LAYOUT (5 elements only)
+   [hamburger] [bank title] [account overview] ... [notif] [avatar]
+   ============================================================ */
+
+.header-hamburger {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  color: var(--db-navy);
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.header-hamburger:hover { background: var(--db-surface); }
+.header-hamburger i { font-size: 18px; }
+
+.header-brand {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  gap: 1px;
+}
+.header-brand-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--db-navy);
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+.header-brand-sub {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--db-text-muted);
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.header-icon-btn {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 50%;
+  color: var(--db-navy);
+  position: relative;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.header-icon-btn:hover { background: var(--db-surface); }
+.header-icon-btn i { font-size: 17px; }
+
+.notif-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  background: #c0392b;
+  border-radius: 50%;
+  border: 2px solid var(--db-white);
+}
+
+/* Profile avatar in header */
+.header-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--db-gold);
+  flex-shrink: 0;
+  display: block;
+  cursor: pointer;
+}
+.header-avatar-placeholder {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--db-navy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--db-gold);
+  border: 2px solid var(--db-gold);
+  flex-shrink: 0;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+}
+
+/* ============================================================
+   SIDEBAR INTERIOR
+   ============================================================ */
+
+.sidebar-header {
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.sidebar-logo {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--db-white);
+  letter-spacing: -0.5px;
+}
+.sidebar-logo span { color: var(--db-gold); }
+.sidebar-close {
+  margin-left: auto;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: rgba(255,255,255,0.08);
+  border-radius: 50%;
+  cursor: pointer;
+  color: rgba(255,255,255,0.7);
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.sidebar-close:hover { background: rgba(255,255,255,0.15); color: var(--db-white); }
+.sidebar-close i { font-size: 14px; }
+
+.sidebar-user {
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sidebar-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--db-gold);
+  flex-shrink: 0;
+}
+.sidebar-avatar-placeholder {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(200,165,90,0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--db-gold);
+  border: 2px solid rgba(200,165,90,0.4);
+  flex-shrink: 0;
+}
+.sidebar-user-info { min-width: 0; }
+.sidebar-user-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--db-white);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+.sidebar-user-role {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-top: 2px;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 16px 0;
+  overflow-y: auto;
+}
+
+.sidebar-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
+  padding: 8px 24px 6px;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  color: rgba(255,255,255,0.72);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+  border-left: 3px solid transparent;
+}
+.sidebar-link i {
+  font-size: 16px;
+  width: 20px;
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+.sidebar-link:hover {
+  background: rgba(255,255,255,0.06);
+  color: var(--db-white);
+}
+.sidebar-link.active {
+  background: rgba(200,165,90,0.12);
+  color: var(--db-gold-light);
+  border-left-color: var(--db-gold);
+}
+.sidebar-link.active i { opacity: 1; }
+
+.sidebar-footer {
+  padding: 16px 0 32px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+.sidebar-signout {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  color: rgba(220,80,70,0.85);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+  width: 100%;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+}
+.sidebar-signout i { font-size: 16px; width: 20px; flex-shrink: 0; }
+.sidebar-signout:hover {
+  background: rgba(220,80,70,0.1);
+  color: #e55d5d;
+}
+
+/* ============================================================
+   DASHBOARD CONTENT
+   ============================================================ */
+
+.dash-container {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.balance-card {
+  background: var(--db-navy);
+  border-radius: var(--radius-lg);
+  padding: 24px 20px 20px;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.balance-card::before {
+  content: '';
+  position: absolute;
+  top: -60px;
+  right: -60px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: rgba(200,165,90,0.07);
+}
+.balance-card::after {
+  content: '';
+  position: absolute;
+  bottom: -40px;
+  left: -30px;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: rgba(0,61,143,0.3);
+}
+.balance-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+  margin-bottom: 8px;
+}
+.balance-amount {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--db-white);
+  letter-spacing: -1px;
+  line-height: 1.1;
+  margin-bottom: 20px;
+}
+.balance-amount span {
+  font-size: 20px;
+  font-weight: 500;
+  opacity: 0.7;
+  margin-right: 4px;
+}
+.balance-meta {
+  display: flex;
+  gap: 24px;
+  position: relative;
+  z-index: 1;
+}
+.balance-meta-item label {
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 3px;
+}
+.balance-meta-item strong {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.85);
+}
+.balance-action {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+.btn-gold {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 18px;
+  background: var(--db-gold);
+  color: var(--db-navy);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  letter-spacing: 0.2px;
+  text-decoration: none;
+  transition: background 0.15s, transform 0.1s;
+}
+.btn-gold:hover { background: var(--db-gold-light); }
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 16px;
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.85);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.btn-ghost:hover { background: rgba(255,255,255,0.16); }
+
+/* Quick actions */
+.section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--db-text);
+  letter-spacing: -0.2px;
+  margin-bottom: 12px;
+  margin-top: 4px;
+}
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.quick-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  text-decoration: none;
+  color: var(--db-text);
+}
+.quick-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
+  background: var(--db-white);
+  border: 1px solid var(--db-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+  color: var(--db-navy);
+  transition: background 0.15s, transform 0.1s;
+}
+.quick-item:hover .quick-icon {
+  background: var(--db-surface);
+  transform: translateY(-1px);
+}
+.quick-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--db-text-muted);
+  letter-spacing: 0.2px;
+  line-height: 1.3;
+}
+
+/* Virtual card */
+.virtual-card {
+  background: linear-gradient(135deg, var(--db-navy-mid) 0%, var(--db-navy-light) 100%);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1.586;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.virtual-card::before {
+  content: '';
+  position: absolute;
+  top: -30px; right: -30px;
+  width: 140px; height: 140px;
+  border-radius: 50%;
+  background: rgba(200,165,90,0.12);
+}
+.card-top { display: flex; justify-content: space-between; align-items: flex-start; position: relative; z-index: 1; }
+.card-bank-name { font-size: 15px; font-weight: 800; color: var(--db-white); letter-spacing: -0.3px; }
+.card-chip {
+  width: 32px; height: 24px;
+  background: linear-gradient(135deg, var(--db-gold) 0%, var(--db-gold-light) 100%);
+  border-radius: 5px;
+  position: relative;
+}
+.card-chip::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 14px; height: 10px;
+  border: 1.5px solid rgba(10,22,40,0.35);
+  border-radius: 2px;
+}
+.card-number { font-size: 16px; font-weight: 600; color: rgba(255,255,255,0.9); letter-spacing: 3px; position: relative; z-index: 1; font-variant-numeric: tabular-nums; }
+.card-bottom { display: flex; justify-content: space-between; align-items: flex-end; position: relative; z-index: 1; }
+.card-holder-label { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 2px; }
+.card-holder-name { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.9); letter-spacing: 0.5px; }
+.card-status { font-size: 11px; font-weight: 600; color: var(--db-gold); letter-spacing: 1px; text-transform: uppercase; }
+.card-visa { font-size: 22px; font-weight: 900; color: var(--db-white); font-style: italic; letter-spacing: -1px; opacity: 0.9; }
+
+/* Transaction list */
+.section-card {
+  background: var(--db-white);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--db-border);
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.section-card-header {
+  padding: 16px 18px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--db-border);
+}
+.section-card-title { font-size: 14px; font-weight: 700; color: var(--db-text); }
+.section-card-link { font-size: 12px; font-weight: 600; color: var(--db-blue); text-decoration: none; }
+
+.tx-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--db-border);
+}
+.tx-row:last-child { border-bottom: none; }
+.tx-icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--db-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  color: var(--db-navy);
+  flex-shrink: 0;
+}
+.tx-icon-wrap.credit { background: #edf7f0; color: #1a8a4a; }
+.tx-body { flex: 1; min-width: 0; }
+.tx-desc { font-size: 13px; font-weight: 600; color: var(--db-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tx-date { font-size: 11px; color: var(--db-text-muted); margin-top: 2px; }
+.tx-amount { font-size: 14px; font-weight: 700; flex-shrink: 0; }
+.tx-amount.credit { color: var(--db-success); }
+.tx-amount.debit { color: var(--db-text); }
+
+/* Status pills */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.status-success { background: #edf7f0; color: #1a6b3a; }
+.status-warning { background: #fdf3e0; color: #8a5e0a; }
+.status-info    { background: #e6f1fb; color: #0c447c; }
+.status-danger  { background: #fce8e8; color: #8a1c1c; }
+
+/* Account details strip */
+.account-strip {
+  background: var(--db-white);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--db-border);
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.account-strip-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.account-strip-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--db-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.account-strip-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--db-text);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.2px;
+}
+
+/* ============================================================
+   DEMO CONTROLS (remove in production)
+   ============================================================ */
+.demo-bar {
+  background: #1a3560;
+  color: rgba(255,255,255,0.7);
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 8px 16px;
+  letter-spacing: 0.5px;
+}
+
+/* Smooth sidebar animation */
+body.sidebar-open { overflow: hidden; }
+</style>
+</head>
+<body>
+
+<div class="demo-bar">📱 MOBILE DASHBOARD — resize to 360–414px to preview</div>
+
+<!-- ============================================================
+     SIDEBAR — z-index: 1000 — TOP LAYER
+     When hamburger opens: sidebar slides over EVERYTHING
+     ============================================================ -->
+<aside class="sidebar" id="sidebar" aria-label="Navigation menu" role="dialog" aria-modal="true">
+
+  <div class="sidebar-header">
+    <div class="sidebar-logo">Deutsche<span>Bank</span></div>
+    <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+
+  <div class="sidebar-user">
+    <div class="sidebar-avatar-placeholder">JD</div>
+    <div class="sidebar-user-info">
+      <div class="sidebar-user-name">John Doe</div>
+      <div class="sidebar-user-role">Personal · EUR Account</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav" aria-label="Main navigation">
+    <div class="sidebar-section-label">Overview</div>
+    <a href="dashboard.php" class="sidebar-link active" aria-current="page">
+      <i class="fa-solid fa-grid-2" aria-hidden="true"></i>Dashboard
+    </a>
+    <a href="user/accounts.php" class="sidebar-link">
+      <i class="fa-solid fa-layer-group" aria-hidden="true"></i>Accounts
+    </a>
+
+    <div class="sidebar-section-label">Payments</div>
+    <a href="user/transfers.php" class="sidebar-link">
+      <i class="fa-solid fa-arrow-right-arrow-left" aria-hidden="true"></i>SEPA Transfer
+    </a>
+    <a href="user/send_money.php" class="sidebar-link">
+      <i class="fa-solid fa-bolt" aria-hidden="true"></i>Send Money
+    </a>
+    <a href="user/bill_pay.php" class="sidebar-link">
+      <i class="fa-solid fa-calendar-check" aria-hidden="true"></i>Bill Payments
+    </a>
+    <a href="user/ach_transfers.php" class="sidebar-link">
+      <i class="fa-solid fa-building-columns" aria-hidden="true"></i>Bank Transfer
+    </a>
+
+    <div class="sidebar-section-label">Cards &amp; Loans</div>
+    <a href="cards.php" class="sidebar-link">
+      <i class="fa-solid fa-credit-card" aria-hidden="true"></i>My Cards
+    </a>
+    <a href="user/linked_accounts.php" class="sidebar-link">
+      <i class="fa-solid fa-link" aria-hidden="true"></i>Link Card
+    </a>
+    <a href="loans.php" class="sidebar-link">
+      <i class="fa-solid fa-hand-holding-dollar" aria-hidden="true"></i>Loans
+    </a>
+
+    <div class="sidebar-section-label">Account</div>
+    <a href="user/transactions.php" class="sidebar-link">
+      <i class="fa-solid fa-receipt" aria-hidden="true"></i>Statements
+    </a>
+    <a href="security.php" class="sidebar-link">
+      <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>Security
+    </a>
+    <a href="support.php" class="sidebar-link">
+      <i class="fa-solid fa-headset" aria-hidden="true"></i>Support
+    </a>
+  </nav>
+
+  <!-- Sign out at very bottom — red, with divider -->
+  <div class="sidebar-footer">
+    <a href="logout.php" class="sidebar-signout">
+      <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>Sign Out
+    </a>
+  </div>
+</aside>
+
+<!-- OVERLAY — z-index: 999 — between sidebar and page content -->
+<div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
+
+<!-- ============================================================
+     TOP HEADER — z-index: 100 — BELOW sidebar & overlay
+     Only 5 elements: hamburger | brand+subtitle | notif | avatar
+     ============================================================ -->
+<header class="top-header" role="banner">
+  <button class="header-hamburger" id="hamburgerBtn" aria-label="Open navigation menu" aria-expanded="false" aria-controls="sidebar">
+    <i class="fa-solid fa-bars" aria-hidden="true"></i>
+  </button>
+
+  <div class="header-brand">
+    <span class="header-brand-name">Deutsche Bank</span>
+    <span class="header-brand-sub">Account Overview</span>
+  </div>
+
+  <div class="header-actions">
+    <button class="header-icon-btn" aria-label="Notifications">
+      <i class="fa-regular fa-bell" aria-hidden="true"></i>
+      <span class="notif-badge" aria-hidden="true"></span>
+    </button>
+    <!-- Profile avatar — NO sign out here, NO language icon -->
+    <div class="header-avatar-placeholder" role="img" aria-label="Profile: John Doe">JD</div>
+  </div>
+</header>
+
+<!-- ============================================================
+     PAGE CONTENT — sits below header, behind sidebar when open
+     ============================================================ -->
+<main class="page-body" id="mainContent">
+  <div class="dash-container">
+
+    <!-- Balance card -->
+    <div class="balance-card" role="region" aria-label="Account balance">
+      <div class="balance-eyebrow">Available Balance</div>
+      <div class="balance-amount"><span>€</span>24,830.00</div>
+      <div class="balance-meta">
+        <div class="balance-meta-item">
+          <label>Pending</label>
+          <strong>€340.00</strong>
+        </div>
+        <div class="balance-meta-item">
+          <label>Savings</label>
+          <strong>€8,200.00</strong>
+        </div>
+        <div class="balance-meta-item">
+          <label>Status</label>
+          <strong style="color:var(--db-gold)">Active</strong>
+        </div>
+      </div>
+      <div class="balance-action">
+        <a href="user/transfers.php" class="btn-gold">
+          <i class="fa-solid fa-arrow-right-arrow-left" aria-hidden="true"></i>SEPA Transfer
+        </a>
+        <a href="user/send_money.php" class="btn-ghost">
+          <i class="fa-solid fa-bolt" aria-hidden="true"></i>Send
+        </a>
+      </div>
+    </div>
+
+    <!-- Quick actions -->
+    <div class="section-title">Quick Access</div>
+    <div class="quick-grid" role="list">
+      <a href="user/accounts.php" class="quick-item" role="listitem">
+        <div class="quick-icon"><i class="fa-solid fa-layer-group" aria-hidden="true"></i></div>
+        <span class="quick-label">Accounts</span>
+      </a>
+      <a href="user/send_money.php" class="quick-item" role="listitem">
+        <div class="quick-icon"><i class="fa-solid fa-bolt" aria-hidden="true"></i></div>
+        <span class="quick-label">Send</span>
+      </a>
+      <a href="user/bill_pay.php" class="quick-item" role="listitem">
+        <div class="quick-icon"><i class="fa-solid fa-calendar-check" aria-hidden="true"></i></div>
+        <span class="quick-label">Bills</span>
+      </a>
+      <a href="loans.php" class="quick-item" role="listitem">
+        <div class="quick-icon"><i class="fa-solid fa-hand-holding-dollar" aria-hidden="true"></i></div>
+        <span class="quick-label">Loans</span>
+      </a>
+    </div>
+
+    <!-- Virtual card -->
+    <div class="section-title">My Card</div>
+    <div class="virtual-card" role="region" aria-label="Virtual debit card">
+      <div class="card-top">
+        <div class="card-bank-name">Deutsche</div>
+        <div class="card-chip" aria-hidden="true"></div>
+      </div>
+      <div class="card-number" aria-label="Card number ending 4582">4582 **** **** 4582</div>
+      <div class="card-bottom">
+        <div>
+          <div class="card-holder-label">Card Holder</div>
+          <div class="card-holder-name">JOHN DOE</div>
+        </div>
+        <div style="text-align:right">
+          <div class="card-status">Active</div>
+          <div class="card-visa">VISA</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Account details -->
+    <div class="account-strip" role="region" aria-label="Account details">
+      <div class="account-strip-row">
+        <span class="account-strip-label">Account Type</span>
+        <span class="account-strip-value">Current Account</span>
+      </div>
+      <div class="account-strip-row">
+        <span class="account-strip-label">IBAN</span>
+        <span class="account-strip-value">DE89 3704 0044 0532 0130 00</span>
+      </div>
+      <div class="account-strip-row">
+        <span class="account-strip-label">BIC / SWIFT</span>
+        <span class="account-strip-value">DEUTDEDB</span>
+      </div>
+    </div>
+
+    <!-- Recent transactions -->
+    <div class="section-card" role="region" aria-label="Recent transactions">
+      <div class="section-card-header">
+        <span class="section-card-title">Recent Transactions</span>
+        <a href="user/transactions.php" class="section-card-link">View all</a>
+      </div>
+      <div class="tx-row">
+        <div class="tx-icon-wrap credit"><i class="fa-solid fa-arrow-down" aria-hidden="true"></i></div>
+        <div class="tx-body">
+          <div class="tx-desc">Salary — Employer GmbH</div>
+          <div class="tx-date">15 May · Income</div>
+        </div>
+        <div class="tx-amount credit">+€3,400.00</div>
+      </div>
+      <div class="tx-row">
+        <div class="tx-icon-wrap"><i class="fa-solid fa-bolt" aria-hidden="true"></i></div>
+        <div class="tx-body">
+          <div class="tx-desc">Electricity — Vattenfall</div>
+          <div class="tx-date">13 May · Utilities</div>
+        </div>
+        <div class="tx-amount debit">−€89.50</div>
+      </div>
+      <div class="tx-row">
+        <div class="tx-icon-wrap"><i class="fa-solid fa-cart-shopping" aria-hidden="true"></i></div>
+        <div class="tx-body">
+          <div class="tx-desc">REWE Supermarkt</div>
+          <div class="tx-date">12 May · Groceries</div>
+        </div>
+        <div class="tx-amount debit">−€54.30</div>
+      </div>
+      <div class="tx-row">
+        <div class="tx-icon-wrap"><i class="fa-solid fa-wifi" aria-hidden="true"></i></div>
+        <div class="tx-body">
+          <div class="tx-desc">Netflix — Subscription</div>
+          <div class="tx-date">10 May · Entertainment</div>
+        </div>
+        <div class="tx-amount debit">−€15.99</div>
+      </div>
+    </div>
+
+  </div><!-- /.dash-container -->
+</main>
+
+<!-- ============================================================
+     JAVASCRIPT — Sidebar toggle
+     Correct stacking: sidebar z:1000 overlay z:999 header z:100
+     ============================================================ -->
+<script>
+(function() {
+  const sidebar   = document.getElementById('sidebar');
+  const overlay   = document.getElementById('sidebarOverlay');
+  const openBtn   = document.getElementById('hamburgerBtn');
+  const closeBtn  = document.getElementById('sidebarClose');
+  const body      = document.body;
+
+  function openSidebar() {
+    sidebar.classList.add('open');
+    overlay.classList.add('active');
+    body.classList.add('sidebar-open');
+    openBtn.setAttribute('aria-expanded', 'true');
+    overlay.setAttribute('aria-hidden', 'false');
+    closeBtn.focus();
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('active');
+    body.classList.remove('sidebar-open');
+    openBtn.setAttribute('aria-expanded', 'false');
+    overlay.setAttribute('aria-hidden', 'true');
+    openBtn.focus();
+  }
+
+  openBtn.addEventListener('click', openSidebar);
+  closeBtn.addEventListener('click', closeSidebar);
+  overlay.addEventListener('click', closeSidebar);
+
+  // Escape key closes sidebar
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && sidebar.classList.contains('open')) {
+      closeSidebar();
+    }
+  });
+
+  // Trap focus inside sidebar when open
+  sidebar.addEventListener('keydown', function(e) {
+    if (e.key !== 'Tab') return;
+    const focusable = sidebar.querySelectorAll('a, button, [tabindex]:not([tabindex="-1"])');
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey) {
+      if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+    } else {
+      if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
