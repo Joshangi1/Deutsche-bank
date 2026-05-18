@@ -181,10 +181,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const codeTimer = document.querySelector('[data-code-timer]');
     if (codeTimer) {
         let seconds = Number(codeTimer.dataset.codeTimer || 300);
+        const resendButton = document.querySelector('[data-resend-button]');
         const tick = () => {
             const m = String(Math.floor(seconds / 60)).padStart(2, '0');
             const s = String(seconds % 60).padStart(2, '0');
-            codeTimer.textContent = `${m}:${s}`;
+            codeTimer.textContent = seconds > 0 ? `${m}:${s}` : 'You can resend now';
+            if (resendButton) resendButton.disabled = seconds > 0;
             seconds = Math.max(0, seconds - 1);
         };
         tick();

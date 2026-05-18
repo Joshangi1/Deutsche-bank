@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/helpers.php';
+require_once __DIR__ . '/../config/brevo.php';
 $user = require_user();
 require_unrestricted_account($user);
 $account = user_account((int) $user['id']);
@@ -44,6 +45,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['confirm_payment'])) {
         $review = $_SESSION['instant_payment_review'] ?? null;
         if ($review && verify_transaction_pin($user, (string) $_POST['transaction_pin'])) {
+            $otpContext = hash('sha256', 'send_money|' . (int) $user['id'] . '|' . json_encode($review));
+            $otpVerified = ($_SESSION['transfer_otp_verified_context'] ?? '') === $otpContext && (time() - (int) ($_SESSION['transfer_otp_verified_at'] ?? 0)) <= 600;
+            if (!$otpVerified) {
+                if (!is_valid_sms_phone((string) ($user['phone'] ?? ''))) {
+                    flash('danger', 'Add a valid phone number with country code before sending money.');
+                    header('Location: profile.php');
+                    exit;
+                }
+                $sent = sms_otp_create((int) $user['id'], (string) $user['phone'], 'transfer', 10);
+                if (($sent['ok'] ?? false) || isset($sent['retry_at'])) {
+                    $_SESSION['pending_transfer_context'] = $otpContext;
+                    $_SESSION['pending_transfer_return'] = 'user/send_money.php?review=1';
+                    flash('info', 'Enter the SMS verification code to continue this payment.');
+                    header('Location: ../otp_verify.php?purpose=transfer');
+                    exit;
+                }
+                flash('danger', (string) ($sent['error'] ?? 'SMS verification could not start. Try again.'));
+                header('Location: send_money.php?review=1');
+                exit;
+            }
             $recipientStmt = db()->prepare('SELECT * FROM payment_recipients WHERE user_id=? AND id=?');
             $recipientStmt->execute([$user['id'], (int) $review['recipient_id']]);
             $recipient = $recipientStmt->fetch();
@@ -67,6 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit;
             }
             unset($_SESSION['instant_payment_review']);
+            unset($_SESSION['transfer_otp_verified_at'], $_SESSION['transfer_otp_verified_context']);
             header('Location: send_money.php');
             exit;
         }

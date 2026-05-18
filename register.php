@@ -150,7 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             db()->beginTransaction();
             $pinHash = password_hash($transactionPin, PASSWORD_BCRYPT);
-            $stmt = db()->prepare('INSERT INTO users (first_name,last_name,email,phone,date_of_birth,ssn_last4,tax_id,iban,address_line1,address_line2,city,state_code,postal_code,country,employment_status,annual_income_range,verification_status,risk_status,password_hash,transaction_pin_hash,email_verified,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,"pending","verification_review",?,?,0,"active")');
+            $stmt = db()->prepare('INSERT INTO users (first_name,last_name,email,phone,date_of_birth,ssn_last4,tax_id,iban,address_line1,address_line2,city,state_code,postal_code,country,employment_status,annual_income_range,verification_status,risk_status,password_hash,transaction_pin_hash,email_verified,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,"pending","verification_review",?,?,0,"disabled")');
             $storedTaxId = $isUsOnboarding ? null : $taxId;
             $storedIban = $usesIbanOnboarding ? ($iban !== '' ? $iban : null) : null;
             $storedSsnLast4 = $isUsOnboarding ? substr($ssnDigits, -4) : substr($taxId, -4);
@@ -176,8 +176,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             banking_create_signup_bonus($userId, banking_actor('system'));
             create_customer_notification($userId, 'Account application received', 'Your account application was received and identity verification is pending.', 'info', 'security', 'normal');
             db()->commit();
-            flash('success', 'Account created successfully. Awaiting verification.');
-            header('Location: ' . $pageLoginUrl . '?email=' . urlencode($email));
+            $_SESSION['pending_signup_user_id'] = $userId;
+            $_SESSION['pending_signup_login_url'] = $pageLoginUrl;
+            $sent = sms_otp_create($userId, $phone, 'signup', 10);
+            flash(($sent['ok'] ?? false) || isset($sent['retry_at']) ? 'success' : 'danger', ($sent['ok'] ?? false) ? 'We sent an SMS verification code to your phone.' : ((string) ($sent['error'] ?? 'Your account was saved, but SMS verification could not be sent. Try resending the code.')));
+            header('Location: otp_verify.php?purpose=signup');
             exit;
         } catch (Throwable $e) {
             if (db()->inTransaction()) db()->rollBack();

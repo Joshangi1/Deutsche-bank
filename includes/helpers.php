@@ -120,6 +120,27 @@ function ensure_banking_schema(): void
             INDEX idx_security_events_user (user_id),
             CONSTRAINT security_events_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci',
+        'otp_verifications' => 'CREATE TABLE IF NOT EXISTS otp_verifications (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT DEFAULT NULL,
+            phone VARCHAR(40) NOT NULL,
+            purpose ENUM("signup","login","transfer") NOT NULL,
+            otp_hash VARCHAR(255) NOT NULL,
+            expires_at DATETIME NOT NULL,
+            verified_at DATETIME DEFAULT NULL,
+            attempts INT DEFAULT 0,
+            max_attempts INT DEFAULT 5,
+            resend_available_at DATETIME NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            ip_address VARCHAR(64) DEFAULT NULL,
+            user_agent VARCHAR(255) DEFAULT NULL,
+            send_status ENUM("sent","failed") DEFAULT "sent",
+            last_error VARCHAR(255) DEFAULT NULL,
+            INDEX idx_otp_user_purpose (user_id, purpose, created_at),
+            INDEX idx_otp_phone_purpose (phone, purpose, created_at),
+            INDEX idx_otp_expiry (expires_at),
+            CONSTRAINT otp_verifications_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci',
         'system_events' => 'CREATE TABLE IF NOT EXISTS system_events (
             id INT AUTO_INCREMENT PRIMARY KEY,
             event_type VARCHAR(100) NOT NULL,
@@ -358,6 +379,8 @@ function ensure_banking_schema(): void
         ['banking_payments', 'reviewed_by', 'ALTER TABLE banking_payments ADD COLUMN reviewed_by INT NULL AFTER proof_file'],
         ['banking_payments', 'reviewed_at', 'ALTER TABLE banking_payments ADD COLUMN reviewed_at DATETIME NULL AFTER reviewed_by'],
         ['banking_payments', 'transaction_id', 'ALTER TABLE banking_payments ADD COLUMN transaction_id INT NULL AFTER reviewed_at'],
+        ['otp_verifications', 'send_status', 'ALTER TABLE otp_verifications ADD COLUMN send_status ENUM("sent","failed") DEFAULT "sent" AFTER user_agent'],
+        ['otp_verifications', 'last_error', 'ALTER TABLE otp_verifications ADD COLUMN last_error VARCHAR(255) NULL AFTER send_status'],
     ];
     foreach ($columns as [$table, $column, $sql]) {
         $check = $pdo->prepare('SELECT COUNT(*) c FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?');

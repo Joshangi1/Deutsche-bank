@@ -1,48 +1,61 @@
 <?php
 declare(strict_types=1);
 
-$brevoLocal = is_file(__DIR__ . '/brevo.local.php') ? require __DIR__ . '/brevo.local.php' : [];
-if (!is_array($brevoLocal)) {
-    $brevoLocal = [];
+$smsLocal = is_file(__DIR__ . '/brevo.local.php') ? require __DIR__ . '/brevo.local.php' : [];
+if (!is_array($smsLocal)) {
+    $smsLocal = [];
 }
 
-function brevo_config(string $key, string $default = ''): string
+function sms_config(string $key, string $default = ''): string
 {
-    global $brevoLocal;
+    global $smsLocal;
     $envValue = getenv($key);
     if (is_string($envValue) && trim($envValue) !== '') {
         return trim($envValue);
     }
-    if (isset($brevoLocal[$key]) && is_scalar($brevoLocal[$key]) && trim((string) $brevoLocal[$key]) !== '') {
-        return trim((string) $brevoLocal[$key]);
+    if (isset($smsLocal[$key]) && is_scalar($smsLocal[$key]) && trim((string) $smsLocal[$key]) !== '') {
+        return trim((string) $smsLocal[$key]);
     }
     return $default;
 }
 
-define('BREVO_API_KEY', brevo_config('BREVO_API_KEY'));
-define('BREVO_FROM_NAME', brevo_config('BREVO_FROM_NAME', defined('APP_NAME') ? APP_NAME : 'Deutsche'));
-define('BREVO_SMS_SENDER', substr(preg_replace('/[^A-Za-z0-9]/', '', brevo_config('BREVO_SMS_SENDER', 'Deutsche')), 0, 11));
-$GLOBALS['brevo_sms_last_error'] = '';
+function brevo_config(string $key, string $default = ''): string
+{
+    return sms_config($key, $default);
+}
+
+define('SMS_API_KEY', sms_config('SMS_API_KEY', sms_config('BREVO_API_KEY')));
+define('SMS_API_SECRET', sms_config('SMS_API_SECRET'));
+define('SMS_SENDER_ID', substr(preg_replace('/[^A-Za-z0-9]/', '', sms_config('SMS_SENDER_ID', sms_config('BREVO_SMS_SENDER', 'Deutsche'))), 0, 11));
+define('SMS_BASE_URL', rtrim(sms_config('SMS_BASE_URL', 'https://api.brevo.com/v3/transactionalSMS/sms'), '/'));
+define('BREVO_API_KEY', SMS_API_KEY);
+define('BREVO_FROM_NAME', sms_config('BREVO_FROM_NAME', defined('APP_NAME') ? APP_NAME : 'Deutsche'));
+define('BREVO_SMS_SENDER', SMS_SENDER_ID);
+$GLOBALS['sms_last_error'] = '';
+
+function sms_set_last_error(string $message): void
+{
+    $GLOBALS['sms_last_error'] = $message;
+}
+
+function sms_last_error(): string
+{
+    return (string) ($GLOBALS['sms_last_error'] ?? '');
+}
 
 function brevo_sms_set_last_error(string $message): void
 {
-    $GLOBALS['brevo_sms_last_error'] = $message;
+    sms_set_last_error($message);
 }
 
 function brevo_sms_last_error(): string
 {
-    return (string) ($GLOBALS['brevo_sms_last_error'] ?? '');
-}
-
-function brevo_sms_is_configured(): bool
-{
-    return BREVO_API_KEY !== '' && BREVO_SMS_SENDER !== '';
+    return sms_last_error();
 }
 
 function normalize_sms_phone(string $phone): string
 {
-    $phone = trim($phone);
-    $phone = preg_replace('/[\s().-]+/', '', $phone);
+    $phone = preg_replace('/[\s().-]+/', '', trim($phone));
     if (!is_string($phone)) {
         return '';
     }
@@ -54,103 +67,196 @@ function is_valid_sms_phone(string $phone): bool
     return normalize_sms_phone($phone) !== '';
 }
 
-function brevo_sms_post(string $url, array $payload): bool
+function sms_is_configured(): bool
 {
-    if (!brevo_sms_is_configured() || !function_exists('curl_init')) {
-        brevo_sms_set_last_error('Brevo SMS is not configured or cURL is unavailable.');
-        error_log(brevo_sms_last_error());
+    return SMS_API_KEY !== '' && SMS_SENDER_ID !== '' && SMS_BASE_URL !== '';
+}
+
+function brevo_sms_is_configured(): bool
+{
+    return sms_is_configured();
+}
+
+function sms_send_message(string $toPhone, string $message): bool
+{
+    $recipient = normalize_sms_phone($toPhone);
+    if ($recipient === '') {
+        sms_set_last_error('The saved phone number is not in international format. Use + country code, for example +2348012345678.');
+        error_log(sms_last_error());
+        return false;
+    }
+    if (!sms_is_configured() || !function_exists('curl_init')) {
+        sms_set_last_error('SMS API is not configured or cURL is unavailable.');
+        error_log(sms_last_error());
         return false;
     }
 
-    $ch = curl_init($url);
+    $payload = [
+        'sender' => SMS_SENDER_ID,
+        'recipient' => $recipient,
+        'phone' => $recipient,
+        'to' => $recipient,
+        'content' => $message,
+        'message' => $message,
+        'type' => 'transactional',
+    ];
+    $headers = [
+        'accept: application/json',
+        'content-type: application/json',
+        'authorization: Bearer ' . SMS_API_KEY,
+        'api-key: ' . SMS_API_KEY,
+    ];
+    if (SMS_API_SECRET !== '') {
+        $headers[] = 'x-api-secret: ' . SMS_API_SECRET;
+    }
+
+    $ch = curl_init(SMS_BASE_URL);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST => true,
         CURLOPT_POSTFIELDS => json_encode($payload),
-        CURLOPT_HTTPHEADER => [
-            'accept: application/json',
-            'api-key: ' . BREVO_API_KEY,
-            'content-type: application/json',
-        ],
+        CURLOPT_HTTPHEADER => $headers,
         CURLOPT_TIMEOUT => 12,
     ]);
-
     $response = curl_exec($ch);
     $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
     $error = curl_error($ch);
     curl_close($ch);
 
     if ($httpCode < 200 || $httpCode >= 300) {
-        $reason = $error ?: (string) $response;
-        brevo_sms_set_last_error('Brevo rejected the SMS request. Check SMS credits, country support, sender name, and the API key.');
-        error_log('Brevo request failed: HTTP ' . $httpCode . ' ' . $reason);
+        $reason = $error ?: substr((string) $response, 0, 500);
+        sms_set_last_error('SMS provider rejected the message. Check API URL, credentials, sender ID, credits, and phone country support.');
+        error_log('SMS request failed: HTTP ' . $httpCode . ' ' . $reason);
         return false;
     }
 
-    return true;
-}
-
-function brevo_send_email(string $toEmail, string $toName, string $subject, string $htmlBody, string $textBody = ''): bool
-{
+    sms_set_last_error('');
     return true;
 }
 
 function brevo_send_sms(string $toPhone, string $message): bool
 {
-    $recipient = normalize_sms_phone($toPhone);
-    if ($recipient === '') {
-        brevo_sms_set_last_error('The saved phone number is not in international format. Use + country code, for example +2348012345678.');
-        error_log(brevo_sms_last_error());
-        return false;
+    return sms_send_message($toPhone, $message);
+}
+
+function sms_otp_ip(): string
+{
+    return substr((string) ($_SERVER['REMOTE_ADDR'] ?? 'local'), 0, 64);
+}
+
+function sms_otp_user_agent(): string
+{
+    return substr((string) ($_SERVER['HTTP_USER_AGENT'] ?? 'Unknown device'), 0, 255);
+}
+
+function sms_otp_create(?int $userId, string $phone, string $purpose, int $ttlMinutes = 10): array
+{
+    $phone = normalize_sms_phone($phone);
+    $purpose = in_array($purpose, ['signup', 'login', 'transfer'], true) ? $purpose : 'login';
+    if ($phone === '') {
+        return ['ok' => false, 'error' => 'Enter a valid phone number with country code.'];
     }
 
-    return brevo_sms_post('https://api.brevo.com/v3/transactionalSMS/sms', [
-        'sender' => BREVO_SMS_SENDER,
-        'recipient' => $recipient,
-        'content' => $message,
-        'type' => 'transactional',
-    ]);
+    $ip = sms_otp_ip();
+    $cooldown = db()->prepare('SELECT resend_available_at FROM otp_verifications WHERE phone=? AND purpose=? AND verified_at IS NULL ORDER BY created_at DESC LIMIT 1');
+    $cooldown->execute([$phone, $purpose]);
+    $latest = $cooldown->fetch();
+    if ($latest && strtotime((string) $latest['resend_available_at']) > time()) {
+        return ['ok' => false, 'error' => 'Please wait before requesting another code.', 'retry_at' => $latest['resend_available_at']];
+    }
+
+    $rate = db()->prepare('SELECT COUNT(*) c FROM otp_verifications WHERE created_at >= DATE_SUB(NOW(), INTERVAL 1 HOUR) AND (phone=? OR ip_address=? OR (user_id IS NOT NULL AND user_id=?))');
+    $rate->execute([$phone, $ip, $userId ?? 0]);
+    if ((int) ($rate->fetch()['c'] ?? 0) >= 5) {
+        return ['ok' => false, 'error' => 'Too many verification codes were requested. Please try again later.'];
+    }
+
+    $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+    $expiresAt = date('Y-m-d H:i:s', time() + ($ttlMinutes * 60));
+    $resendAt = date('Y-m-d H:i:s', time() + 60);
+    $hash = password_hash($code, PASSWORD_BCRYPT);
+
+    db()->prepare('INSERT INTO otp_verifications (user_id, phone, purpose, otp_hash, expires_at, attempts, max_attempts, resend_available_at, ip_address, user_agent, send_status) VALUES (?, ?, ?, ?, ?, 0, 5, ?, ?, ?, "sent")')
+        ->execute([$userId, $phone, $purpose, $hash, $expiresAt, $resendAt, $ip, sms_otp_user_agent()]);
+    $otpId = (int) db()->lastInsertId();
+    $message = BREVO_FROM_NAME . ": Your verification code is {$code}. Valid for {$ttlMinutes} minutes. Never share this code.";
+
+    if (!sms_send_message($phone, $message)) {
+        db()->prepare('UPDATE otp_verifications SET send_status="failed", last_error=? WHERE id=?')->execute([sms_last_error(), $otpId]);
+        return ['ok' => false, 'error' => sms_last_error() ?: 'SMS could not be sent.'];
+    }
+
+    if (function_exists('banking_emit_event')) {
+        banking_emit_event('otp.sent', ['purpose' => $purpose, 'phone_tail' => substr($phone, -4), 'system_detail' => 'SMS OTP sent. Code is never logged.'], ['type' => 'system', 'id' => null], $userId, 'otp_verification', $otpId);
+    }
+    return ['ok' => true, 'id' => $otpId, 'expires_at' => $expiresAt, 'resend_available_at' => $resendAt];
+}
+
+function sms_otp_verify(?int $userId, string $phone, string $purpose, string $code): array
+{
+    $phone = normalize_sms_phone($phone);
+    $code = trim($code);
+    if (!preg_match('/^\d{6}$/', $code)) {
+        return ['ok' => false, 'error' => 'Enter the 6-digit verification code.'];
+    }
+
+    $sql = 'SELECT * FROM otp_verifications WHERE phone=? AND purpose=? AND verified_at IS NULL ORDER BY created_at DESC LIMIT 1';
+    $params = [$phone, $purpose];
+    if ($userId !== null) {
+        $sql = 'SELECT * FROM otp_verifications WHERE user_id=? AND phone=? AND purpose=? AND verified_at IS NULL ORDER BY created_at DESC LIMIT 1';
+        $params = [$userId, $phone, $purpose];
+    }
+    $stmt = db()->prepare($sql);
+    $stmt->execute($params);
+    $otp = $stmt->fetch();
+    if (!$otp) {
+        return ['ok' => false, 'error' => 'Request a new verification code.'];
+    }
+    if (strtotime((string) $otp['expires_at']) < time()) {
+        return ['ok' => false, 'error' => 'This code has expired. Request a new one.'];
+    }
+    if ((int) $otp['attempts'] >= (int) $otp['max_attempts']) {
+        return ['ok' => false, 'error' => 'Too many incorrect attempts. Request a new code.'];
+    }
+    if (!password_verify($code, (string) $otp['otp_hash'])) {
+        db()->prepare('UPDATE otp_verifications SET attempts=attempts+1 WHERE id=?')->execute([$otp['id']]);
+        if (function_exists('banking_emit_event')) {
+            banking_emit_event('otp.failed_attempt', ['purpose' => $purpose, 'phone_tail' => substr($phone, -4)], ['type' => 'system', 'id' => null], $userId, 'otp_verification', (int) $otp['id']);
+        }
+        return ['ok' => false, 'error' => 'The verification code is incorrect.'];
+    }
+
+    db()->prepare('UPDATE otp_verifications SET verified_at=NOW() WHERE id=?')->execute([$otp['id']]);
+    if (function_exists('banking_emit_event')) {
+        banking_emit_event('otp.verified', ['purpose' => $purpose, 'phone_tail' => substr($phone, -4)], ['type' => 'system', 'id' => null], $userId, 'otp_verification', (int) $otp['id']);
+    }
+    return ['ok' => true, 'id' => (int) $otp['id']];
 }
 
 function generate_otp(int $userId, string $purpose = 'login', int $ttlMinutes = 10): string
 {
-    $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-    $hash = password_hash($code, PASSWORD_BCRYPT);
-    $expires = date('Y-m-d H:i:s', time() + $ttlMinutes * 60);
-
-    db()->prepare('DELETE FROM otp_codes WHERE user_id = ? AND purpose = ?')->execute([$userId, $purpose]);
-    db()->prepare('INSERT INTO otp_codes (user_id, code_hash, purpose, expires_at) VALUES (?, ?, ?, ?)')->execute([$userId, $hash, $purpose, $expires]);
-
-    return $code;
+    $stmt = db()->prepare('SELECT phone FROM users WHERE id=? LIMIT 1');
+    $stmt->execute([$userId]);
+    $user = $stmt->fetch();
+    $result = sms_otp_create($userId, (string) ($user['phone'] ?? ''), $purpose, $ttlMinutes);
+    return $result['ok'] ? 'sent' : '';
 }
 
 function verify_otp(int $userId, string $code, string $purpose = 'login'): bool
 {
-    $stmt = db()->prepare('SELECT * FROM otp_codes WHERE user_id = ? AND purpose = ? AND used_at IS NULL AND expires_at > NOW() ORDER BY created_at DESC LIMIT 1');
-    $stmt->execute([$userId, $purpose]);
-    $otp = $stmt->fetch();
-
-    if (!$otp || !password_verify($code, $otp['code_hash'])) {
-        return false;
-    }
-
-    db()->prepare('UPDATE otp_codes SET used_at = NOW() WHERE id = ?')->execute([$otp['id']]);
-    return true;
+    $stmt = db()->prepare('SELECT phone FROM users WHERE id=? LIMIT 1');
+    $stmt->execute([$userId]);
+    $user = $stmt->fetch();
+    return sms_otp_verify($userId, (string) ($user['phone'] ?? ''), $purpose, $code)['ok'] ?? false;
 }
 
 function send_otp_sms(int $userId, string $purpose = 'login', int $ttlMinutes = 10): bool
 {
-    $stmt = db()->prepare('SELECT phone FROM users WHERE id = ?');
+    $stmt = db()->prepare('SELECT phone FROM users WHERE id=? LIMIT 1');
     $stmt->execute([$userId]);
     $user = $stmt->fetch();
-    if (!$user || !is_valid_sms_phone((string) ($user['phone'] ?? ''))) {
-        return false;
-    }
-
-    $code = generate_otp($userId, $purpose, $ttlMinutes);
-    $message = BREVO_FROM_NAME . ": Your verification code is {$code}. Valid for {$ttlMinutes} minutes. Never share this code.";
-
-    return brevo_send_sms((string) $user['phone'], $message);
+    $result = sms_otp_create($userId, (string) ($user['phone'] ?? ''), $purpose, $ttlMinutes);
+    return (bool) ($result['ok'] ?? false);
 }
 
 function send_otp_email(int $userId, string $purpose = 'login', int $ttlMinutes = 10): bool
@@ -161,6 +267,11 @@ function send_otp_email(int $userId, string $purpose = 'login', int $ttlMinutes 
 function send_user_otp(int $userId, string $purpose, int $ttlMinutes = 10): bool
 {
     return send_otp_sms($userId, $purpose, $ttlMinutes);
+}
+
+function brevo_send_email(string $toEmail, string $toName, string $subject, string $htmlBody, string $textBody = ''): bool
+{
+    return true;
 }
 
 function send_password_reset_email(string $email): bool
