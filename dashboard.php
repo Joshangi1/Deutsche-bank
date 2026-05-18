@@ -116,6 +116,20 @@ if ($bankingRegion === 'us') {
 }
 
 $statusMeta = account_display_status($user);
+$accountCardDetails = [];
+$accountDetailKeywords = ['account', 'routing', 'sort', 'iban', 'bic', 'swift', 'institution', 'transit', 'bank name', 'bank address', 'address'];
+foreach ($bankingDetails as $detail) {
+    $label = strtolower((string) ($detail['detail_label'] ?? ''));
+    foreach ($accountDetailKeywords as $keyword) {
+        if (str_contains($label, $keyword)) {
+            $accountCardDetails[] = $detail;
+            break;
+        }
+    }
+}
+if (!$accountCardDetails) {
+    $accountCardDetails = array_slice($bankingDetails, 0, 4);
+}
 
 $newAccountCards = in_array($bankingRegion, ['us', 'ca', 'uk'], true) ? [
     ($user['verification_status'] ?? '') === 'approved'
@@ -140,7 +154,6 @@ $newAccountCards = in_array($bankingRegion, ['us', 'ca', 'uk'], true) ? [
 <?php if ($isNewAccount): ?>
 <div class="banking-hero mb-4"><div><div class="eyebrow"><?= e($ui['hero_eyebrow']) ?></div><h2><?= e($ui['hero_title']) ?></h2><p><?= e($ui['hero_copy']) ?></p></div><i class="fa-solid fa-circle-check"></i></div>
 <?php endif; ?>
-<?= deposit_protection_badge($user, $account, 'dashboard-trust-banner mb-4') ?>
 <div class="row g-4 dashboard-grid dashboard-page-grid">
     <div class="col-xl-6 dashboard-balance-section">
         <div class="balance-card">
@@ -159,6 +172,14 @@ $newAccountCards = in_array($bankingRegion, ['us', 'ca', 'uk'], true) ? [
             </div>
         </div>
     </div>
+    <div class="col-xl-6 dashboard-quick-section"><div class="premium-card quick-access-card p-4 h-100"><div class="section-heading"><div><span class="eyebrow">Move money faster</span><h5 class="fw-bold mb-0"><?= e($ui['quick']) ?></h5></div></div><div class="quick-grid">
+        <a href="user/accounts.php"><i class="fa-solid fa-layer-group"></i><span>Accounts</span></a>
+        <a href="user/transfers.php" class="<?= account_is_restricted($user) ? 'disabled' : '' ?>"><i class="fa-solid fa-right-left"></i><span><?= e($ui['transfer']) ?></span></a>
+        <a href="user/send_money.php" class="<?= account_is_restricted($user) ? 'disabled' : '' ?>"><i class="fa-solid fa-bolt"></i><span><?= e($regionConfig['rail_primary']) ?></span></a>
+        <a href="user/bill_pay.php" class="<?= account_is_restricted($user) ? 'disabled' : '' ?>"><i class="fa-solid fa-calendar-check"></i><span>Bills</span></a>
+        <a href="user/ach_transfers.php" class="<?= account_is_restricted($user) ? 'disabled' : '' ?>"><i class="fa-solid fa-building-columns"></i><span><?= e($regionConfig['rail_bank']) ?></span></a>
+        <a href="user/loans.php"><i class="fa-solid fa-hand-holding-dollar"></i><span>Loans</span></a>
+    </div></div></div>
     <div class="col-xl-6 dashboard-account-summary-section">
         <div class="account-summary-card h-100">
             <div class="account-summary-watermark"><i class="fa-solid fa-building-columns"></i></div>
@@ -170,10 +191,16 @@ $newAccountCards = in_array($bankingRegion, ['us', 'ca', 'uk'], true) ? [
                 <span class="account-status-pill <?= e($statusMeta['class']) ?>"><i class="fa-solid <?= e($statusMeta['icon']) ?>"></i><?= e($statusMeta['label']) ?></span>
             </div>
             <div class="account-summary-details">
-                <?php foreach (array_slice($bankingDetails, 0, 2) as $detail): ?>
+                <?php foreach ($accountCardDetails as $detail): ?>
+                    <?php $copyable = !array_key_exists('is_copyable', $detail) || (int) $detail['is_copyable'] === 1; ?>
                     <div>
                         <span><?= e($detail['detail_label']) ?></span>
                         <strong><?= e($detail['detail_value']) ?></strong>
+                        <?php if ($copyable): ?>
+                            <button type="button" class="account-summary-copy" data-copy-text="<?= e($detail['detail_value']) ?>" aria-label="Copy <?= e($detail['detail_label']) ?>">
+                                <i class="fa-regular fa-copy"></i><span>Copy</span>
+                            </button>
+                        <?php endif; ?>
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -182,39 +209,12 @@ $newAccountCards = in_array($bankingRegion, ['us', 'ca', 'uk'], true) ? [
             </a>
         </div>
     </div>
-    <div class="col-12 dashboard-details-section">
-        <div class="account-details-card">
-            <div class="account-details-header">
-                <span>Account details</span>
-                <small><?= e($regionConfig['country']) ?></small>
-            </div>
-            <div class="account-detail-list">
-                <?php foreach ($bankingDetails as $detail): ?>
-                    <?php $copyable = !array_key_exists('is_copyable', $detail) || (int) $detail['is_copyable'] === 1; ?>
-                    <div class="account-detail-row">
-                        <span class="account-detail-label"><?= e($detail['detail_label']) ?></span>
-                        <strong class="account-detail-value"><?= e($detail['detail_value']) ?></strong>
-                        <?php if ($copyable): ?>
-                            <button type="button" class="copy-detail-btn" data-copy-text="<?= e($detail['detail_value']) ?>" aria-label="Copy <?= e($detail['detail_label']) ?>">
-                                <i class="fa-regular fa-copy"></i><span>Copy</span>
-                            </button>
-                        <?php endif; ?>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
-    </div>
     <div class="col-xl-6 dashboard-card-section"><div class="virtual-card"><div class="d-flex justify-content-between"><strong>Deutsche</strong><i class="fa-brands fa-cc-visa fa-2x"></i></div><div class="fs-4 fw-bold">4582 **** **** <?= e($card['card_last4']) ?></div><div class="d-flex justify-content-between"><span><?= e(strtoupper($user['first_name'] . ' ' . $user['last_name'])) ?></span><span><?= $isNewAccount ? 'PREPARING' : e(strtoupper($card['status'])) ?></span></div></div></div>
-    <div class="col-xl-6 dashboard-quick-section"><div class="premium-card quick-access-card p-4 h-100"><div class="section-heading"><div><span class="eyebrow">Move money faster</span><h5 class="fw-bold mb-0"><?= e($ui['quick']) ?></h5></div></div><div class="quick-grid">
-        <a href="user/accounts.php"><i class="fa-solid fa-layer-group"></i><span>Accounts</span></a>
-        <a href="user/linked_accounts.php"><i class="fa-solid fa-credit-card"></i><span><?= e($ui['link_card']) ?></span></a>
-        <a href="user/send_money.php"><i class="fa-solid fa-bolt"></i><span><?= e($regionConfig['rail_primary']) ?></span></a>
-        <a href="user/bill_pay.php"><i class="fa-solid fa-calendar-check"></i><span><?= e($regionConfig['rail_scheduled']) ?></span></a>
-        <a href="user/ach_transfers.php"><i class="fa-solid fa-building-columns"></i><span><?= e($regionConfig['rail_bank']) ?></span></a>
-        <a href="user/loans.php"><i class="fa-solid fa-hand-holding-dollar"></i><span>Loans</span></a>
-    </div></div></div>
     <div class="col-xl-8 dashboard-transactions-section"><div class="table-card"><div class="p-4 d-flex justify-content-between"><h5 class="fw-bold mb-0"><?= e($ui['recent']) ?></h5><a href="user/transactions.php"><?= e($ui['view_all']) ?></a></div><div class="table-responsive"><table class="table transaction-table align-middle mb-0"><tbody><?php foreach ($txRows as $row): ?><?php $isCredit = (float) $row['amount'] > 0; ?><tr><td><div class="tx-merchant"><span class="tx-icon <?= $isCredit ? 'tx-icon-credit' : '' ?>"><i class="fa-solid <?= e(transaction_icon($row)) ?>"></i></span><div><strong><?= e($row['description']) ?></strong><div class="small muted"><?= e(transaction_display_date($row['created_at'])) ?> &middot; <?= e(transaction_category($row)) ?></div></div></div></td><td><span class="status-pill status-<?= $row['status']==='completed'?'success':(in_array($row['status'], ['failed','rejected'], true)?'danger':'warning') ?>"><?= e(strtoupper($row['status'])) ?></span></td><td class="text-end fw-bold tx-amount <?= $isCredit ? 'tx-credit' : 'tx-debit' ?>"><?= $isCredit ? '+' : '-' ?><?= money(abs((float) $row['amount']), $currency) ?></td></tr><?php endforeach; ?><?php if (!$txRows): ?><tr><td colspan="3" class="text-center muted py-5"><i class="fa-solid fa-receipt d-block fs-3 mb-2"></i>No transactions yet.</td></tr><?php endif; ?></tbody></table></div></div></div>
     <div class="col-xl-4 dashboard-chart-section"><div class="table-card p-4 h-100"><h5 class="fw-bold"><?= e($ui['balance']) ?></h5><?php if ($isNewAccount): ?><div class="empty-mini">Charts will populate after account activity begins.</div><?php else: ?><canvas data-chart="line" height="220"></canvas><?php endif; ?></div></div>
+    <div class="col-12 dashboard-protection-section">
+        <?= deposit_protection_badge($user, $account, 'dashboard-trust-banner dashboard-trust-banner-compact mb-0') ?>
+    </div>
     <?php if ($isNewAccount): ?>
         <div class="col-12 dashboard-onboarding-section"><div class="row g-3">
             <?php foreach ($newAccountCards as $item): ?>
