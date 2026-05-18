@@ -1927,47 +1927,72 @@ body,
   order: 3;
 }
 
-.dashboard-card-section {
+.dashboard-transactions-section {
   order: 4;
 }
 
-.dashboard-transactions-section {
+.dashboard-chart-section {
   order: 5;
 }
 
-.dashboard-chart-section {
+.dashboard-protection-section {
   order: 6;
 }
 
-.dashboard-protection-section {
-  order: 7;
-}
-
 .dashboard-onboarding-section {
-  order: 8;
+  order: 7;
 }
 
 .dashboard-cash-section,
 .dashboard-verification-section,
 .dashboard-bills-section,
 .dashboard-recipients-section {
-  order: 9;
+  order: 8;
 }
 
 .account-summary-card {
   background:
-    radial-gradient(circle at 88% 8%, rgba(91, 141, 255, 0.34), transparent 14rem),
-    linear-gradient(135deg, #061b58 0%, #06277c 52%, #083f9f 100%);
+    radial-gradient(circle at 98% 0%, rgba(9, 74, 185, 0.09), transparent 18rem),
+    linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  color: #0f172a;
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.1);
 }
 
 .account-summary-details {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   margin-bottom: 18px;
 }
 
 .account-summary-details div {
   position: relative;
+  min-height: 74px;
   padding-right: 54px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: #fff;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
+}
+
+.account-summary-card .account-summary-watermark {
+  color: rgba(9, 40, 116, 0.05);
+}
+
+.account-summary-card .account-summary-label {
+  color: #3152a3;
+}
+
+.account-summary-card h2 {
+  color: #0f172a;
+}
+
+.account-summary-details span {
+  color: #64748b;
+  font-weight: 700;
+}
+
+.account-summary-details strong {
+  color: #111827;
+  font-size: 0.96rem;
 }
 
 .account-summary-copy {
@@ -1984,15 +2009,27 @@ body,
   padding: 0 9px;
   border: 1px solid rgba(255,255,255,0.18);
   border-radius: 10px;
-  color: #fff;
-  background: rgba(255,255,255,0.12);
+  color: #0a2e86;
+  background: #eef4ff;
+  border-color: rgba(10, 46, 134, 0.12);
   font-size: 0.72rem;
   font-weight: 800;
 }
 
 .account-summary-copy:hover,
 .account-summary-copy.copied {
-  background: rgba(255,255,255,0.22);
+  background: #dfeaff;
+}
+
+.account-summary-card .account-summary-action {
+  color: #fff;
+  background: linear-gradient(135deg, #071f68, #0b45c6);
+  border-color: rgba(7, 31, 104, 0.16);
+  box-shadow: 0 12px 24px rgba(7, 31, 104, 0.16);
+}
+
+.account-summary-card .account-status-pill {
+  border-color: transparent !important;
 }
 
 .quick-grid a.disabled {
@@ -2075,15 +2112,14 @@ body,
   .dashboard-balance-section { order: 1 !important; }
   .dashboard-quick-section { order: 2 !important; }
   .dashboard-account-summary-section { order: 3 !important; }
-  .dashboard-card-section { order: 4 !important; }
-  .dashboard-transactions-section { order: 5 !important; }
-  .dashboard-chart-section { order: 6 !important; }
-  .dashboard-protection-section { order: 7 !important; }
-  .dashboard-onboarding-section { order: 8 !important; }
-  .dashboard-cash-section { order: 9 !important; }
-  .dashboard-verification-section { order: 10 !important; }
-  .dashboard-bills-section { order: 11 !important; }
-  .dashboard-recipients-section { order: 12 !important; }
+  .dashboard-transactions-section { order: 4 !important; }
+  .dashboard-chart-section { order: 5 !important; }
+  .dashboard-protection-section { order: 6 !important; }
+  .dashboard-onboarding-section { order: 7 !important; }
+  .dashboard-cash-section { order: 8 !important; }
+  .dashboard-verification-section { order: 9 !important; }
+  .dashboard-bills-section { order: 10 !important; }
+  .dashboard-recipients-section { order: 11 !important; }
 
   .balance-card {
     padding: 18px !important;
@@ -2136,6 +2172,7 @@ body,
   }
 
   .account-summary-details div {
+    min-height: 64px;
     padding: 11px 48px 11px 12px;
   }
 
@@ -2154,15 +2191,6 @@ body,
   .account-summary-action {
     padding: 11px 13px;
     min-width: 0;
-  }
-
-  .virtual-card {
-    min-height: 168px !important;
-    padding: 20px !important;
-  }
-
-  .virtual-card .fs-4 {
-    font-size: 1.3rem !important;
   }
 
   .dashboard-transactions-section .transaction-table tbody tr:nth-child(n+4) {
