@@ -115,12 +115,7 @@ if ($bankingRegion === 'us') {
     ];
 }
 
-$statusMeta = match (true) {
-    $accountStatus === 'frozen' => ['Frozen', 'status-warning', 'fa-snowflake'],
-    $accountStatus === 'suspended' => ['Suspended', 'status-danger', 'fa-ban'],
-    $verificationStatus !== 'approved' => ['Unverified', 'status-info', 'fa-id-card'],
-    default => ['Active', 'status-success', 'fa-circle'],
-};
+$statusMeta = account_display_status($user);
 
 $newAccountCards = in_array($bankingRegion, ['us', 'ca', 'uk'], true) ? [
     ($user['verification_status'] ?? '') === 'approved'
@@ -145,38 +140,46 @@ $newAccountCards = in_array($bankingRegion, ['us', 'ca', 'uk'], true) ? [
 <?php if ($isNewAccount): ?>
 <div class="banking-hero mb-4"><div><div class="eyebrow"><?= e($ui['hero_eyebrow']) ?></div><h2><?= e($ui['hero_title']) ?></h2><p><?= e($ui['hero_copy']) ?></p></div><i class="fa-solid fa-circle-check"></i></div>
 <?php endif; ?>
-<div class="dashboard-upgrade">
-<?= deposit_protection_badge($user, $account, 'dashboard-disclosure mb-4') ?>
-<div class="row g-4 dashboard-grid">
+<?= deposit_protection_badge($user, $account, 'dashboard-trust-banner mb-4') ?>
+<div class="row g-4 dashboard-grid dashboard-page-grid">
     <div class="col-xl-6 dashboard-balance-section">
         <div class="balance-card">
             <div class="row g-4 position-relative">
                 <div class="col-12">
                     <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
-                        <div class="text-white-50 dashboard-card-label"><?= e($ui['available']) ?></div>
-                        <span class="account-status-pill <?= e($statusMeta[1]) ?>"><i class="fa-solid <?= e($statusMeta[2]) ?>"></i><?= e($statusMeta[0]) ?></span>
+                        <div class="text-white-50"><?= e($ui['available']) ?></div>
+                        <span class="account-status-pill <?= e($statusMeta['class']) ?>"><i class="fa-solid <?= e($statusMeta['icon']) ?>"></i><?= e($statusMeta['label']) ?></span>
                     </div>
                     <div class="display-5 fw-bold"><?= money($account['available_balance'], $currency) ?></div>
-                    <div class="dashboard-balance-meta">
-                        <div><span><?= e($ui['pending']) ?></span><strong><?= money($account['pending_balance'], $currency) ?></strong></div>
-                        <div><span><?= e($ui['savings']) ?></span><strong><?= money($account['savings_balance'], $currency) ?></strong></div>
+                    <div class="mt-4 d-flex gap-4 flex-wrap">
+                        <div><div class="text-white-50 small"><?= e($ui['pending']) ?></div><strong><?= money($account['pending_balance'], $currency) ?></strong></div>
+                        <div><div class="text-white-50 small"><?= e($ui['savings']) ?></div><strong><?= money($account['savings_balance'], $currency) ?></strong></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     <div class="col-xl-6 dashboard-account-summary-section">
-        <div class="account-summary-card">
-            <div>
-                <div class="dashboard-card-label"><?= e($ui['account']) ?></div>
-                <h2><?= e($account['account_type']) ?></h2>
+        <div class="account-summary-card h-100">
+            <div class="account-summary-watermark"><i class="fa-solid fa-building-columns"></i></div>
+            <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+                <div>
+                    <div class="account-summary-label"><?= e($ui['account']) ?></div>
+                    <h2><?= e($account['account_type']) ?></h2>
+                </div>
+                <span class="account-status-pill <?= e($statusMeta['class']) ?>"><i class="fa-solid <?= e($statusMeta['icon']) ?>"></i><?= e($statusMeta['label']) ?></span>
             </div>
             <div class="account-summary-details">
                 <?php foreach (array_slice($bankingDetails, 0, 2) as $detail): ?>
-                    <div><span><?= e($detail['detail_label']) ?></span><strong><?= e($detail['detail_value']) ?></strong></div>
+                    <div>
+                        <span><?= e($detail['detail_label']) ?></span>
+                        <strong><?= e($detail['detail_value']) ?></strong>
+                    </div>
                 <?php endforeach; ?>
             </div>
-            <a class="account-summary-action <?= account_is_restricted($user) ? 'disabled' : '' ?>" href="user/transfers.php"><span><?= e($ui['transfer']) ?></span><i class="fa-solid fa-arrow-right"></i></a>
+            <a class="account-summary-action <?= account_is_restricted($user) ? 'disabled' : '' ?>" href="user/transfers.php">
+                <span><?= e($ui['transfer']) ?></span><i class="fa-solid fa-arrow-right"></i>
+            </a>
         </div>
     </div>
     <div class="col-12 dashboard-details-section">
@@ -202,16 +205,7 @@ $newAccountCards = in_array($bankingRegion, ['us', 'ca', 'uk'], true) ? [
         </div>
     </div>
     <div class="col-xl-6 dashboard-card-section"><div class="virtual-card"><div class="d-flex justify-content-between"><strong>Deutsche</strong><i class="fa-brands fa-cc-visa fa-2x"></i></div><div class="fs-4 fw-bold">4582 **** **** <?= e($card['card_last4']) ?></div><div class="d-flex justify-content-between"><span><?= e(strtoupper($user['first_name'] . ' ' . $user['last_name'])) ?></span><span><?= $isNewAccount ? 'PREPARING' : e(strtoupper($card['status'])) ?></span></div></div></div>
-    <?php if ($isNewAccount): ?>
-        <div class="col-12"><div class="row g-3">
-            <?php foreach ($newAccountCards as $item): ?>
-                <div class="col-md-4"><div class="empty-state-card"><span class="tx-icon"><i class="fa-solid <?= e($item[0]) ?>"></i></span><strong><?= e($item[1]) ?></strong><p><?= e($item[2]) ?></p></div></div>
-            <?php endforeach; ?>
-        </div></div>
-    <?php endif; ?>
-    <div class="col-xl-8 dashboard-transactions-section"><div class="table-card"><div class="p-4 d-flex justify-content-between"><h5 class="fw-bold mb-0"><?= e($ui['recent']) ?></h5><a href="user/transactions.php"><?= e($ui['view_all']) ?></a></div><div class="table-responsive"><table class="table transaction-table align-middle mb-0"><tbody><?php foreach ($txRows as $row): ?><?php $isCredit = (float) $row['amount'] > 0; ?><tr><td><div class="tx-merchant"><span class="tx-icon <?= $isCredit ? 'tx-icon-credit' : '' ?>"><i class="fa-solid <?= e(transaction_icon($row)) ?>"></i></span><div><strong><?= e($row['description']) ?></strong><div class="small muted"><?= e(transaction_display_date($row['created_at'])) ?> &middot; <?= e(transaction_category($row)) ?></div></div></div></td><td><span class="status-pill status-<?= $row['status']==='completed'?'success':(in_array($row['status'], ['failed','rejected'], true)?'danger':'warning') ?>"><?= e(strtoupper($row['status'])) ?></span></td><td class="text-end fw-bold tx-amount <?= $isCredit ? 'tx-credit' : 'tx-debit' ?>"><?= $isCredit ? '+' : '-' ?><?= money(abs((float) $row['amount']), $currency) ?></td></tr><?php endforeach; ?><?php if (!$txRows): ?><tr><td colspan="3" class="text-center muted py-5"><i class="fa-solid fa-receipt d-block fs-3 mb-2"></i>No transactions yet.</td></tr><?php endif; ?></tbody></table></div></div></div>
-    <div class="col-xl-4 dashboard-chart-section"><div class="table-card p-4 h-100"><h5 class="fw-bold"><?= e($ui['balance']) ?></h5><?php if ($isNewAccount): ?><div class="empty-mini">Charts will populate after account activity begins.</div><?php else: ?><canvas data-chart="line" height="220"></canvas><?php endif; ?></div></div>
-    <div class="col-xl-4 dashboard-quick-section"><div class="premium-card p-4 h-100"><h5 class="fw-bold"><?= e($ui['quick']) ?></h5><div class="quick-grid">
+    <div class="col-xl-6 dashboard-quick-section"><div class="premium-card quick-access-card p-4 h-100"><div class="section-heading"><div><span class="eyebrow">Move money faster</span><h5 class="fw-bold mb-0"><?= e($ui['quick']) ?></h5></div></div><div class="quick-grid">
         <a href="user/accounts.php"><i class="fa-solid fa-layer-group"></i><span>Accounts</span></a>
         <a href="user/linked_accounts.php"><i class="fa-solid fa-credit-card"></i><span><?= e($ui['link_card']) ?></span></a>
         <a href="user/send_money.php"><i class="fa-solid fa-bolt"></i><span><?= e($regionConfig['rail_primary']) ?></span></a>
@@ -219,10 +213,18 @@ $newAccountCards = in_array($bankingRegion, ['us', 'ca', 'uk'], true) ? [
         <a href="user/ach_transfers.php"><i class="fa-solid fa-building-columns"></i><span><?= e($regionConfig['rail_bank']) ?></span></a>
         <a href="user/loans.php"><i class="fa-solid fa-hand-holding-dollar"></i><span>Loans</span></a>
     </div></div></div>
+    <div class="col-xl-8 dashboard-transactions-section"><div class="table-card"><div class="p-4 d-flex justify-content-between"><h5 class="fw-bold mb-0"><?= e($ui['recent']) ?></h5><a href="user/transactions.php"><?= e($ui['view_all']) ?></a></div><div class="table-responsive"><table class="table transaction-table align-middle mb-0"><tbody><?php foreach ($txRows as $row): ?><?php $isCredit = (float) $row['amount'] > 0; ?><tr><td><div class="tx-merchant"><span class="tx-icon <?= $isCredit ? 'tx-icon-credit' : '' ?>"><i class="fa-solid <?= e(transaction_icon($row)) ?>"></i></span><div><strong><?= e($row['description']) ?></strong><div class="small muted"><?= e(transaction_display_date($row['created_at'])) ?> &middot; <?= e(transaction_category($row)) ?></div></div></div></td><td><span class="status-pill status-<?= $row['status']==='completed'?'success':(in_array($row['status'], ['failed','rejected'], true)?'danger':'warning') ?>"><?= e(strtoupper($row['status'])) ?></span></td><td class="text-end fw-bold tx-amount <?= $isCredit ? 'tx-credit' : 'tx-debit' ?>"><?= $isCredit ? '+' : '-' ?><?= money(abs((float) $row['amount']), $currency) ?></td></tr><?php endforeach; ?><?php if (!$txRows): ?><tr><td colspan="3" class="text-center muted py-5"><i class="fa-solid fa-receipt d-block fs-3 mb-2"></i>No transactions yet.</td></tr><?php endif; ?></tbody></table></div></div></div>
+    <div class="col-xl-4 dashboard-chart-section"><div class="table-card p-4 h-100"><h5 class="fw-bold"><?= e($ui['balance']) ?></h5><?php if ($isNewAccount): ?><div class="empty-mini">Charts will populate after account activity begins.</div><?php else: ?><canvas data-chart="line" height="220"></canvas><?php endif; ?></div></div>
+    <?php if ($isNewAccount): ?>
+        <div class="col-12 dashboard-onboarding-section"><div class="row g-3">
+            <?php foreach ($newAccountCards as $item): ?>
+                <div class="col-md-4"><div class="empty-state-card"><span class="tx-icon"><i class="fa-solid <?= e($item[0]) ?>"></i></span><strong><?= e($item[1]) ?></strong><p><?= e($item[2]) ?></p></div></div>
+            <?php endforeach; ?>
+        </div></div>
+    <?php endif; ?>
     <div class="col-xl-4 dashboard-cash-section"><div class="table-card p-4 h-100"><h5 class="fw-bold"><?= e($ui['cash']) ?></h5><div class="cash-flow"><div><span><?= e($ui['income']) ?></span><strong class="tx-credit"><?= money($monthlyIncome->fetch()['total'], $currency) ?></strong></div><div><span><?= e($ui['expenses']) ?></span><strong class="tx-debit"><?= money($monthlyExpense->fetch()['total'], $currency) ?></strong></div></div><?php if ($isNewAccount): ?><div class="empty-mini">Income and expenses will appear after your first posted transaction.</div><?php else: ?><canvas data-chart="doughnut" height="160" data-chart-region="<?= $isUsAccount ? 'us' : 'eu' ?>"></canvas><?php endif; ?></div></div>
     <div class="col-xl-4 dashboard-verification-section"><div class="premium-card p-4 h-100"><h5 class="fw-bold"><?= e($ui['verification']) ?></h5><p class="muted"><?= e($ui['review']) ?></p><div class="goal-ring"><strong><?= e(strtoupper(str_replace('_',' ', $user['verification_status'] ?? 'NOT STARTED'))) ?></strong><span><?= e(strtoupper(str_replace('_',' ', $user['risk_status'] ?? 'CLEAR'))) ?></span></div></div></div>
     <div class="col-xl-6 dashboard-bills-section"><div class="table-card"><div class="p-4"><h5 class="fw-bold mb-0"><?= e($ui['bill_title']) ?></h5></div><table class="table align-middle mb-0"><tbody><?php foreach ($billRows as $bill): ?><tr><td><i class="fa-solid fa-calendar-day text-warning me-2"></i><?= e($bill['name']) ?><div class="small muted"><?= e($bill['category']) ?> &middot; <?= e($ui['bill_day']) ?> <?= e((string)$bill['due_day']) ?></div></td><td><span class="status-pill status-<?= $bill['autopay']?'success':'warning' ?>"><?= $bill['autopay'] ? e($ui['bill_active']) : e($ui['bill_manual']) ?></span></td></tr><?php endforeach; ?><?php if (!$billRows): ?><tr><td class="text-center muted py-5"><?= e($ui['bill_empty']) ?></td></tr><?php endif; ?></tbody></table></div></div>
     <div class="col-xl-6 dashboard-recipients-section"><div class="table-card"><div class="p-4"><h5 class="fw-bold mb-0"><?= e($ui['recipient_title']) ?></h5></div><div class="p-3"><?php foreach ($recipientRows as $r): ?><div class="recipient-row"><span class="tx-icon"><i class="fa-solid fa-user"></i></span><div><strong><?= e($r['name']) ?></strong><div class="small muted"><?= e($r['iban'] ? format_iban_display($r['iban']) : ($r['email'] ?: $r['phone'])) ?></div></div><a class="btn btn-sm btn-light border ms-auto" href="user/send_money.php"><?= e($ui['recipient_action']) ?></a></div><?php endforeach; ?><?php if (!$recipientRows): ?><div class="text-center muted py-4"><?= e($ui['recipient_empty']) ?></div><?php endif; ?></div></div></div>
-</div>
 </div>
 <?php include __DIR__ . '/includes/user_footer.php'; ?>

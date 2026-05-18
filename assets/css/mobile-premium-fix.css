@@ -1449,455 +1449,467 @@ body,
   }
 }
 
-/* Issue #6 dashboard hierarchy upgrade */
-.dashboard-upgrade,
-.dashboard-upgrade * {
-  letter-spacing: 0 !important;
-}
-
-.app-main:has(.dashboard-upgrade) {
+/* Corrective premium dashboard pass */
+.app-main {
   background:
-    radial-gradient(circle at 18% 0%, rgba(26,79,214,0.07), transparent 32%),
-    linear-gradient(180deg, #fbfcff 0%, #f5f7fb 100%);
+    radial-gradient(circle at top left, rgba(14, 62, 140, 0.08), transparent 34rem),
+    linear-gradient(180deg, #f8fbff 0%, #f3f6fb 100%);
 }
 
-.app-main:has(.dashboard-upgrade) .topbar {
-  min-height: 92px;
-  margin-bottom: 24px;
-  padding-bottom: 18px;
-  border-bottom: 1px solid rgba(10,22,40,0.08);
+.dashboard-page-grid {
+  align-items: stretch;
 }
 
-.app-main:has(.dashboard-upgrade) .topbar-kicker {
-  color: #53617c;
-  font-size: 13px;
-  font-weight: 650;
-  text-transform: none;
-}
-
-.app-main:has(.dashboard-upgrade) .topbar h1.h3 {
-  color: #09162d;
-  font-size: clamp(32px, 3vw, 44px);
-  line-height: 1.02;
-  font-weight: 850;
-  margin: 2px 0 6px;
-}
-
-.app-main:has(.dashboard-upgrade) .topbar .muted {
-  color: #344155;
-  font-size: 15px;
-  font-weight: 500;
-}
-
-.app-main:has(.dashboard-upgrade) .sidebar .nav-link {
-  font-size: 15px;
-  font-weight: 700;
-}
-
-.dashboard-upgrade {
-  max-width: 1320px;
-}
-
-.dashboard-upgrade .dashboard-grid {
-  --bs-gutter-x: 20px;
-  --bs-gutter-y: 20px;
-}
-
-.dashboard-upgrade .deposit-protection-badge {
-  display: grid;
-  grid-template-columns: minmax(190px, auto) 1fr;
-  gap: 22px;
+.deposit-protection-badge.dashboard-trust-banner,
+.deposit-protection-badge {
+  display: flex;
   align-items: center;
-  min-height: 112px;
-  border: 1px solid rgba(10,22,40,0.12);
+  gap: 26px;
+  padding: 24px 28px;
+  border: 1px solid rgba(11, 34, 73, 0.12);
   border-radius: 18px;
   background:
-    linear-gradient(135deg, rgba(255,255,255,0.98), rgba(247,249,253,0.96)),
-    radial-gradient(circle at 96% 8%, rgba(26,79,214,0.08), transparent 30%);
-  box-shadow: 0 16px 44px rgba(10,22,40,0.08);
-  padding: 24px 28px;
+    linear-gradient(135deg, rgba(255,255,255,0.98), rgba(242,247,255,0.94)),
+    radial-gradient(circle at 98% 12%, rgba(14,42,102,0.08), transparent 15rem);
+  box-shadow: 0 18px 44px rgba(14, 34, 66, 0.11);
+  overflow: hidden;
 }
 
-.dashboard-upgrade .deposit-protection-badge.is-neutral-disclosure .deposit-protection-agency {
-  font-size: clamp(28px, 3vw, 44px);
-}
-
-.dashboard-upgrade .deposit-protection-agency {
-  min-width: 0;
-  border-right: 1px solid rgba(10,22,40,0.14);
-  padding-right: 22px;
-  color: #0018a8;
-  font-size: clamp(48px, 6vw, 78px);
-  line-height: .95;
-  font-weight: 900;
-}
-
-.dashboard-upgrade .deposit-protection-copy strong {
-  color: #07142c;
-  font-size: clamp(20px, 2vw, 30px);
-  line-height: 1.12;
-  font-weight: 850;
-  margin-bottom: 8px;
-}
-
-.dashboard-upgrade .deposit-protection-copy p {
-  max-width: 780px;
-  color: #24324a;
-  font-size: 15px;
-  line-height: 1.6;
-}
-
-.dashboard-upgrade .balance-card,
-.dashboard-upgrade .account-summary-card,
-.dashboard-upgrade .account-details-card,
-.dashboard-upgrade .virtual-card,
-.dashboard-upgrade .table-card,
-.dashboard-upgrade .premium-card {
-  border-radius: 16px !important;
-}
-
-.dashboard-upgrade .balance-card {
-  min-height: 252px;
+.deposit-protection-mark {
   display: flex;
-  align-items: stretch;
-  padding: 28px 30px !important;
-  background:
-    radial-gradient(circle at 88% 18%, rgba(255,255,255,0.18), transparent 26%),
-    linear-gradient(135deg, #0018a8 0%, #061a75 52%, #07142c 100%) !important;
-  box-shadow: 0 18px 46px rgba(0,24,168,0.18) !important;
+  align-items: center;
+  gap: 16px;
+  flex: 0 0 auto;
 }
 
-.dashboard-upgrade .balance-card .row {
-  width: 100%;
+.deposit-protection-mark i {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  color: #0b2d6b;
+  background: #eef4ff;
+  border: 1px solid rgba(11,45,107,0.12);
+  border-radius: 14px;
 }
 
-.dashboard-upgrade .balance-card .display-5 {
-  font-size: clamp(44px, 5vw, 72px) !important;
-  line-height: 1.02 !important;
-  font-weight: 850 !important;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
-  color: #fff;
+.deposit-protection-agency {
+  font-family: Manrope, Inter, system-ui, sans-serif;
+  font-size: clamp(2.3rem, 5vw, 4.4rem);
+  line-height: 0.95;
+  font-weight: 800;
+  letter-spacing: 0;
+  color: #102a72;
+  white-space: nowrap;
 }
 
-.dashboard-upgrade .dashboard-card-label,
-.dashboard-upgrade .balance-card .text-white-50 {
-  color: rgba(255,255,255,0.78) !important;
-  font-size: 13px !important;
-  font-weight: 750 !important;
-  text-transform: uppercase;
+.deposit-protection-copy {
+  max-width: 720px;
 }
 
-.dashboard-balance-meta {
-  display: flex;
-  gap: 0;
-  margin-top: 28px;
-  border-top: 1px solid rgba(255,255,255,0.18);
-  padding-top: 18px;
-}
-
-.dashboard-balance-meta div {
-  min-width: 128px;
-  padding-right: 30px;
-}
-
-.dashboard-balance-meta div + div {
-  border-left: 1px solid rgba(255,255,255,0.18);
-  padding-left: 30px;
-}
-
-.dashboard-balance-meta span {
+.deposit-protection-copy strong {
   display: block;
-  color: rgba(255,255,255,0.62);
-  font-size: 12px;
-  font-weight: 750;
-  text-transform: uppercase;
   margin-bottom: 6px;
+  color: #071b35;
+  font-size: clamp(1.05rem, 2vw, 1.45rem);
+  line-height: 1.25;
 }
 
-.dashboard-balance-meta strong {
-  color: #fff;
-  font-size: 20px;
-  font-weight: 820;
+.deposit-protection-copy p {
+  margin: 0;
+  color: #334155;
+  font-size: 0.98rem;
+  line-height: 1.65;
 }
 
-.dashboard-upgrade .account-status-pill {
-  padding: 6px 12px;
+.account-summary-card,
+.bank-account-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
   border: 1px solid rgba(255,255,255,0.22);
-  font-size: 12px;
+  background:
+    radial-gradient(circle at 90% 10%, rgba(47, 93, 205, 0.38), transparent 16rem),
+    linear-gradient(135deg, #071b6a 0%, #05205a 48%, #083b9c 100%);
+  color: #fff;
+  box-shadow: 0 18px 44px rgba(8, 31, 86, 0.28);
 }
 
 .account-summary-card {
-  min-height: 252px;
-  display: grid;
-  align-content: space-between;
-  gap: 18px;
-  padding: 28px 30px;
-  color: #fff;
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 16px;
-  background:
-    linear-gradient(145deg, rgba(255,255,255,0.08), transparent 34%),
-    linear-gradient(135deg, #0b1c42 0%, #0018a8 100%);
-  box-shadow: 0 18px 46px rgba(0,24,168,0.15);
+  min-height: 238px;
+  padding: 28px;
 }
 
-.account-summary-card .dashboard-card-label {
-  color: rgba(255,255,255,0.72) !important;
+.account-summary-watermark {
+  position: absolute;
+  right: 28px;
+  bottom: 18px;
+  color: rgba(255,255,255,0.08);
+  font-size: 7rem;
+  pointer-events: none;
+}
+
+.account-summary-label,
+.bank-account-card .eyebrow {
+  color: rgba(255,255,255,0.72);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .account-summary-card h2 {
-  margin: 8px 0 0;
+  position: relative;
+  margin: 6px 0 0;
   color: #fff;
-  font-size: clamp(26px, 3vw, 38px);
-  line-height: 1.08;
-  font-weight: 820;
+  font-size: clamp(1.45rem, 2.6vw, 2rem);
+  line-height: 1.1;
+  letter-spacing: 0;
 }
 
 .account-summary-details {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.account-summary-details div {
+  min-width: 0;
+  padding: 13px 14px;
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.09);
+  backdrop-filter: blur(10px);
 }
 
 .account-summary-details span {
   display: block;
-  color: rgba(255,255,255,0.62);
-  font-size: 12px;
-  font-weight: 740;
-  text-transform: uppercase;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
+  color: rgba(255,255,255,0.64);
+  font-size: 0.76rem;
 }
 
 .account-summary-details strong {
   display: block;
   color: #fff;
-  font-size: 16px;
-  font-weight: 800;
   overflow-wrap: anywhere;
 }
 
 .account-summary-action {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  width: min(100%, 280px);
-  min-height: 48px;
-  border: 1px solid rgba(255,255,255,0.24);
-  border-radius: 10px;
-  padding: 0 16px;
+  min-width: 220px;
+  padding: 13px 16px;
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 13px;
   color: #fff;
-  background: rgba(255,255,255,0.08);
-  font-size: 15px;
+  background: rgba(255,255,255,0.12);
+  text-decoration: none;
   font-weight: 800;
 }
 
 .account-summary-action:hover {
   color: #fff;
-  background: rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.18);
 }
 
 .account-summary-action.disabled {
-  opacity: .46;
   pointer-events: none;
+  opacity: 0.58;
 }
 
-.dashboard-upgrade .account-details-card {
-  background: rgba(255,255,255,0.98);
-  border-color: rgba(10,22,40,0.10);
-  box-shadow: 0 14px 34px rgba(10,22,40,0.07);
-}
-
-.dashboard-upgrade .account-details-header {
-  padding: 20px 24px;
-}
-
-.dashboard-upgrade .account-details-header span,
-.dashboard-upgrade .table-card h5,
-.dashboard-upgrade .premium-card h5 {
-  color: #07142c;
-  font-size: 20px;
-  line-height: 1.2;
-  font-weight: 850;
-}
-
-.dashboard-upgrade .account-detail-list {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  padding: 18px 22px 22px;
-  gap: 16px;
-}
-
-.dashboard-upgrade .account-detail-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 8px 10px;
-  padding: 16px;
-  border: 1px solid rgba(10,22,40,0.09);
-  border-radius: 12px;
-  background: #fbfcff;
-}
-
-.dashboard-upgrade .account-detail-row:first-child {
-  border-top: 1px solid rgba(10,22,40,0.09);
-}
-
-.dashboard-upgrade .account-detail-label {
-  grid-column: 1 / -1;
-  color: #51607a;
-  font-size: 12px;
+.account-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 11px;
+  border-radius: 999px;
+  font-size: 0.72rem;
   font-weight: 800;
+  letter-spacing: 0;
+  white-space: nowrap;
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.18);
 }
 
-.dashboard-upgrade .account-detail-value {
-  color: #07142c;
-  font-size: 16px;
-  font-weight: 850;
+.status-success { color: #047857 !important; background: #dff8ec !important; border-color: #b8edd2 !important; }
+.status-warning { color: #a16207 !important; background: #fff5d6 !important; border-color: #f9df8a !important; }
+.status-danger { color: #b42318 !important; background: #fee4e2 !important; border-color: #fecdca !important; }
+.status-info { color: #175cd3 !important; background: #e7f0ff !important; border-color: #c7dcff !important; }
+
+.balance-card,
+.virtual-card,
+.premium-card,
+.table-card,
+.account-details-card {
+  border-radius: 18px !important;
+  box-shadow: 0 16px 42px rgba(15, 23, 42, 0.1) !important;
 }
 
-.dashboard-upgrade .copy-detail-btn {
-  width: 34px;
-  min-width: 34px;
-  height: 34px;
-  min-height: 34px;
-  padding: 0;
-  border-radius: 10px;
-  color: #0018a8;
-  background: #fff;
-}
-
-.dashboard-upgrade .copy-detail-btn span {
-  display: none;
-}
-
-.dashboard-upgrade .virtual-card {
-  max-width: 540px;
-  min-height: 210px;
+.balance-card {
+  min-height: 238px;
   padding: 28px !important;
-  background:
-    radial-gradient(circle at 74% 20%, rgba(255,255,255,0.12), transparent 26%),
-    linear-gradient(135deg, #0a1b46 0%, #0018a8 60%, #07142c 100%) !important;
-  box-shadow: 0 18px 40px rgba(0,24,168,0.16) !important;
 }
 
-.dashboard-upgrade .virtual-card .fs-4 {
-  font-size: clamp(20px, 3vw, 30px) !important;
-  font-weight: 700 !important;
+.balance-card .display-5 {
+  font-size: clamp(2.6rem, 5vw, 4.3rem);
+  line-height: 1;
+  letter-spacing: 0;
 }
 
-.dashboard-upgrade .table-card,
-.dashboard-upgrade .premium-card {
-  border: 1px solid rgba(10,22,40,0.09);
-  box-shadow: 0 14px 34px rgba(10,22,40,0.06);
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
 }
 
-.dashboard-upgrade .transaction-table td {
-  padding: 18px 20px !important;
+.quick-access-card {
+  background: rgba(255,255,255,0.98) !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
 }
 
-.dashboard-upgrade .tx-merchant strong {
-  color: #07142c;
-  font-size: 15px;
-  font-weight: 850;
+.quick-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 12px !important;
 }
 
-.dashboard-upgrade .tx-amount {
-  font-size: 16px;
-  font-weight: 850 !important;
+.quick-grid a {
+  min-height: 96px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: linear-gradient(180deg, #ffffff, #f7faff);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.07);
 }
 
-@media (min-width: 1200px) {
-  .dashboard-upgrade .dashboard-card-section {
-    width: 50%;
+.quick-grid a span {
+  line-height: 1.25;
+}
+
+.bank-account-card {
+  padding: 24px;
+}
+
+.bank-account-card-top {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.bank-account-card h5 {
+  margin: 5px 0 4px;
+  color: #fff;
+  font-size: 1.2rem;
+  line-height: 1.2;
+}
+
+.bank-account-card p {
+  margin: 0;
+  color: rgba(255,255,255,0.68);
+}
+
+.bank-account-balance {
+  position: relative;
+  margin-bottom: 20px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.14);
+}
+
+.bank-account-balance span {
+  display: block;
+  color: rgba(255,255,255,0.68);
+  font-size: 0.82rem;
+}
+
+.bank-account-balance strong {
+  display: block;
+  margin-top: 4px;
+  color: #fff;
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 1;
+}
+
+.bank-account-card .account-detail-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.bank-account-card .account-detail-grid div {
+  border-color: rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.09);
+}
+
+.bank-account-card .account-detail-grid span {
+  color: rgba(255,255,255,0.62);
+}
+
+.bank-account-card .account-detail-grid strong {
+  color: #fff;
+}
+
+.bank-account-card .copy-detail-btn {
+  color: #fff;
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.16);
+}
+
+.bank-account-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+@media (max-width: 991.98px) {
+  .topbar {
+    min-height: 64px !important;
+    padding: 10px 14px !important;
+    align-items: center !important;
+    border-radius: 0 0 18px 18px !important;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.1) !important;
   }
-  .dashboard-upgrade .dashboard-transactions-section {
-    width: 58.333333%;
+
+  .mobile-toggle {
+    display: inline-grid !important;
+    place-items: center;
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    padding: 0 !important;
+    border-radius: 13px !important;
+    box-shadow: 0 10px 22px rgba(5, 30, 88, 0.18) !important;
   }
-  .dashboard-upgrade .dashboard-chart-section {
-    width: 41.666667%;
+
+  .topbar h1.h3 {
+    font-size: 18px !important;
+    line-height: 1.15 !important;
+    letter-spacing: 0 !important;
+  }
+
+  .topbar-kicker,
+  .topbar .muted {
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+  }
+
+  .topbar > .d-flex:last-child {
+    gap: 6px !important;
+  }
+
+  .topbar .language-static-pill {
+    display: none !important;
+  }
+
+  .notification-menu > .btn,
+  .topbar .btn-outline-danger {
+    display: inline-grid !important;
+    place-items: center;
+    width: 40px !important;
+    height: 40px !important;
+    padding: 0 !important;
+    border-radius: 13px !important;
+  }
+
+  .avatar-sm {
+    width: 40px !important;
+    height: 40px !important;
+    margin-left: 0 !important;
   }
 }
 
-@media (max-width: 1199px) {
-  .dashboard-upgrade .account-detail-list {
-    grid-template-columns: 1fr;
+@media (max-width: 767.98px) {
+  .app-main {
+    padding: 78px 14px 24px !important;
   }
-}
 
-@media (max-width: 767px) {
-  .app-main:has(.dashboard-upgrade) .topbar {
-    min-height: 0;
-    margin-bottom: 16px;
-    padding-bottom: 14px;
+  .dashboard-grid > [class*="col-"] {
+    order: 50;
   }
-  .app-main:has(.dashboard-upgrade) .topbar h1.h3 {
-    font-size: 28px !important;
-  }
-  .dashboard-upgrade .dashboard-grid {
-    --bs-gutter-y: 16px;
-  }
-  .dashboard-grid > [class*="col-"] { order: 50; }
-  .dashboard-balance-section { order: 1; }
-  .dashboard-account-summary-section { order: 2; }
-  .dashboard-details-section { order: 3; }
-  .dashboard-card-section { order: 4; }
-  .dashboard-transactions-section { order: 5; }
-  .dashboard-chart-section { order: 6; }
-  .dashboard-quick-section { order: 7; }
-  .dashboard-cash-section { order: 8; }
-  .dashboard-verification-section { order: 9; }
-  .dashboard-bills-section { order: 10; }
-  .dashboard-recipients-section { order: 11; }
-  .dashboard-upgrade .deposit-protection-badge {
-    grid-template-columns: 1fr;
-    min-height: 0;
-    padding: 18px;
-    gap: 12px;
-  }
-  .dashboard-upgrade .deposit-protection-agency {
-    border-right: 0;
-    border-bottom: 1px solid rgba(10,22,40,0.12);
-    padding-right: 0;
-    padding-bottom: 12px;
-    font-size: 30px;
-  }
-  .dashboard-upgrade .deposit-protection-copy strong {
-    font-size: 19px;
-  }
-  .dashboard-upgrade .deposit-protection-copy p {
-    font-size: 14px;
-  }
-  .dashboard-upgrade .balance-card,
-  .dashboard-upgrade .account-summary-card {
-    min-height: 0;
-    padding: 22px 18px !important;
-  }
-  .dashboard-upgrade .balance-card .display-5 {
-    font-size: 40px !important;
-  }
-  .dashboard-balance-meta {
-    flex-wrap: wrap;
+
+  .dashboard-balance-section { order: 1 !important; }
+  .dashboard-account-summary-section { order: 2 !important; }
+  .dashboard-details-section { order: 3 !important; }
+  .dashboard-card-section { order: 4 !important; }
+  .dashboard-quick-section { order: 5 !important; }
+  .dashboard-transactions-section { order: 6 !important; }
+  .dashboard-chart-section { order: 7 !important; }
+  .dashboard-onboarding-section { order: 8 !important; }
+  .dashboard-cash-section { order: 9 !important; }
+  .dashboard-verification-section { order: 10 !important; }
+  .dashboard-bills-section { order: 11 !important; }
+  .dashboard-recipients-section { order: 12 !important; }
+
+  .deposit-protection-badge.dashboard-trust-banner,
+  .deposit-protection-badge {
+    align-items: flex-start;
+    flex-direction: column;
     gap: 14px;
+    padding: 18px;
+    border-radius: 16px;
   }
-  .dashboard-balance-meta div,
-  .dashboard-balance-meta div + div {
-    min-width: 0;
-    flex: 1 1 120px;
-    border-left: 0;
-    padding-left: 0;
-    padding-right: 0;
+
+  .deposit-protection-mark {
+    width: 100%;
+    justify-content: space-between;
   }
-  .account-summary-details {
+
+  .deposit-protection-agency {
+    font-size: clamp(2.2rem, 16vw, 3.7rem);
+  }
+
+  .deposit-protection-copy strong {
+    font-size: 1.05rem;
+  }
+
+  .deposit-protection-copy p {
+    font-size: 0.9rem;
+  }
+
+  .balance-card,
+  .account-summary-card,
+  .virtual-card,
+  .premium-card,
+  .table-card,
+  .account-details-card,
+  .bank-account-card {
+    border-radius: 16px !important;
+  }
+
+  .balance-card,
+  .account-summary-card {
+    min-height: unset;
+    padding: 20px !important;
+  }
+
+  .account-summary-details,
+  .bank-account-card .account-detail-grid {
     grid-template-columns: 1fr;
   }
-  .dashboard-upgrade .account-detail-list {
-    padding: 14px;
-    gap: 12px;
+
+  .account-summary-action {
+    width: 100%;
   }
-  .dashboard-upgrade .account-detail-row {
-    grid-template-columns: minmax(0, 1fr) auto;
+
+  .quick-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
-  .dashboard-upgrade .virtual-card {
-    max-width: 100%;
-    min-height: 184px;
+
+  .quick-grid a {
+    min-height: 82px !important;
+  }
+
+  .bank-account-card {
+    padding: 20px;
+  }
+
+  .bank-account-card-top {
+    flex-direction: column;
   }
 }

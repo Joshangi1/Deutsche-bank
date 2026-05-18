@@ -2,6 +2,7 @@
 $pageTitle = 'Accounts';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/helpers.php';
+require_once __DIR__ . '/../includes/frontend_components.php';
 ensure_banking_schema();
 $user = require_user();
 
@@ -23,6 +24,7 @@ $region = user_banking_region($user, $primary);
 $regionConfig = banking_region_config($region);
 $usesIban = in_array($region, ['de', 'ch'], true);
 $currency = user_account_currency($user, $primary);
+$statusMeta = account_display_status($user);
 $accountOptions = in_array($region, ['us', 'ca'], true)
     ? ['Everyday Checking', 'Savings Account', 'Money Market', 'Business Current Account']
     : ($region === 'uk' ? ['Current Account', 'Savings Account', 'Business Current Account'] : ['Current Account', 'Savings Account', 'Business Current Account']);
@@ -41,20 +43,25 @@ $accountOptions = in_array($region, ['us', 'ca'], true)
     <div class="col-xl-8">
         <div class="row g-3">
             <?php foreach ($accounts as $account): ?>
+                <?php $details = user_banking_details((int) $user['id'], $user, $account, true); ?>
                 <div class="col-md-6">
-                    <div class="premium-card p-4 h-100">
-                        <div class="d-flex justify-content-between align-items-start gap-3">
+                    <div class="bank-account-card h-100">
+                        <div class="bank-account-card-top">
                             <div>
                                 <div class="eyebrow"><?= (int) $account['id'] === (int) ($primary['id'] ?? 0) ? 'Primary account' : 'Additional account' ?></div>
-                                <h5 class="fw-bold mb-1"><?= e($account['account_type']) ?></h5>
-                                <p class="muted mb-3">Opened <?= e(date('M j, Y', strtotime((string) $account['created_at']))) ?></p>
+                                <h5><?= e($account['account_type']) ?></h5>
+                                <p>Opened <?= e(date('M j, Y', strtotime((string) $account['created_at']))) ?></p>
                             </div>
-                            <span class="status-pill status-success">ACTIVE</span>
+                            <span class="account-status-pill <?= e($statusMeta['class']) ?>"><i class="fa-solid <?= e($statusMeta['icon']) ?>"></i><?= e($statusMeta['label']) ?></span>
+                        </div>
+                        <div class="bank-account-balance">
+                            <span>Available balance</span>
+                            <strong><?= money($account['available_balance'], $currency) ?></strong>
                         </div>
                         <div class="account-detail-grid">
-                            <div><span>Available</span><strong><?= money($account['available_balance'], $currency) ?></strong></div>
                             <div><span>Pending</span><strong><?= money($account['pending_balance'], $currency) ?></strong></div>
-                            <?php foreach (user_banking_details((int) $user['id'], $user, $account, true) as $detail): ?>
+                            <div><span>Savings</span><strong><?= money($account['savings_balance'], $currency) ?></strong></div>
+                            <?php foreach ($details as $detail): ?>
                                 <div class="copyable-account-detail">
                                     <span><?= e($detail['detail_label']) ?></span>
                                     <strong><?= e($detail['detail_value']) ?></strong>
@@ -63,6 +70,10 @@ $accountOptions = in_array($region, ['us', 'ca'], true)
                                     <?php endif; ?>
                                 </div>
                             <?php endforeach; ?>
+                        </div>
+                        <div class="bank-account-actions">
+                            <a class="btn btn-sm btn-navy <?= account_is_restricted($user) ? 'disabled' : '' ?>" href="<?= url('user/transfers.php') ?>"><i class="fa-solid fa-right-left me-1"></i>Transfer</a>
+                            <a class="btn btn-sm btn-light border" href="<?= url('user/statements.php') ?>"><i class="fa-solid fa-file-lines me-1"></i>Statements</a>
                         </div>
                     </div>
                 </div>

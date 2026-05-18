@@ -103,10 +103,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    document.querySelectorAll('[data-toggle-sidebar]').forEach(btn => {
-        btn.addEventListener('click', () => document.querySelector('.sidebar')?.classList.toggle('open'));
-    });
-
     document.querySelectorAll('[data-freeze-card]').forEach(btn => {
         btn.addEventListener('click', () => {
             const label = btn.querySelector('span');

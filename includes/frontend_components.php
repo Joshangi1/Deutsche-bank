@@ -24,10 +24,9 @@ function deposit_protection_config_for_user(array $user, ?array $account = null)
     $configPath = __DIR__ . '/../config/deposit_protection.php';
     $config = is_file($configPath) ? require $configPath : [];
     $default = $config['default'] ?? [
-        'enabled' => false,
-        'agency' => 'Account Protection',
-        'name' => 'Security & Account Disclosures',
-        'text' => 'Account protection and regulatory disclosures depend on your selected country and account type. Please review the applicable terms and disclosures.',
+        'agency' => 'Local Deposit Protection',
+        'name' => 'Local deposit protection',
+        'text' => 'Deposit protection may be available under applicable local banking regulations, subject to eligibility and limits.',
     ];
     $countries = is_array($config['countries'] ?? null) ? $config['countries'] : [];
 
@@ -50,8 +49,7 @@ function deposit_protection_config_for_user(array $user, ?array $account = null)
         $matchesProfileCountry = $country !== '' && in_array($country, $aliases, true);
         $matchesFallbackRegion = $country === '' && $region === strtolower((string) $key);
         if ($matchesProfileCountry || $matchesFallbackRegion) {
-            $candidate = array_merge($default, $item, ['key' => (string) $key]);
-            return !empty($candidate['enabled']) ? $candidate : array_merge($default, ['key' => 'default']);
+            return array_merge($default, $item, ['key' => (string) $key]);
         }
     }
 
@@ -61,11 +59,82 @@ function deposit_protection_config_for_user(array $user, ?array $account = null)
 function deposit_protection_badge(array $user, ?array $account = null, string $className = ''): string
 {
     $protection = deposit_protection_config_for_user($user, $account);
-    $classes = trim('deposit-protection-badge ' . (!empty($protection['enabled']) ? 'is-verified-agency ' : 'is-neutral-disclosure ') . $className);
+    $classes = trim('deposit-protection-badge ' . $className);
     return '<section class="' . e($classes) . '" aria-label="Deposit protection information">'
-        . '<div class="deposit-protection-agency">' . e((string) $protection['agency']) . '</div>'
+        . '<div class="deposit-protection-mark"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span class="deposit-protection-agency">' . e((string) $protection['agency']) . '</span></div>'
         . '<div class="deposit-protection-copy"><strong>' . e((string) $protection['name']) . '</strong><p>' . e((string) $protection['text']) . '</p></div>'
         . '</section>';
+}
+
+function account_display_status(array $user): array
+{
+    $status = strtolower((string) ($user['status'] ?? 'active'));
+    $verification = strtolower((string) ($user['verification_status'] ?? 'not_started'));
+    $risk = strtolower((string) ($user['risk_status'] ?? 'clear'));
+
+    if ($status === 'frozen') {
+        return [
+            'label' => 'Frozen',
+            'title' => 'Account Frozen',
+            'description' => 'Account activity is temporarily restricted. Contact support for review.',
+            'class' => 'status-warning',
+            'tone' => 'warning',
+            'icon' => 'fa-snowflake',
+        ];
+    }
+
+    if ($status === 'suspended') {
+        return [
+            'label' => 'Suspended',
+            'title' => 'Account Suspended',
+            'description' => 'Online banking access is restricted until support completes a review.',
+            'class' => 'status-danger',
+            'tone' => 'danger',
+            'icon' => 'fa-ban',
+        ];
+    }
+
+    if (in_array($risk, ['fraud_review', 'transfer_restricted'], true)) {
+        return [
+            'label' => 'Restricted',
+            'title' => 'Account Restricted',
+            'description' => 'Some account actions are paused while the security review is active.',
+            'class' => 'status-danger',
+            'tone' => 'danger',
+            'icon' => 'fa-shield-halved',
+        ];
+    }
+
+    if ($verification === 'reupload_requested') {
+        return [
+            'label' => 'Awaiting Verification',
+            'title' => 'Awaiting Verification',
+            'description' => 'Updated identity documents are needed before all account features are available.',
+            'class' => 'status-warning',
+            'tone' => 'warning',
+            'icon' => 'fa-id-card',
+        ];
+    }
+
+    if ($verification !== 'approved' || $risk === 'verification_review') {
+        return [
+            'label' => 'Pending Approval',
+            'title' => 'Pending Admin Approval',
+            'description' => 'Your account is being reviewed by operations before full access is enabled.',
+            'class' => 'status-info',
+            'tone' => 'info',
+            'icon' => 'fa-clock',
+        ];
+    }
+
+    return [
+        'label' => 'Active',
+        'title' => 'Active',
+        'description' => 'Your account is approved and online banking features are available.',
+        'class' => 'status-success',
+        'tone' => 'success',
+        'icon' => 'fa-circle-check',
+    ];
 }
 
 function google_translate_widget(): string
