@@ -2230,3 +2230,185 @@ body,
     line-height: 1.45;
   }
 }
+
+/* Desktop dashboard: premium workspace layout, separate from mobile rules */
+@media (min-width: 1200px) {
+  .dashboard-page-grid {
+    --bs-gutter-x: 1.15rem;
+    --bs-gutter-y: 1.15rem;
+    align-items: stretch;
+  }
+
+  .dashboard-page-grid > [class*="col-"] {
+    display: flex;
+  }
+
+  .dashboard-page-grid > [class*="col-"] > * {
+    width: 100%;
+  }
+
+  .dashboard-balance-section { order: 1 !important; }
+  .dashboard-account-summary-section { order: 2 !important; }
+  .dashboard-transactions-section { order: 3 !important; }
+  .dashboard-quick-section { order: 4 !important; }
+  .dashboard-chart-section { order: 5 !important; }
+  .dashboard-protection-section { order: 6 !important; }
+  .dashboard-onboarding-section { order: 7 !important; }
+  .dashboard-cash-section { order: 8 !important; }
+  .dashboard-verification-section { order: 9 !important; }
+  .dashboard-bills-section { order: 10 !important; }
+  .dashboard-recipients-section { order: 11 !important; }
+
+  .dashboard-balance-section .balance-card,
+  .dashboard-account-summary-section .account-summary-card {
+    min-height: 318px;
+  }
+
+  .balance-card {
+    padding: 34px 32px !important;
+    border-radius: 20px !important;
+    box-shadow: 0 24px 58px rgba(9, 31, 104, 0.18) !important;
+  }
+
+  .balance-card .text-white-50 {
+    font-size: 0.78rem !important;
+    letter-spacing: 0.08em !important;
+    font-weight: 800 !important;
+  }
+
+  .balance-card .display-5 {
+    font-size: clamp(2.9rem, 4.1vw, 4.6rem) !important;
+    letter-spacing: -0.055em !important;
+    line-height: 0.98 !important;
+  }
+
+  .balance-card .mt-4.d-flex {
+    gap: 3.25rem !important;
+    margin-top: 2.2rem !important;
+  }
+
+  .balance-card .mt-4.d-flex > div strong {
+    font-size: 1.04rem !important;
+    letter-spacing: -0.02em;
+  }
+
+  .account-summary-card {
+    padding: 30px !important;
+    border-radius: 20px !important;
+    box-shadow: 0 20px 48px rgba(15, 23, 42, 0.09) !important;
+  }
+
+  .account-summary-card h2 {
+    font-size: clamp(1.7rem, 2vw, 2.25rem) !important;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+  }
+
+  .account-summary-label,
+  .section-heading .eyebrow {
+    letter-spacing: 0.11em !important;
+    font-size: 0.72rem !important;
+    font-weight: 850 !important;
+  }
+
+  .account-summary-details {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .account-summary-details div {
+    min-height: 86px !important;
+    padding: 14px 48px 14px 14px !important;
+  }
+
+  .account-summary-details strong {
+    font-size: 0.98rem !important;
+    letter-spacing: -0.01em;
+  }
+
+  .account-summary-action {
+    margin-top: auto;
+    min-height: 46px;
+  }
+
+  .quick-access-card {
+    padding: 22px !important;
+  }
+
+  .quick-access-card .section-heading {
+    margin-bottom: 14px;
+  }
+
+  .quick-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  .quick-grid a {
+    min-height: 72px !important;
+    padding: 12px 10px !important;
+    border-radius: 14px !important;
+    font-size: 0.76rem !important;
+  }
+
+  .quick-grid i {
+    font-size: 1rem !important;
+  }
+
+  .dashboard-transactions-section .table-card,
+  .dashboard-chart-section .table-card,
+  .dashboard-cash-section .table-card,
+  .dashboard-verification-section .premium-card,
+  .dashboard-bills-section .table-card,
+  .dashboard-recipients-section .table-card {
+    border-radius: 18px !important;
+    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.07) !important;
+  }
+
+  .dashboard-transactions-section .table-card > .p-4,
+  .dashboard-chart-section .table-card,
+  .dashboard-cash-section .table-card,
+  .dashboard-verification-section .premium-card {
+    padding: 22px !important;
+  }
+
+  .dashboard-transactions-section h5,
+  .dashboard-chart-section h5,
+  .dashboard-cash-section h5,
+  .dashboard-verification-section h5,
+  .dashboard-bills-section h5,
+  .dashboard-recipients-section h5 {
+    font-size: 1rem !important;
+    letter-spacing: -0.015em;
+  }
+
+  .transaction-table td {
+    padding: 14px 18px !important;
+  }
+
+  .tx-merchant strong {
+    font-size: 0.9rem !important;
+    letter-spacing: -0.01em;
+  }
+
+  .dashboard-chart-section canvas[data-chart] {
+    max-height: 238px !important;
+  }
+
+  .dashboard-trust-banner-compact {
+    max-width: 1120px;
+    margin: 0 auto !important;
+  }
+}
+
+@media (min-width: 1400px) {
+  .dashboard-page-grid {
+    --bs-gutter-x: 1.35rem;
+    --bs-gutter-y: 1.35rem;
+  }
+
+  .dashboard-balance-section .balance-card,
+  .dashboard-account-summary-section .account-summary-card {
+    min-height: 340px;
+  }
+}
