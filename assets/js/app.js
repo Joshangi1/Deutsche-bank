@@ -193,6 +193,23 @@ document.addEventListener('DOMContentLoaded', () => {
         setInterval(tick, 1000);
     }
 
+    document.querySelectorAll('[data-otp-form]').forEach(form => {
+        form.addEventListener('submit', event => {
+            const submitter = event.submitter;
+            if (submitter?.matches('[data-resend-button]')) return;
+            const button = form.querySelector('[data-otp-submit]');
+            const code = form.querySelector('[name="otp_code"]');
+            if (code && !/^\d{6}$/.test(code.value.trim())) {
+                return;
+            }
+            if (button) {
+                button.disabled = true;
+                button.classList.add('is-loading');
+                button.textContent = 'Verifying...';
+            }
+        });
+    });
+
     document.querySelectorAll('[data-mask-ssn], [data-mask-tax-id]').forEach(input => {
         input.addEventListener('input', () => {
             const limit = input.hasAttribute('data-mask-tax-id') ? 11 : 9;

@@ -343,6 +343,9 @@ function ensure_banking_schema(): void
         ['admin_logs', 'affected_user_id', 'ALTER TABLE admin_logs ADD COLUMN affected_user_id INT NULL AFTER action'],
         ['admin_logs', 'before_values', 'ALTER TABLE admin_logs ADD COLUMN before_values LONGTEXT NULL AFTER details'],
         ['admin_logs', 'after_values', 'ALTER TABLE admin_logs ADD COLUMN after_values LONGTEXT NULL AFTER before_values'],
+        ['admins', 'failed_attempts', 'ALTER TABLE admins ADD COLUMN failed_attempts INT DEFAULT 0 AFTER role'],
+        ['admins', 'locked_until', 'ALTER TABLE admins ADD COLUMN locked_until DATETIME NULL AFTER failed_attempts'],
+        ['admins', 'last_login', 'ALTER TABLE admins ADD COLUMN last_login DATETIME NULL AFTER locked_until'],
         ['users', 'date_of_birth', 'ALTER TABLE users ADD COLUMN date_of_birth DATE NULL AFTER phone'],
         ['users', 'ssn_last4', 'ALTER TABLE users ADD COLUMN ssn_last4 CHAR(4) NULL AFTER date_of_birth'],
         ['users', 'address_line1', 'ALTER TABLE users ADD COLUMN address_line1 VARCHAR(160) NULL AFTER ssn_last4'],
@@ -907,6 +910,15 @@ function require_user(): array
     enforce_session_activity('user');
     $user = current_user();
     if ($user) {
+        if (($user['status'] ?? 'active') === 'disabled') {
+            clear_current_session();
+            if (session_status() !== PHP_SESSION_ACTIVE) {
+                session_start();
+            }
+            flash('danger', 'This account is not active. Complete phone verification or contact support.');
+            header('Location: ' . url('login.php'));
+            exit;
+        }
         return $user;
     }
     try {

@@ -112,7 +112,7 @@ $GLOBALS['disableTranslate'] = true;
 include __DIR__ . '/includes/public_header.php';
 ?>
 <section class="auth-shell">
-  <form class="auth-card otp-verify-card" method="post" novalidate>
+  <form class="auth-card otp-verify-card" method="post" data-otp-form novalidate>
     <?= csrf_field() ?>
     <input type="hidden" name="purpose" value="<?= e($purpose) ?>">
     <div class="mb-4"><?= lead_logo('dark') ?></div>
@@ -122,7 +122,7 @@ include __DIR__ . '/includes/public_header.php';
     <label class="form-label" for="otp_code">6-digit SMS code</label>
     <input id="otp_code" name="otp_code" class="form-control<?= isset($otpErrors['code']) ? ' is-invalid' : '' ?>" inputmode="numeric" minlength="6" maxlength="6" pattern="\d{6}" autocomplete="one-time-code" required autofocus>
     <?php if (isset($otpErrors['code'])): ?><div class="field-error"><?= e($otpErrors['code']) ?></div><?php endif; ?>
-    <button class="btn btn-gold w-100 mt-3">Verify code</button>
+    <button class="btn btn-gold w-100 mt-3" data-otp-submit>Verify code</button>
     <div class="otp-resend-row">
       <button class="btn btn-link p-0" name="resend_code" value="1" type="submit" data-resend-button formnovalidate>Resend code</button>
       <?php if ($resendAt): ?><span class="small muted" data-code-timer="<?= e((string) max(0, strtotime($resendAt) - time())) ?>">Wait before resending</span><?php endif; ?>

@@ -95,6 +95,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $signupErrors['email'] = 'Enter a valid email address.';
+    } else {
+        $emailCheck = db()->prepare('SELECT id, status, email_verified FROM users WHERE email=? LIMIT 1');
+        $emailCheck->execute([$email]);
+        $existingSignup = $emailCheck->fetch();
+        if ($existingSignup) {
+            $signupErrors['email'] = ((string) ($existingSignup['status'] ?? '') === 'disabled' && (int) ($existingSignup['email_verified'] ?? 0) === 0)
+                ? 'This email has an unfinished phone verification. Sign in to resend the code.'
+                : 'An account already exists for this email.';
+        }
     }
     if ($phoneRaw === '' || !is_valid_sms_phone($phone)) {
         $signupErrors['phone'] = 'Enter a valid phone number with country code.';

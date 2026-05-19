@@ -98,6 +98,9 @@ CREATE TABLE `admins` (
   `email` varchar(160) NOT NULL,
   `password_hash` varchar(255) NOT NULL,
   `role` enum('Super Admin','Operations','Support') DEFAULT 'Operations',
+  `failed_attempts` int(11) DEFAULT 0,
+  `locked_until` datetime DEFAULT NULL,
+  `last_login` datetime DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)

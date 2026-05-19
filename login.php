@@ -49,6 +49,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             flash('danger', 'The database is offline. Please contact support or try again later.');
         } elseif ($user && (int) $user['failed_attempts'] >= 5 && strtotime((string) $user['locked_until']) > time()) {
             flash('danger', 'Account temporarily locked after failed attempts. Try again later.');
+        } elseif ($user && password_verify($password, $user['password_hash']) && ($user['status'] ?? '') === 'disabled' && (int) ($user['email_verified'] ?? 0) === 0) {
+            if (!is_valid_sms_phone((string) ($user['phone'] ?? ''))) {
+                $loginErrors['email'] = 'A valid phone number is required for SMS verification.';
+                flash('danger', 'This signup is not verified and needs a valid phone number. Contact support to update it.');
+            } else {
+                $sent = sms_otp_create((int) $user['id'], (string) $user['phone'], 'signup', 10);
+                if (($sent['ok'] ?? false) || isset($sent['retry_at'])) {
+                    $_SESSION['pending_signup_user_id'] = (int) $user['id'];
+                    $_SESSION['pending_signup_login_url'] = $pageLoginUrl;
+                    flash('info', 'Finish phone verification to activate this account application.');
+                    header('Location: otp_verify.php?purpose=signup');
+                    exit;
+                }
+                $loginErrors['password'] = 'We could not send the SMS code.';
+                flash('danger', (string) ($sent['error'] ?? 'SMS verification could not start. Please try again.'));
+            }
         } elseif ($user && password_verify($password, $user['password_hash']) && in_array($user['status'], ['active', 'frozen', 'suspended'], true)) {
             if (!is_valid_sms_phone((string) ($user['phone'] ?? ''))) {
                 $loginErrors['email'] = 'A valid phone number is required for SMS sign in.';
