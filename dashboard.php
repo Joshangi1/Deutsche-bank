@@ -130,6 +130,13 @@ foreach ($bankingDetails as $detail) {
 if (!$accountCardDetails) {
     $accountCardDetails = array_slice($bankingDetails, 0, 4);
 }
+$accountMetaRows = array_filter([
+    ['label' => 'Account Status', 'value' => $statusMeta['label'] ?? null],
+    ['label' => 'Account Type', 'value' => $account['account_type'] ?? null],
+    ['label' => 'Verification', 'value' => strtoupper(str_replace('_', ' ', (string) ($user['verification_status'] ?? '')))],
+    ['label' => 'Risk Review', 'value' => strtoupper(str_replace('_', ' ', (string) ($user['risk_status'] ?? '')))],
+    ['label' => 'Opened', 'value' => !empty($account['created_at']) ? date('M j, Y', strtotime((string) $account['created_at'])) : null],
+], static fn (array $row): bool => trim((string) ($row['value'] ?? '')) !== '');
 
 $newAccountCards = in_array($bankingRegion, ['us', 'ca', 'uk'], true) ? [
     ($user['verification_status'] ?? '') === 'approved'
@@ -196,12 +203,19 @@ $newAccountCards = in_array($bankingRegion, ['us', 'ca', 'uk'], true) ? [
                     </div>
                 <?php endforeach; ?>
             </div>
+            <?php if ($accountMetaRows): ?>
+                <div class="account-summary-meta">
+                    <?php foreach ($accountMetaRows as $meta): ?>
+                        <div><span><?= e($meta['label']) ?></span><strong><?= e($meta['value']) ?></strong></div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
             <a class="account-summary-action <?= account_is_restricted($user) ? 'disabled' : '' ?>" href="user/transfers.php">
                 <span><?= e($ui['transfer']) ?></span><i class="fa-solid fa-arrow-right"></i>
             </a>
         </div>
     </div>
-    <div class="col-xl-8 dashboard-transactions-section"><div class="table-card"><div class="p-4 d-flex justify-content-between"><h5 class="fw-bold mb-0"><?= e($ui['recent']) ?></h5><a href="user/transactions.php"><?= e($ui['view_all']) ?></a></div><div class="table-responsive"><table class="table transaction-table align-middle mb-0"><tbody><?php foreach ($txRows as $row): ?><?php $isCredit = (float) $row['amount'] > 0; ?><tr><td><div class="tx-merchant"><span class="tx-icon <?= $isCredit ? 'tx-icon-credit' : '' ?>"><i class="fa-solid <?= e(transaction_icon($row)) ?>"></i></span><div><strong><?= e($row['description']) ?></strong><div class="small muted"><?= e(transaction_display_date($row['created_at'])) ?> &middot; <?= e(transaction_category($row)) ?></div></div></div></td><td><span class="status-pill status-<?= $row['status']==='completed'?'success':(in_array($row['status'], ['failed','rejected'], true)?'danger':'warning') ?>"><?= e(strtoupper($row['status'])) ?></span></td><td class="text-end fw-bold tx-amount <?= $isCredit ? 'tx-credit' : 'tx-debit' ?>"><?= $isCredit ? '+' : '-' ?><?= money(abs((float) $row['amount']), $currency) ?></td></tr><?php endforeach; ?><?php if (!$txRows): ?><tr><td colspan="3" class="text-center muted py-5"><i class="fa-solid fa-receipt d-block fs-3 mb-2"></i>No transactions yet.</td></tr><?php endif; ?></tbody></table></div></div></div>
+    <div class="col-xl-8 dashboard-transactions-section"><div class="table-card dashboard-transactions-card"><div class="dashboard-section-head"><div><span class="eyebrow">Latest activity</span><h5 class="fw-bold mb-0"><?= e($ui['recent']) ?></h5></div><a href="user/transactions.php"><?= e($ui['view_all']) ?></a></div><?php if ($txRows): ?><div class="table-responsive"><table class="table transaction-table align-middle mb-0"><tbody><?php foreach ($txRows as $row): ?><?php $isCredit = (float) $row['amount'] > 0; ?><tr><td><div class="tx-merchant"><span class="tx-icon <?= $isCredit ? 'tx-icon-credit' : '' ?>"><i class="fa-solid <?= e(transaction_icon($row)) ?>"></i></span><div><strong><?= e($row['description']) ?></strong><div class="small muted"><?= e(transaction_display_date($row['created_at'])) ?> &middot; <?= e(transaction_category($row)) ?></div></div></div></td><td><span class="status-pill status-<?= $row['status']==='completed'?'success':(in_array($row['status'], ['failed','rejected'], true)?'danger':'warning') ?>"><?= e(strtoupper($row['status'])) ?></span></td><td class="text-end fw-bold tx-amount <?= $isCredit ? 'tx-credit' : 'tx-debit' ?>"><?= $isCredit ? '+' : '-' ?><?= money(abs((float) $row['amount']), $currency) ?></td></tr><?php endforeach; ?></tbody></table></div><?php else: ?><div class="dashboard-empty-state"><span class="tx-icon"><i class="fa-solid fa-receipt"></i></span><div><strong>No transactions yet</strong><p>Your first deposit, card activity, or transfer will appear here with status and category details.</p></div></div><?php endif; ?></div></div>
     <div class="col-xl-4 dashboard-quick-section"><div class="premium-card quick-access-card p-4 h-100"><div class="section-heading"><div><span class="eyebrow">Move money faster</span><h5 class="fw-bold mb-0"><?= e($ui['quick']) ?></h5></div></div><div class="quick-grid">
         <a href="user/accounts.php"><i class="fa-solid fa-layer-group"></i><span>Accounts</span></a>
         <a href="user/transfers.php" class="<?= account_is_restricted($user) ? 'disabled' : '' ?>"><i class="fa-solid fa-right-left"></i><span><?= e($ui['transfer']) ?></span></a>
