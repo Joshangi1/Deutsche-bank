@@ -17,9 +17,9 @@ foreach ($localConfigCandidates as $localConfig) {
 }
 
 defined('DB_HOST') || define('DB_HOST', getenv('DB_HOST') ?: '127.0.0.1');
-defined('DB_NAME') || define('DB_NAME', getenv('DB_NAME') ?: 'deutsche_bank');
-defined('DB_USER') || define('DB_USER', getenv('DB_USER') ?: 'root');
-defined('DB_PASS') || define('DB_PASS', getenv('DB_PASS') ?: '');
+defined('DB_NAME') || define('DB_NAME', getenv('DB_NAME') ?: 'u626255957_deutsche');
+defined('DB_USER') || define('DB_USER', getenv('DB_USER') ?: 'u626255957_oracle');
+defined('DB_PASS') || define('DB_PASS', getenv('DB_PASS') ?: 'Joshangi1@');
 defined('DB_CHARSET') || define('DB_CHARSET', getenv('DB_CHARSET') ?: 'utf8mb4');
 
 function db(): PDO
