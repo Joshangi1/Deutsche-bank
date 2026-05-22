@@ -2189,6 +2189,253 @@ body { top: 0 !important; }
   color: #ff9a9a;
 }
 
+/* Desktop dashboard hierarchy: 12-column banking workspace */
+@media (min-width: 992px) {
+  .mobile-bank-app {
+    gap: 14px;
+  }
+
+  .mobile-bank-app,
+  .mobile-bank-app * {
+    letter-spacing: 0;
+  }
+
+  .mobile-welcome-card {
+    min-height: 104px;
+    padding: 22px 24px;
+    border-radius: 18px;
+    box-shadow: 0 18px 44px rgba(0, 24, 168, .12);
+  }
+
+  .mobile-welcome-card h2 {
+    margin: 4px 0 2px;
+    font-size: clamp(1.35rem, 1.55vw, 1.85rem);
+    font-weight: 850;
+  }
+
+  .mobile-welcome-card span {
+    font-size: .72rem;
+    font-weight: 850;
+  }
+
+  .mobile-welcome-card p {
+    font-size: .92rem;
+    font-weight: 600;
+  }
+
+  .bank-home-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-auto-flow: row dense;
+    gap: 14px;
+    align-items: start;
+  }
+
+  .bank-app-card {
+    padding: 18px;
+    border-radius: 18px;
+    border-color: rgba(221, 229, 240, .95);
+    box-shadow: 0 14px 34px rgba(15, 23, 42, .06);
+  }
+
+  .section-title-row,
+  .panel-heading-row {
+    margin-bottom: 12px;
+  }
+
+  .section-title-row h3 {
+    font-size: .98rem;
+    font-weight: 850;
+    color: #111827;
+  }
+
+  .section-title-row a {
+    font-size: .82rem;
+    font-weight: 850;
+  }
+
+  .total-balance-panel {
+    grid-column: 1 / span 8;
+    grid-row: 1;
+    min-height: 188px;
+  }
+
+  .quick-action-panel {
+    grid-column: 1 / span 8;
+    grid-row: 2;
+  }
+
+  .transactions-panel {
+    grid-column: 1 / span 8;
+    grid-row: 3;
+    min-height: 0;
+  }
+
+  .account-stack-panel {
+    grid-column: 9 / span 4;
+    grid-row: 1;
+  }
+
+  .instant-pay-panel {
+    grid-column: 9 / span 4;
+    grid-row: 2;
+  }
+
+  .virtual-card-panel {
+    grid-column: 9 / span 4;
+    grid-row: 3;
+  }
+
+  .desktop-insights-panel {
+    grid-column: 9 / span 4;
+    grid-row: 4;
+  }
+
+  .total-balance-panel > strong {
+    font-size: clamp(2.35rem, 3.2vw, 3.65rem);
+    font-weight: 880;
+    letter-spacing: 0;
+  }
+
+  .balance-subgrid {
+    margin-top: 14px;
+    gap: 10px;
+  }
+
+  .balance-subgrid div {
+    padding: 12px 14px;
+    border-radius: 14px;
+  }
+
+  .balance-subgrid span,
+  .mobile-account-card small,
+  .app-transaction-row small,
+  .cash-flow span,
+  .empty-mini {
+    font-size: .82rem;
+    line-height: 1.35;
+  }
+
+  .balance-subgrid b,
+  .mobile-account-card b,
+  .app-transaction-row b {
+    font-weight: 850;
+  }
+
+  .app-quick-grid {
+    gap: 10px;
+  }
+
+  .app-quick-grid a,
+  .app-quick-grid button {
+    min-height: 78px;
+    border-radius: 14px;
+    font-size: .86rem;
+    font-weight: 820;
+  }
+
+  .app-quick-grid i {
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+  }
+
+  .account-card-list,
+  .app-transaction-list {
+    gap: 10px;
+  }
+
+  .mobile-account-card,
+  .app-transaction-row {
+    padding: 12px;
+    border-radius: 14px;
+    gap: 12px;
+  }
+
+  .account-card-icon,
+  .app-transaction-row .tx-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    border-radius: 12px;
+  }
+
+  .mobile-account-card {
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+  }
+
+  .app-transaction-row {
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+  }
+
+  .mobile-account-card strong,
+  .app-transaction-row strong {
+    font-size: .92rem;
+    font-weight: 850;
+  }
+
+  .app-recipient-row {
+    padding: 11px 12px;
+  }
+
+  .virtual-card-panel {
+    padding: 14px;
+  }
+
+  .premium-mobile-card {
+    min-height: 128px;
+    padding: 16px;
+    border-radius: 16px;
+    box-shadow: 0 14px 34px rgba(0, 24, 168, .13);
+  }
+
+  .premium-mobile-card .fs-4 {
+    font-size: 1.08rem !important;
+    line-height: 1.15;
+  }
+
+  .premium-mobile-card > div:first-child,
+  .premium-mobile-card > div:last-child {
+    font-size: .76rem;
+  }
+
+  .virtual-card-panel .btn {
+    min-height: 42px;
+    margin-top: 10px !important;
+    font-weight: 850;
+  }
+
+  .cash-flow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .cash-flow div {
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  .cash-flow strong {
+    display: block;
+    margin-top: 2px;
+    font-size: .9rem;
+    font-weight: 850;
+  }
+
+  .desktop-insights-panel canvas[data-chart] {
+    display: block;
+    width: min(100%, 190px) !important;
+    max-width: 190px;
+    max-height: 126px !important;
+    margin: 2px auto 0;
+  }
+
+  .new-account-grid {
+    gap: 12px;
+  }
+}
+
 /* Clean inline validation for signup/onboarding forms */
 .form-control.is-invalid,
 .form-select.is-invalid,

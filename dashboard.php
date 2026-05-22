@@ -252,7 +252,7 @@ $routingLabel = in_array($bankingRegion, ['us', 'ca', 'uk'], true)
         <section class="bank-app-card desktop-insights-panel">
             <div class="section-title-row"><h3><?= e($ui['cash']) ?></h3></div>
             <div class="cash-flow"><div><span><?= e($ui['income']) ?></span><strong class="tx-credit"><?= money($monthlyIncome->fetch()['total'], $currency) ?></strong></div><div><span><?= e($ui['expenses']) ?></span><strong class="tx-debit"><?= money($monthlyExpense->fetch()['total'], $currency) ?></strong></div></div>
-            <?php if ($isNewAccount): ?><div class="empty-mini mt-3">Income and expenses will appear after your first posted transaction.</div><?php else: ?><canvas data-chart="doughnut" height="150" data-chart-region="<?= $isUsAccount ? 'us' : 'eu' ?>"></canvas><?php endif; ?>
+            <?php if ($isNewAccount): ?><div class="empty-mini mt-3">Income and expenses will appear after your first posted transaction.</div><?php else: ?><canvas data-chart="doughnut" height="90" data-chart-region="<?= $isUsAccount ? 'us' : 'eu' ?>"></canvas><?php endif; ?>
         </section>
     </div>
 
