@@ -3457,3 +3457,58 @@ body.dashboard-screen .balance-account-meta b {
     font-size: 1.8rem;
   }
 }
+
+/* Emergency fix: keep dashboard balance hero blue and readable on desktop. */
+@media (min-width: 992px) {
+  body.dashboard-screen .bank-home-grid > .total-balance-panel.bank-app-card {
+    color: #fff !important;
+    background:
+      radial-gradient(circle at 86% 18%, rgba(91, 126, 255, .42), transparent 12rem),
+      radial-gradient(circle at 92% 92%, rgba(255,255,255,.16), transparent 10rem),
+      linear-gradient(135deg, #00105f 0%, #002bd4 54%, #071b35 100%) !important;
+  }
+
+  body.dashboard-screen .total-balance-panel .balance-label,
+  body.dashboard-screen .total-balance-panel .balance-mask,
+  body.dashboard-screen .total-balance-panel .balance-value-row strong,
+  body.dashboard-screen .total-balance-panel .balance-account-select,
+  body.dashboard-screen .total-balance-panel .balance-account-meta b {
+    display: flex;
+    color: #fff !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  body.dashboard-screen .total-balance-panel .balance-label,
+  body.dashboard-screen .total-balance-panel .balance-mask {
+    display: block;
+  }
+
+  body.dashboard-screen .total-balance-panel .balance-account-meta,
+  body.dashboard-screen .total-balance-panel .balance-value-row {
+    display: grid !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  body.dashboard-screen .total-balance-panel .balance-value-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  body.dashboard-screen .total-balance-panel .balance-account-meta {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  body.dashboard-screen .total-balance-panel .balance-account-meta div {
+    display: block !important;
+    border-color: rgba(173, 198, 255, .35) !important;
+    background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.08)) !important;
+  }
+
+  body.dashboard-screen .total-balance-panel .balance-account-meta span {
+    display: block !important;
+    color: rgba(210, 222, 255, .75) !important;
+    opacity: 1 !important;
+  }
+}
