@@ -122,6 +122,32 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const txDetailModal = document.querySelector('#transactionDetailsModal');
+    if (txDetailModal) {
+        const amount = txDetailModal.querySelector('[data-tx-detail-amount]');
+        const title = txDetailModal.querySelector('[data-tx-detail-title]');
+        const type = txDetailModal.querySelector('[data-tx-detail-type]');
+        const category = txDetailModal.querySelector('[data-tx-detail-category]');
+        const date = txDetailModal.querySelector('[data-tx-detail-date]');
+        const status = txDetailModal.querySelector('[data-tx-detail-status]');
+        const icon = txDetailModal.querySelector('[data-tx-detail-icon]');
+        document.querySelectorAll('[data-transaction-detail]').forEach(button => {
+            button.addEventListener('click', () => {
+                if (amount) {
+                    amount.textContent = button.dataset.amount || '';
+                    amount.classList.toggle('tx-credit', button.dataset.direction === 'credit');
+                    amount.classList.toggle('tx-debit', button.dataset.direction !== 'credit');
+                }
+                if (title) title.textContent = button.dataset.title || '';
+                if (type) type.textContent = button.dataset.type || '';
+                if (category) category.textContent = button.dataset.category || '';
+                if (date) date.textContent = button.dataset.date || '';
+                if (status) status.textContent = button.dataset.status || '';
+                if (icon) icon.classList.toggle('tx-icon-credit', button.dataset.direction === 'credit');
+            });
+        });
+    }
+
     document.querySelectorAll('[data-quick-amount]').forEach(btn => {
         btn.addEventListener('click', () => {
             const form = btn.closest('form');
