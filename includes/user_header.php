@@ -153,7 +153,10 @@ document.addEventListener('DOMContentLoaded', function () {
             </button>
             <div>
                 <?php if ($isDashboardPage): ?>
-                    <h1 class="h3 mb-0 fw-bold"><?= $useGermanLabels ? 'Guten Tag' : 'Good afternoon' ?>, <?= e($user['first_name'] . ' ' . $user['last_name']) ?></h1>
+                    <div class="dashboard-greeting">
+                        <span><?= $useGermanLabels ? 'Guten Tag' : 'Good afternoon' ?>,</span>
+                        <strong><?= e($user['first_name'] . ' ' . $user['last_name']) ?></strong>
+                    </div>
                 <?php else: ?>
                     <span class="topbar-kicker"><?= e($regionConfig['workspace']) ?></span>
                     <h1 class="h3 mb-0 fw-bold"><?= e($pageTitle ?? 'Dashboard') ?></h1>
