@@ -50,6 +50,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($user && (int) $user['failed_attempts'] >= 5 && strtotime((string) $user['locked_until']) > time()) {
             flash('danger', 'Account temporarily locked after failed attempts. Try again later.');
         } elseif ($user && password_verify($password, $user['password_hash']) && ($user['status'] ?? '') === 'disabled' && (int) ($user['email_verified'] ?? 0) === 0) {
+            if (!SMS_OTP_ENABLED) {
+                db()->prepare('UPDATE users SET status="active", email_verified=1 WHERE id=? AND status="disabled"')->execute([(int) $user['id']]);
+                flash('success', 'SMS verification is temporarily disabled. Your account application is active for testing.');
+                header('Location: ' . $pageLoginUrl);
+                exit;
+            }
             if (!is_valid_sms_phone((string) ($user['phone'] ?? ''))) {
                 $loginErrors['email'] = 'A valid phone number is required for SMS verification.';
                 flash('danger', 'This signup is not verified and needs a valid phone number. Contact support to update it.');
@@ -66,6 +72,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 flash('danger', (string) ($sent['error'] ?? 'SMS verification could not start. Please try again.'));
             }
         } elseif ($user && password_verify($password, $user['password_hash']) && in_array($user['status'], ['active', 'frozen', 'suspended'], true)) {
+            if (!SMS_OTP_ENABLED) {
+                start_authenticated_session('user', (int) $user['id']);
+                db()->prepare('UPDATE users SET failed_attempts=0, locked_until=NULL, last_login=NOW() WHERE id=?')->execute([(int) $user['id']]);
+                if (($user['status'] ?? 'active') !== 'active') {
+                    notify_customer_event((int) $user['id'], 'account_restricted');
+                }
+                header('Location: dashboard.php');
+                exit;
+            }
             if (!is_valid_sms_phone((string) ($user['phone'] ?? ''))) {
                 $loginErrors['email'] = 'A valid phone number is required for SMS sign in.';
                 flash('danger', 'Your account needs a valid phone number before SMS verification can continue. Contact support to update it.');
@@ -112,7 +127,7 @@ $pageTitle = match ($regionConfig['region']) {
 };
 $prefillEmail = filter_var($_GET['email'] ?? '', FILTER_VALIDATE_EMAIL) ? strtolower((string) $_GET['email']) : '';
 $loginRailTitle = match ($regionConfig['region']) {
-    'us' => 'Modern access for checking, cards, ACH, Zelle, and wires.',
+    'us' => 'Modern access for checking, cards, ACH, Instant Pay, and wires.',
     'ca' => 'Modern access for chequing, cards, Interac, EFT, and wires.',
     'uk' => 'Modern access for current accounts, cards, Faster Payments, and CHAPS.',
     'ch' => 'Modern access for Swiss accounts, cards, SIC, QR-bills, and international transfers.',

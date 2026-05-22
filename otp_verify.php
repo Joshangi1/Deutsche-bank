@@ -6,6 +6,11 @@ ensure_banking_schema();
 
 $purpose = (string) ($_GET['purpose'] ?? $_POST['purpose'] ?? '');
 $purpose = in_array($purpose, ['signup', 'login', 'transfer'], true) ? $purpose : '';
+if (!SMS_OTP_ENABLED) {
+    flash('info', 'SMS verification is temporarily disabled for testing.');
+    header('Location: login.php');
+    exit;
+}
 $otpErrors = [];
 $otpInfo = '';
 $phone = '';

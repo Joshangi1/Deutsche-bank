@@ -187,9 +187,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             db()->commit();
             $_SESSION['pending_signup_user_id'] = $userId;
             $_SESSION['pending_signup_login_url'] = $pageLoginUrl;
-            $sent = sms_otp_create($userId, $phone, 'signup', 10);
-            flash(($sent['ok'] ?? false) || isset($sent['retry_at']) ? 'success' : 'danger', ($sent['ok'] ?? false) ? 'We sent an SMS verification code to your phone.' : ((string) ($sent['error'] ?? 'Your account was saved, but SMS verification could not be sent. Try resending the code.')));
-            header('Location: otp_verify.php?purpose=signup');
+            if (SMS_OTP_ENABLED) {
+                $sent = sms_otp_create($userId, $phone, 'signup', 10);
+                flash(($sent['ok'] ?? false) || isset($sent['retry_at']) ? 'success' : 'danger', ($sent['ok'] ?? false) ? 'We sent an SMS verification code to your phone.' : ((string) ($sent['error'] ?? 'Your account was saved, but SMS verification could not be sent. Try resending the code.')));
+                header('Location: otp_verify.php?purpose=signup');
+            } else {
+                db()->prepare('UPDATE users SET status="active", email_verified=1 WHERE id=?')->execute([$userId]);
+                flash('success', 'Account created. SMS verification is temporarily disabled for testing.');
+                header('Location: ' . $loginUrl . '?email=' . urlencode($email));
+            }
             exit;
         } catch (Throwable $e) {
             if (db()->inTransaction()) db()->rollBack();

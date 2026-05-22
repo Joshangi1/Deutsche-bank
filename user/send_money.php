@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($review && verify_transaction_pin($user, (string) $_POST['transaction_pin'])) {
             $otpContext = hash('sha256', 'send_money|' . (int) $user['id'] . '|' . json_encode($review));
             $otpVerified = ($_SESSION['transfer_otp_verified_context'] ?? '') === $otpContext && (time() - (int) ($_SESSION['transfer_otp_verified_at'] ?? 0)) <= 600;
-            if (!$otpVerified) {
+            if (!$otpVerified && SMS_OTP_ENABLED) {
                 if (!is_valid_sms_phone((string) ($user['phone'] ?? ''))) {
                     flash('danger', 'Add a valid phone number with country code before sending money.');
                     header('Location: profile.php');
