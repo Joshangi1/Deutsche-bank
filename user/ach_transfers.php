@@ -11,7 +11,7 @@ $pageTitle = $isUsAccount ? 'ACH Transfers' : 'SEPA Transfers';
 
 $pendingAch = $_SESSION['ach_transfer_review'] ?? null;
 $pendingContext = $pendingAch ? hash('sha256', 'ach_transfer|' . (int) $user['id'] . '|' . json_encode($pendingAch)) : '';
-if ($pendingAch && isset($_GET['otp']) && ($_SESSION['transfer_otp_verified_context'] ?? '') === $pendingContext && (time() - (int) ($_SESSION['transfer_otp_verified_at'] ?? 0)) <= 600) {
+if ($pendingAch && (!SMS_OTP_ENABLED || (isset($_GET['otp']) && ($_SESSION['transfer_otp_verified_context'] ?? '') === $pendingContext && (time() - (int) ($_SESSION['transfer_otp_verified_at'] ?? 0)) <= 600))) {
     try {
         $actor = banking_actor('customer', (int) $user['id']);
         if ($isUsAccount) {
@@ -48,6 +48,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'frequency' => $_POST['frequency'] ?? null,
     ];
     $otpContext = hash('sha256', 'ach_transfer|' . (int) $user['id'] . '|' . json_encode($_SESSION['ach_transfer_review']));
+    if (!SMS_OTP_ENABLED) {
+        header('Location: ach_transfers.php?otp=verified');
+        exit;
+    }
     if (!is_valid_sms_phone((string) ($user['phone'] ?? ''))) {
         flash('danger', 'Add a valid phone number with country code before submitting transfers.');
         header('Location: profile.php');

@@ -31,6 +31,9 @@ define('SMS_BASE_URL', rtrim(sms_config('SMS_BASE_URL', sms_config('SENDINC_BASE
 define('BREVO_API_KEY', SMS_API_KEY);
 define('BREVO_FROM_NAME', sms_config('BREVO_FROM_NAME', defined('APP_NAME') ? APP_NAME : 'Deutsche'));
 define('BREVO_SMS_SENDER', SMS_SENDER_ID);
+// Temporary testing switch. Keep OTP code intact, but mute all OTP gates until API setup is complete.
+defined('OTP_ENABLED') || define('OTP_ENABLED', false);
+define('SMS_OTP_ENABLED', OTP_ENABLED && filter_var(sms_config('SMS_OTP_ENABLED', '0'), FILTER_VALIDATE_BOOLEAN));
 $GLOBALS['sms_last_error'] = '';
 
 function sms_set_last_error(string $message): void
@@ -69,7 +72,7 @@ function is_valid_sms_phone(string $phone): bool
 
 function sms_is_configured(): bool
 {
-    return SMS_API_KEY !== '' && SMS_SENDER_ID !== '' && SMS_BASE_URL !== '';
+    return SMS_OTP_ENABLED && SMS_API_KEY !== '' && SMS_SENDER_ID !== '' && SMS_BASE_URL !== '';
 }
 
 function brevo_sms_is_configured(): bool
