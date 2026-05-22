@@ -72,7 +72,7 @@ if ($downloadReady) {
             <form class="transaction-filter">
                 <div class="search-wrap">
                     <i class="fa-solid fa-magnifying-glass"></i>
-                    <input name="q" value="<?= e($query) ?>" class="form-control" placeholder="<?= $isUsAccount ? 'Search merchants, ACH, Zelle, wires' : 'Search merchants, SEPA, transfers' ?>" data-tx-search>
+                    <input name="q" value="<?= e($query) ?>" class="form-control" placeholder="<?= $isUsAccount ? 'Search merchants, ACH, Instant Pay, wires' : 'Search merchants, SEPA, transfers' ?>" data-tx-search>
                 </div>
                 <select name="status" class="form-select"><option value="">All statuses</option><?php foreach(['pending','completed','failed','rejected'] as $s): ?><option value="<?= $s ?>" <?= $status===$s?'selected':'' ?>><?= ucfirst($s) ?></option><?php endforeach; ?></select>
                 <button class="btn btn-navy"><i class="fa-solid fa-filter me-1"></i>Apply</button>

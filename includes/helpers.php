@@ -120,6 +120,27 @@ function ensure_banking_schema(): void
             INDEX idx_security_events_user (user_id),
             CONSTRAINT security_events_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci',
+        'otp_verifications' => 'CREATE TABLE IF NOT EXISTS otp_verifications (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT DEFAULT NULL,
+            phone VARCHAR(40) NOT NULL,
+            purpose ENUM("signup","login","transfer") NOT NULL,
+            otp_hash VARCHAR(255) NOT NULL,
+            expires_at DATETIME NOT NULL,
+            verified_at DATETIME DEFAULT NULL,
+            attempts INT DEFAULT 0,
+            max_attempts INT DEFAULT 5,
+            resend_available_at DATETIME NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            ip_address VARCHAR(64) DEFAULT NULL,
+            user_agent VARCHAR(255) DEFAULT NULL,
+            send_status ENUM("sent","failed") DEFAULT "sent",
+            last_error VARCHAR(255) DEFAULT NULL,
+            INDEX idx_otp_user_purpose (user_id, purpose, created_at),
+            INDEX idx_otp_phone_purpose (phone, purpose, created_at),
+            INDEX idx_otp_expiry (expires_at),
+            CONSTRAINT otp_verifications_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci',
         'system_events' => 'CREATE TABLE IF NOT EXISTS system_events (
             id INT AUTO_INCREMENT PRIMARY KEY,
             event_type VARCHAR(100) NOT NULL,
@@ -322,6 +343,9 @@ function ensure_banking_schema(): void
         ['admin_logs', 'affected_user_id', 'ALTER TABLE admin_logs ADD COLUMN affected_user_id INT NULL AFTER action'],
         ['admin_logs', 'before_values', 'ALTER TABLE admin_logs ADD COLUMN before_values LONGTEXT NULL AFTER details'],
         ['admin_logs', 'after_values', 'ALTER TABLE admin_logs ADD COLUMN after_values LONGTEXT NULL AFTER before_values'],
+        ['admins', 'failed_attempts', 'ALTER TABLE admins ADD COLUMN failed_attempts INT DEFAULT 0 AFTER role'],
+        ['admins', 'locked_until', 'ALTER TABLE admins ADD COLUMN locked_until DATETIME NULL AFTER failed_attempts'],
+        ['admins', 'last_login', 'ALTER TABLE admins ADD COLUMN last_login DATETIME NULL AFTER locked_until'],
         ['users', 'date_of_birth', 'ALTER TABLE users ADD COLUMN date_of_birth DATE NULL AFTER phone'],
         ['users', 'ssn_last4', 'ALTER TABLE users ADD COLUMN ssn_last4 CHAR(4) NULL AFTER date_of_birth'],
         ['users', 'address_line1', 'ALTER TABLE users ADD COLUMN address_line1 VARCHAR(160) NULL AFTER ssn_last4'],
@@ -358,6 +382,8 @@ function ensure_banking_schema(): void
         ['banking_payments', 'reviewed_by', 'ALTER TABLE banking_payments ADD COLUMN reviewed_by INT NULL AFTER proof_file'],
         ['banking_payments', 'reviewed_at', 'ALTER TABLE banking_payments ADD COLUMN reviewed_at DATETIME NULL AFTER reviewed_by'],
         ['banking_payments', 'transaction_id', 'ALTER TABLE banking_payments ADD COLUMN transaction_id INT NULL AFTER reviewed_at'],
+        ['otp_verifications', 'send_status', 'ALTER TABLE otp_verifications ADD COLUMN send_status ENUM("sent","failed") DEFAULT "sent" AFTER user_agent'],
+        ['otp_verifications', 'last_error', 'ALTER TABLE otp_verifications ADD COLUMN last_error VARCHAR(255) NULL AFTER send_status'],
     ];
     foreach ($columns as [$table, $column, $sql]) {
         $check = $pdo->prepare('SELECT COUNT(*) c FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?');
@@ -664,7 +690,7 @@ function banking_region_config(string $regionOrCountry): array
         default => $key,
     };
     $configs = [
-        'us' => ['region' => 'us', 'country' => 'United States', 'language' => 'en', 'currency' => 'USD', 'login' => 'login_us.php', 'register' => 'register_us.php', 'account_type' => 'Premium Checking', 'routing' => US_ROUTING_NUMBER, 'rail_primary' => 'Zelle', 'rail_scheduled' => 'Bill Pay', 'rail_bank' => 'ACH Transfers', 'rail_wire' => 'Wire Transfers', 'transfer' => 'Wire transfer', 'workspace' => 'Deutsche US banking', 'account_label' => 'Account', 'routing_label' => 'Routing'],
+        'us' => ['region' => 'us', 'country' => 'United States', 'language' => 'en', 'currency' => 'USD', 'login' => 'login_us.php', 'register' => 'register_us.php', 'account_type' => 'Premium Checking', 'routing' => US_ROUTING_NUMBER, 'rail_primary' => 'Instant Pay', 'rail_scheduled' => 'Bill Pay', 'rail_bank' => 'ACH Transfers', 'rail_wire' => 'Wire Transfers', 'transfer' => 'Wire transfer', 'workspace' => 'Deutsche US banking', 'account_label' => 'Account', 'routing_label' => 'Routing'],
         'de' => ['region' => 'de', 'country' => 'Germany', 'language' => 'en', 'currency' => 'EUR', 'login' => 'login_de.php', 'register' => 'register_de.php', 'account_type' => 'Current Account', 'routing' => DEFAULT_BIC, 'rail_primary' => 'SEPA Instant', 'rail_scheduled' => 'Standing Orders', 'rail_bank' => 'SEPA Transfers', 'rail_wire' => 'Transfers', 'transfer' => 'SEPA transfer', 'workspace' => 'Deutsche Germany banking', 'account_label' => 'IBAN', 'routing_label' => 'BIC/SWIFT'],
         'ca' => ['region' => 'ca', 'country' => 'Canada', 'language' => 'en', 'currency' => 'CAD', 'login' => 'login_ca.php', 'register' => 'register_ca.php', 'account_type' => 'Premium Chequing', 'routing' => '001000002', 'rail_primary' => 'Interac e-Transfer', 'rail_scheduled' => 'Bill Payments', 'rail_bank' => 'EFT Transfers', 'rail_wire' => 'Wire Transfers', 'transfer' => 'Wire transfer', 'workspace' => 'Deutsche Canada banking', 'account_label' => 'Account', 'routing_label' => 'Institution/Transit'],
         'uk' => ['region' => 'uk', 'country' => 'United Kingdom', 'language' => 'en', 'currency' => 'GBP', 'login' => 'login_uk.php', 'register' => 'register_uk.php', 'account_type' => 'Current Account', 'routing' => '040004', 'rail_primary' => 'Faster Payments', 'rail_scheduled' => 'Direct Debits', 'rail_bank' => 'Standing Orders', 'rail_wire' => 'CHAPS Transfers', 'transfer' => 'CHAPS transfer', 'workspace' => 'Deutsche UK banking', 'account_label' => 'Account', 'routing_label' => 'Sort code'],
@@ -884,6 +910,15 @@ function require_user(): array
     enforce_session_activity('user');
     $user = current_user();
     if ($user) {
+        if (($user['status'] ?? 'active') === 'disabled') {
+            clear_current_session();
+            if (session_status() !== PHP_SESSION_ACTIVE) {
+                session_start();
+            }
+            flash('danger', 'This account is not active. Complete phone verification or contact support.');
+            header('Location: ' . url('login.php'));
+            exit;
+        }
         return $user;
     }
     try {

@@ -11,13 +11,14 @@ if (!$account) {
     include __DIR__ . '/includes/user_footer.php';
     exit;
 }
+$allAccounts = user_accounts((int) $user['id']);
+$allAccounts = $allAccounts ?: [$account];
 
 $bankingRegion = user_banking_region($user, $account);
 $regionConfig = banking_region_config($bankingRegion);
-$bankingDetails = user_banking_details((int) $user['id'], $user, $account, true);
 $isUsAccount = $bankingRegion === 'us';
 $currency = user_account_currency($user, $account);
-$useGermanLabels = false;
+$useGermanLabels = $regionConfig['language'] === 'de';
 $displayIban = $account['iban'] ?? $user['iban'] ?? '';
 $displayIban = $displayIban !== '' ? format_iban_display($displayIban) : '';
 $displayBic = $account['bic'] ?? $account['routing_number'] ?? DEFAULT_BIC;
@@ -59,10 +60,10 @@ if ($bankingRegion === 'us') {
         'verification' => 'Verification status', 'review' => 'Current account review', 'quick' => 'Quick access',
         'link_card' => 'Add Credit Card', 'statements' => 'Statements', 'security' => 'Security',
         'hero_eyebrow' => 'Welcome to Deutsche', 'hero_title' => 'Your U.S. checking account is ready',
-        'hero_copy' => 'Routing, bill pay, Zelle, ACH, and wire tools are available after verification.',
+        'hero_copy' => 'Routing, bill pay, Instant Pay, ACH, and wire tools are available after verification.',
         'bill_title' => 'Upcoming bill payments', 'bill_day' => 'Due day', 'bill_active' => 'AUTOPAY', 'bill_manual' => 'MANUAL',
         'bill_empty' => 'No bill payments yet. Add a biller when you are ready.',
-        'recipient_title' => 'Zelle recipients', 'recipient_action' => 'Send', 'recipient_empty' => 'No Zelle recipients yet.',
+        'recipient_title' => 'Instant Pay recipients', 'recipient_action' => 'Send', 'recipient_empty' => 'No Instant Pay recipients yet.',
     ];
 } elseif ($bankingRegion === 'ca') {
     $ui = [
@@ -100,6 +101,19 @@ if ($bankingRegion === 'us') {
         'bill_title' => 'Scheduled QR-bills', 'bill_day' => 'Run day', 'bill_active' => 'ACTIVE', 'bill_manual' => 'MANUAL',
         'bill_empty' => 'No QR-bills yet.', 'recipient_title' => 'Swiss recipients', 'recipient_action' => 'Send', 'recipient_empty' => 'No recipients yet.',
     ];
+} elseif ($useGermanLabels) {
+    $ui = [
+        'available' => 'Verfuegbarer Saldo', 'pending' => 'Vorgemerkt', 'savings' => 'Tagesgeld', 'account' => 'Konto',
+        'transfer' => 'SEPA-Ueberweisung', 'recent' => 'Aktuelle Transaktionen', 'view_all' => 'Alle anzeigen',
+        'balance' => 'Ausgewogener Trend', 'cash' => 'Cashflow', 'income' => 'Einkommen', 'expenses' => 'Kosten',
+        'verification' => 'Verifizierungsstatus', 'review' => 'Aktuelle Kontoueberpruefung', 'quick' => 'Schnellzugriff',
+        'link_card' => 'Kreditkarte hinzufuegen', 'statements' => 'Kontoauszuege', 'security' => 'Sicherheit',
+        'hero_eyebrow' => 'Willkommen bei Deutsche', 'hero_title' => 'Ihr neues Girokonto ist bereit',
+        'hero_copy' => 'Ihre Kontoinfrastruktur ist aktiv. Schliessen Sie die Verifizierung ab und nutzen Sie SEPA-Zahlungen.',
+        'bill_title' => 'Geplante Dauerauftraege', 'bill_day' => 'Ausfuehrungstag', 'bill_active' => 'AKTIV', 'bill_manual' => 'MANUELL',
+        'bill_empty' => 'Noch keine Dauerauftraege. Legen Sie einen SEPA-Empfaenger an, wenn Sie bereit sind.',
+        'recipient_title' => 'SEPA-Empfaenger', 'recipient_action' => 'Senden', 'recipient_empty' => 'Noch keine Empfaenger. SEPA-Empfaenger erscheinen hier.',
+    ];
 } else {
     $ui = [
         'available' => 'Available balance', 'pending' => 'Pending', 'savings' => 'Savings', 'account' => 'Account',
@@ -115,115 +129,207 @@ if ($bankingRegion === 'us') {
     ];
 }
 
-$statusMeta = account_display_status($user);
-$accountCardDetails = [];
-$accountDetailKeywords = ['account', 'routing', 'sort', 'iban', 'bic', 'swift', 'institution', 'transit', 'bank name', 'bank address', 'address'];
-foreach ($bankingDetails as $detail) {
-    $label = strtolower((string) ($detail['detail_label'] ?? ''));
-    foreach ($accountDetailKeywords as $keyword) {
-        if (str_contains($label, $keyword)) {
-            $accountCardDetails[] = $detail;
-            break;
-        }
-    }
-}
-if (!$accountCardDetails) {
-    $accountCardDetails = array_slice($bankingDetails, 0, 4);
-}
+$statusMeta = match (true) {
+    $accountStatus === 'frozen' => ['Frozen', 'status-warning', 'fa-snowflake'],
+    $accountStatus === 'suspended' => ['Suspended', 'status-danger', 'fa-ban'],
+    $verificationStatus !== 'approved' => ['Unverified', 'status-info', 'fa-id-card'],
+    default => ['Active', 'status-success', 'fa-circle'],
+};
 
-$newAccountCards = in_array($bankingRegion, ['us', 'ca', 'uk'], true) ? [
+$newAccountCards = $isUsAccount ? [
     ($user['verification_status'] ?? '') === 'approved'
         ? ['fa-circle-check', 'Identity verified', 'Your identity review is complete and online banking is active.']
         : ['fa-id-card', 'Identity review', 'Your submitted documents are being reviewed by operations.'],
-    ['fa-building-columns', $regionConfig['routing_label'] . ' ready', 'Your local account details are visible for transfers and account review.'],
-    ['fa-bolt', $regionConfig['rail_primary'] . ' available', 'Add recipients after account verification.'],
-    ['fa-file-invoice-dollar', $regionConfig['rail_scheduled'] . ' ready', 'Set up scheduled payments after verification.'],
+    ['fa-building-columns', 'Routing ready', 'Your account and routing number are visible for ACH and wire transfers.'],
+    ['fa-bolt', 'Instant Pay available', 'Add recipients by email or phone after account verification.'],
+    ['fa-file-invoice-dollar', 'Bill Pay ready', 'Set up billers for utilities, rent, subscriptions, and insurance.'],
     ['fa-credit-card', 'Debit card prepared', 'Your digital card view is ready while the physical card is prepared.'],
-    ['fa-receipt', 'No activity yet', 'New activity appears after your first deposit, transfer, scheduled payment, or card transaction.'],
+    ['fa-receipt', 'No activity yet', 'New activity appears after your first deposit, bill pay, ACH, wire, or card transaction.'],
 ] : [
     ($user['verification_status'] ?? '') === 'approved'
-        ? ['fa-circle-check', 'Identity verified', 'Your identity review is complete and online banking is active.']
-        : ['fa-id-card', 'Identity review', 'Your submitted documents are being reviewed by operations.'],
-    ['fa-building-columns', 'IBAN data ready', 'Your IBAN and BIC/SWIFT are visible for transfers.'],
-    ['fa-credit-card', 'Add Credit Card', 'Generate an Add Credit Card link and have the credit card approved by admin.'],
-    ['fa-calendar-check', 'Set up standing order', 'Schedule recurring SEPA payments after verification.'],
-    ['fa-credit-card', 'Debit card prepared', 'Your digital card view is ready while the physical edition is prepared.'],
-    ['fa-receipt', 'No activity yet', 'New activity appears after your first deposit, transfer, or card payment.'],
+        ? ['fa-circle-check', $useGermanLabels ? 'Identitaet verifiziert' : 'Identity verified', $useGermanLabels ? 'Ihre Identitaetspruefung ist abgeschlossen und das Online-Banking ist aktiv.' : 'Your identity review is complete and online banking is active.']
+        : ['fa-id-card', $useGermanLabels ? 'Identitaet pruefen' : 'Identity review', $useGermanLabels ? 'Ihre eingereichten Dokumente werden durch unser Operations-Team geprueft.' : 'Your submitted documents are being reviewed by operations.'],
+    ['fa-building-columns', $useGermanLabels ? 'SEPA-Daten bereit' : 'SEPA data ready', $useGermanLabels ? 'Ihre IBAN und BIC sind fuer SEPA-Ueberweisungen sichtbar.' : 'Your IBAN and BIC are visible for SEPA transfers.'],
+    ['fa-credit-card', $useGermanLabels ? 'Kreditkarte hinzufuegen' : 'Add Credit Card', $useGermanLabels ? 'Erzeugen Sie einen sicheren Kartenlink und lassen Sie die Kreditkarte durch den Admin freigeben.' : 'Generate an Add Credit Card link and have the credit card approved by admin.'],
+    ['fa-calendar-check', $useGermanLabels ? 'Dauerauftrag einrichten' : 'Set up standing order', $useGermanLabels ? 'Planen Sie wiederkehrende SEPA-Zahlungen nach der Verifizierung.' : 'Schedule recurring SEPA payments after verification.'],
+    ['fa-credit-card', $useGermanLabels ? 'Debitkarte vorbereitet' : 'Debit card prepared', $useGermanLabels ? 'Ihre digitale Kartenansicht ist bereit, waehrend die physische Ausgabe vorbereitet wird.' : 'Your digital card view is ready while the physical edition is prepared.'],
+    ['fa-receipt', $useGermanLabels ? 'Noch keine Umsaetze' : 'No activity yet', $useGermanLabels ? 'Neue Aktivitaeten erscheinen nach der ersten Einzahlung, Ueberweisung oder Kartenzahlung.' : 'New activity appears after your first deposit, transfer, or card payment.'],
 ];
+$quickActions = [
+    ['type' => 'button', 'target' => '#transferModal', 'icon' => 'fa-right-left', 'label' => $useGermanLabels ? 'Ueberweisen' : 'Transfer'],
+    ['type' => 'link', 'href' => 'user/bill_pay.php', 'icon' => 'fa-file-invoice-dollar', 'label' => $isUsAccount ? 'Pay bills' : ($useGermanLabels ? 'Zahlungen' : 'Payments')],
+    ['type' => 'link', 'href' => 'user/deposits.php', 'icon' => 'fa-camera', 'label' => $useGermanLabels ? 'Einzahlen' : 'Deposit'],
+    ['type' => 'link', 'href' => 'user/send_money.php', 'icon' => 'fa-paper-plane', 'label' => $isUsAccount ? 'Instant Pay' : $regionConfig['rail_primary']],
+];
+$primaryAccountLabel = in_array($bankingRegion, ['us', 'ca', 'uk'], true)
+    ? e($regionConfig['account_label']) . ' ' . e(mask_account((string) $account['account_number']))
+    : 'IBAN ' . e($displayIban);
+$routingLabel = in_array($bankingRegion, ['us', 'ca', 'uk'], true)
+    ? e($regionConfig['routing_label']) . ' ' . e((string) ($account['routing_number'] ?: $regionConfig['routing']))
+    : 'BIC/SWIFT ' . e($displayBic);
 ?>
-<?php if ($isNewAccount): ?>
-<div class="banking-hero mb-4"><div><div class="eyebrow"><?= e($ui['hero_eyebrow']) ?></div><h2><?= e($ui['hero_title']) ?></h2><p><?= e($ui['hero_copy']) ?></p></div><i class="fa-solid fa-circle-check"></i></div>
-<?php endif; ?>
-<div class="row g-4 dashboard-grid dashboard-page-grid">
-    <div class="col-xl-7 dashboard-balance-section">
-        <div class="balance-card">
-            <div class="row g-4 position-relative">
-                <div class="col-12">
-                    <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
-                        <div class="text-white-50"><?= e($ui['available']) ?></div>
-                        <span class="account-status-pill <?= e($statusMeta['class']) ?>"><i class="fa-solid <?= e($statusMeta['icon']) ?>"></i><?= e($statusMeta['label']) ?></span>
-                    </div>
-                    <div class="display-5 fw-bold"><?= money($account['available_balance'], $currency) ?></div>
-                    <div class="mt-4 d-flex gap-4 flex-wrap">
-                        <div><div class="text-white-50 small"><?= e($ui['pending']) ?></div><strong><?= money($account['pending_balance'], $currency) ?></strong></div>
-                        <div><div class="text-white-50 small"><?= e($ui['savings']) ?></div><strong><?= money($account['savings_balance'], $currency) ?></strong></div>
-                    </div>
-                </div>
-            </div>
+<div class="mobile-bank-app">
+    <section class="mobile-welcome-card">
+        <div>
+            <span><?= e($regionConfig['workspace']) ?></span>
+            <h2><?= $useGermanLabels ? 'Guten Tag' : 'Good afternoon' ?>, <?= e($user['first_name']) ?></h2>
+            <p><?= e(date('l, F j, Y - g:i A')) ?></p>
         </div>
-    </div>
-    <div class="col-xl-5 dashboard-account-summary-section">
-        <div class="account-summary-card h-100">
-            <div class="account-summary-watermark"><i class="fa-solid fa-building-columns"></i></div>
-            <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
-                <div>
-                    <div class="account-summary-label"><?= e($ui['account']) ?></div>
-                    <h2><?= e($account['account_type']) ?></h2>
-                </div>
-                <span class="account-status-pill <?= e($statusMeta['class']) ?>"><i class="fa-solid <?= e($statusMeta['icon']) ?>"></i><?= e($statusMeta['label']) ?></span>
+        <button class="welcome-card-action" type="button" data-bs-toggle="modal" data-bs-target="#cardApplicationModal" aria-label="Open card application"><i class="fa-solid fa-credit-card"></i></button>
+    </section>
+
+    <div class="bank-home-grid">
+        <section class="bank-app-card total-balance-panel">
+            <div class="panel-heading-row">
+                <span><?= e($ui['available']) ?></span>
+                <span class="account-status-pill <?= e($statusMeta[1]) ?>"><i class="fa-solid <?= e($statusMeta[2]) ?>"></i><?= e($statusMeta[0]) ?></span>
             </div>
-            <div class="account-summary-details">
-                <?php foreach ($accountCardDetails as $detail): ?>
-                    <?php $copyable = !array_key_exists('is_copyable', $detail) || (int) $detail['is_copyable'] === 1; ?>
-                    <div>
-                        <span><?= e($detail['detail_label']) ?></span>
-                        <strong><?= e($detail['detail_value']) ?></strong>
-                        <?php if ($copyable): ?>
-                            <button type="button" class="account-summary-copy" data-copy-text="<?= e($detail['detail_value']) ?>" aria-label="Copy <?= e($detail['detail_label']) ?>">
-                                <i class="fa-regular fa-copy"></i><span>Copy</span>
-                            </button>
-                        <?php endif; ?>
-                    </div>
+            <strong><?= money($account['available_balance'], $currency) ?></strong>
+            <div class="balance-subgrid">
+                <div><span><?= e($ui['pending']) ?></span><b><?= money($account['pending_balance'], $currency) ?></b></div>
+                <div><span><?= e($ui['savings']) ?></span><b><?= money($account['savings_balance'], $currency) ?></b></div>
+            </div>
+        </section>
+
+        <section class="bank-app-card quick-action-panel">
+            <div class="section-title-row"><h3><?= e($ui['quick']) ?></h3></div>
+            <div class="app-quick-grid">
+                <?php foreach ($quickActions as $action): ?>
+                    <?php if ($action['type'] === 'button'): ?>
+                        <button type="button" data-bs-toggle="modal" data-bs-target="<?= e($action['target']) ?>" <?= account_is_restricted($user) ? 'disabled' : '' ?>><i class="fa-solid <?= e($action['icon']) ?>"></i><span><?= e($action['label']) ?></span></button>
+                    <?php else: ?>
+                        <a href="<?= e($action['href']) ?>" class="<?= account_is_restricted($user) && in_array($action['href'], ['user/send_money.php','user/bill_pay.php','user/deposits.php'], true) ? 'disabled' : '' ?>"><i class="fa-solid <?= e($action['icon']) ?>"></i><span><?= e($action['label']) ?></span></a>
+                    <?php endif; ?>
                 <?php endforeach; ?>
             </div>
-            <a class="account-summary-action <?= account_is_restricted($user) ? 'disabled' : '' ?>" href="user/transfers.php">
-                <span><?= e($ui['transfer']) ?></span><i class="fa-solid fa-arrow-right"></i>
-            </a>
+        </section>
+
+        <section class="bank-app-card account-stack-panel">
+            <div class="section-title-row"><h3>My Accounts</h3><a href="user/accounts.php"><?= e($ui['view_all']) ?></a></div>
+            <div class="account-card-list">
+                <?php foreach (array_slice($allAccounts, 0, 3) as $index => $accountRow): ?>
+                    <a class="mobile-account-card" href="user/accounts.php">
+                        <span class="account-card-icon"><i class="fa-solid <?= $index === 0 ? 'fa-building-columns' : 'fa-piggy-bank' ?>"></i></span>
+                        <span><strong><?= e($accountRow['account_type']) ?></strong><small><?= e(mask_account((string) $accountRow['account_number'])) ?></small></span>
+                        <b><?= money($accountRow['available_balance'], $currency) ?></b>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        </section>
+
+        <section class="bank-app-card instant-pay-panel">
+            <div class="section-title-row"><h3><?= $isUsAccount ? 'Instant Pay' : e($regionConfig['rail_primary']) ?></h3><a href="user/send_money.php"><?= e($ui['recipient_action']) ?></a></div>
+            <?php foreach ($recipientRows as $r): ?>
+                <div class="recipient-row app-recipient-row"><span class="tx-icon"><i class="fa-solid fa-user"></i></span><div><strong><?= e($r['name']) ?></strong><div class="small muted"><?= e($r['iban'] ? format_iban_display($r['iban']) : ($r['email'] ?: $r['phone'])) ?></div></div><a class="btn btn-sm btn-light border ms-auto" href="user/send_money.php"><?= e($ui['recipient_action']) ?></a></div>
+            <?php endforeach; ?>
+            <?php if (!$recipientRows): ?><div class="empty-mini"><?= e($ui['recipient_empty']) ?></div><?php endif; ?>
+        </section>
+
+        <section class="bank-app-card virtual-card-panel">
+            <div class="virtual-card premium-mobile-card">
+                <div class="d-flex justify-content-between"><strong><?= e(UI_BRAND_SHORT) ?></strong><i class="fa-solid fa-credit-card"></i></div>
+                <div class="fs-4 fw-bold">Card ending <?= e($card['card_last4']) ?></div>
+                <div class="d-flex justify-content-between"><span><?= e(strtoupper($user['first_name'] . ' ' . $user['last_name'])) ?></span><span><?= $isNewAccount ? 'PREPARING' : e(strtoupper($card['status'])) ?></span></div>
+            </div>
+            <button class="btn btn-navy w-100 mt-3" type="button" data-bs-toggle="modal" data-bs-target="#cardApplicationModal"><?= e($ui['link_card']) ?></button>
+        </section>
+
+        <section class="bank-app-card transactions-panel">
+            <div class="section-title-row"><h3><?= e($ui['recent']) ?></h3><a href="user/transactions.php"><?= e($ui['view_all']) ?></a></div>
+            <div class="app-transaction-list">
+                <?php foreach ($txRows as $row): ?>
+                    <?php $isCredit = (float) $row['amount'] > 0; ?>
+                    <button type="button" class="app-transaction-row" data-transaction-detail data-bs-toggle="modal" data-bs-target="#transactionDetailsModal" data-title="<?= e($row['description']) ?>" data-type="<?= e(strtoupper(str_replace('_', ' ', $row['transaction_type']))) ?>" data-category="<?= e(transaction_category($row)) ?>" data-status="<?= e(strtoupper($row['status'])) ?>" data-date="<?= e(transaction_display_date($row['created_at'])) ?>" data-amount="<?= e(($isCredit ? '+' : '-') . money(abs((float) $row['amount']), $currency)) ?>" data-direction="<?= $isCredit ? 'credit' : 'debit' ?>">
+                        <span class="tx-icon <?= $isCredit ? 'tx-icon-credit' : '' ?>"><i class="fa-solid <?= e(transaction_icon($row)) ?>"></i></span>
+                        <span><strong><?= e($row['description']) ?></strong><small><?= e(transaction_display_date($row['created_at'])) ?> &middot; <?= e(transaction_category($row)) ?></small></span>
+                        <b class="<?= $isCredit ? 'tx-credit' : 'tx-debit' ?>"><?= $isCredit ? '+' : '-' ?><?= money(abs((float) $row['amount']), $currency) ?></b>
+                    </button>
+                <?php endforeach; ?>
+                <?php if (!$txRows): ?><div class="empty-mini"><i class="fa-solid fa-receipt d-block fs-3 mb-2"></i>No transactions yet.</div><?php endif; ?>
+            </div>
+        </section>
+
+        <section class="bank-app-card desktop-insights-panel">
+            <div class="section-title-row"><h3><?= e($ui['cash']) ?></h3></div>
+            <div class="cash-flow"><div><span><?= e($ui['income']) ?></span><strong class="tx-credit"><?= money($monthlyIncome->fetch()['total'], $currency) ?></strong></div><div><span><?= e($ui['expenses']) ?></span><strong class="tx-debit"><?= money($monthlyExpense->fetch()['total'], $currency) ?></strong></div></div>
+            <?php if ($isNewAccount): ?><div class="empty-mini mt-3">Income and expenses will appear after your first posted transaction.</div><?php else: ?><canvas data-chart="doughnut" height="150" data-chart-region="<?= $isUsAccount ? 'us' : 'eu' ?>"></canvas><?php endif; ?>
+        </section>
+    </div>
+
+    <?php if ($isNewAccount): ?>
+        <section class="new-account-grid">
+            <?php foreach ($newAccountCards as $item): ?>
+                <div class="empty-state-card"><span class="tx-icon"><i class="fa-solid <?= e($item[0]) ?>"></i></span><strong><?= e($item[1]) ?></strong><p><?= e($item[2]) ?></p></div>
+            <?php endforeach; ?>
+        </section>
+    <?php endif; ?>
+</div>
+
+<div class="modal fade app-flow-modal" id="transferModal" tabindex="-1" aria-labelledby="transferModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <form class="modal-content" method="post" action="user/transfers.php">
+            <?= csrf_field() ?>
+            <div class="modal-header"><h2 class="modal-title fs-5" id="transferModalTitle"><?= e($ui['transfer']) ?></h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+            <div class="modal-body">
+                <div class="transfer-type-tabs"><span>Internal Transfer</span><span>External Transfer</span></div>
+                <label class="form-label">From account</label>
+                <select class="form-select mb-3" disabled><option><?= e($account['account_type']) ?> (<?= money($account['available_balance'], $currency) ?>)</option></select>
+                <label class="form-label">Recipient name</label>
+                <input name="recipient_name" class="form-control mb-3" required>
+                <?php if ($isUsAccount): ?>
+                    <label class="form-label">Routing number</label>
+                    <input name="routing_number" class="form-control mb-3" inputmode="numeric" maxlength="9" required>
+                    <label class="form-label">Account number</label>
+                    <input name="account_number" class="form-control mb-3" inputmode="numeric" maxlength="17" required>
+                <?php else: ?>
+                    <label class="form-label">IBAN</label>
+                    <input name="iban" class="form-control mb-3 text-uppercase" data-format-iban required>
+                    <label class="form-label">BIC/SWIFT</label>
+                    <input name="bic" class="form-control mb-3 text-uppercase" value="<?= e(DEFAULT_BIC) ?>" required>
+                <?php endif; ?>
+                <label class="form-label">Amount in <?= e($currency) ?></label>
+                <input name="amount" type="number" step="0.01" min="1" class="form-control mb-3" required>
+                <input name="memo" class="form-control" placeholder="Memo optional">
+                <p class="transfer-note mt-3"><i class="fa-solid fa-triangle-exclamation"></i> Transfers continue through the existing secure review and approval flow.</p>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-light border" data-bs-dismiss="modal">Cancel</button><button name="review" value="1" class="btn btn-navy">Continue</button></div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade app-flow-modal" id="transactionDetailsModal" tabindex="-1" aria-labelledby="transactionDetailsTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header"><h2 class="modal-title fs-5" id="transactionDetailsTitle">Transaction Details</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+            <div class="modal-body">
+                <div class="transaction-detail-hero"><span data-tx-detail-icon><i class="fa-solid fa-receipt"></i></span><strong data-tx-detail-amount></strong><small data-tx-detail-title></small></div>
+                <div class="review-panel mb-0">
+                    <span>Type</span><strong data-tx-detail-type></strong>
+                    <span>Category</span><strong data-tx-detail-category></strong>
+                    <span>Date</span><strong data-tx-detail-date></strong>
+                    <span>Status</span><strong data-tx-detail-status></strong>
+                </div>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-navy w-100" data-bs-dismiss="modal">Close</button></div>
         </div>
     </div>
-    <div class="col-xl-8 dashboard-transactions-section"><div class="table-card"><div class="p-4 d-flex justify-content-between"><h5 class="fw-bold mb-0"><?= e($ui['recent']) ?></h5><a href="user/transactions.php"><?= e($ui['view_all']) ?></a></div><div class="table-responsive"><table class="table transaction-table align-middle mb-0"><tbody><?php foreach ($txRows as $row): ?><?php $isCredit = (float) $row['amount'] > 0; ?><tr><td><div class="tx-merchant"><span class="tx-icon <?= $isCredit ? 'tx-icon-credit' : '' ?>"><i class="fa-solid <?= e(transaction_icon($row)) ?>"></i></span><div><strong><?= e($row['description']) ?></strong><div class="small muted"><?= e(transaction_display_date($row['created_at'])) ?> &middot; <?= e(transaction_category($row)) ?></div></div></div></td><td><span class="status-pill status-<?= $row['status']==='completed'?'success':(in_array($row['status'], ['failed','rejected'], true)?'danger':'warning') ?>"><?= e(strtoupper($row['status'])) ?></span></td><td class="text-end fw-bold tx-amount <?= $isCredit ? 'tx-credit' : 'tx-debit' ?>"><?= $isCredit ? '+' : '-' ?><?= money(abs((float) $row['amount']), $currency) ?></td></tr><?php endforeach; ?><?php if (!$txRows): ?><tr><td colspan="3" class="text-center muted py-5"><i class="fa-solid fa-receipt d-block fs-3 mb-2"></i>No transactions yet.</td></tr><?php endif; ?></tbody></table></div></div></div>
-    <div class="col-xl-4 dashboard-quick-section"><div class="premium-card quick-access-card p-4 h-100"><div class="section-heading"><div><span class="eyebrow">Move money faster</span><h5 class="fw-bold mb-0"><?= e($ui['quick']) ?></h5></div></div><div class="quick-grid">
-        <a href="user/accounts.php"><i class="fa-solid fa-layer-group"></i><span>Accounts</span></a>
-        <a href="user/transfers.php" class="<?= account_is_restricted($user) ? 'disabled' : '' ?>"><i class="fa-solid fa-right-left"></i><span><?= e($ui['transfer']) ?></span></a>
-        <a href="user/send_money.php" class="<?= account_is_restricted($user) ? 'disabled' : '' ?>"><i class="fa-solid fa-bolt"></i><span><?= e($regionConfig['rail_primary']) ?></span></a>
-        <a href="user/bill_pay.php" class="<?= account_is_restricted($user) ? 'disabled' : '' ?>"><i class="fa-solid fa-calendar-check"></i><span>Bills</span></a>
-        <a href="user/ach_transfers.php" class="<?= account_is_restricted($user) ? 'disabled' : '' ?>"><i class="fa-solid fa-building-columns"></i><span><?= e($regionConfig['rail_bank']) ?></span></a>
-        <a href="user/loans.php"><i class="fa-solid fa-hand-holding-dollar"></i><span>Loans</span></a>
-    </div></div></div>
-    <div class="col-xl-4 dashboard-chart-section"><div class="table-card p-4 h-100"><h5 class="fw-bold"><?= e($ui['balance']) ?></h5><?php if ($isNewAccount): ?><div class="empty-mini">Charts will populate after account activity begins.</div><?php else: ?><canvas data-chart="line" height="220"></canvas><?php endif; ?></div></div>
-    <div class="col-12 dashboard-protection-section">
-        <?= deposit_protection_badge($user, $account, 'dashboard-trust-banner dashboard-trust-banner-compact mb-0') ?>
+</div>
+
+<div class="modal fade app-flow-modal" id="cardApplicationModal" tabindex="-1" aria-labelledby="cardApplicationTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content" method="post" action="user/linked_accounts.php">
+            <?= csrf_field() ?>
+            <div class="modal-header"><h2 class="modal-title fs-5" id="cardApplicationTitle"><?= e($ui['link_card']) ?></h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+            <div class="modal-body">
+                <p class="muted">Generate a secure one-time page tied to your profile. Approval and funding stay in the existing admin review workflow.</p>
+                <div class="review-panel mb-0">
+                    <span>Customer</span><strong><?= e($user['first_name'] . ' ' . $user['last_name']) ?></strong>
+                    <span>Primary account</span><strong><?= $primaryAccountLabel ?></strong>
+                    <span>Transfer details</span><strong><?= $routingLabel ?></strong>
+                </div>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-light border" data-bs-dismiss="modal">Cancel</button><button name="create_card_link" value="1" class="btn btn-navy">Generate secure link</button></div>
+        </form>
     </div>
-    <?php if ($isNewAccount): ?>
-        <div class="col-12 dashboard-onboarding-section"><div class="row g-3">
-            <?php foreach ($newAccountCards as $item): ?>
-                <div class="col-md-4"><div class="empty-state-card"><span class="tx-icon"><i class="fa-solid <?= e($item[0]) ?>"></i></span><strong><?= e($item[1]) ?></strong><p><?= e($item[2]) ?></p></div></div>
-            <?php endforeach; ?>
-        </div></div>
-    <?php endif; ?>
-    <div class="col-xl-4 dashboard-cash-section"><div class="table-card p-4 h-100"><h5 class="fw-bold"><?= e($ui['cash']) ?></h5><div class="cash-flow"><div><span><?= e($ui['income']) ?></span><strong class="tx-credit"><?= money($monthlyIncome->fetch()['total'], $currency) ?></strong></div><div><span><?= e($ui['expenses']) ?></span><strong class="tx-debit"><?= money($monthlyExpense->fetch()['total'], $currency) ?></strong></div></div><?php if ($isNewAccount): ?><div class="empty-mini">Income and expenses will appear after your first posted transaction.</div><?php else: ?><canvas data-chart="doughnut" height="160" data-chart-region="<?= $isUsAccount ? 'us' : 'eu' ?>"></canvas><?php endif; ?></div></div>
-    <div class="col-xl-4 dashboard-verification-section"><div class="premium-card p-4 h-100"><h5 class="fw-bold"><?= e($ui['verification']) ?></h5><p class="muted"><?= e($ui['review']) ?></p><div class="goal-ring"><strong><?= e(strtoupper(str_replace('_',' ', $user['verification_status'] ?? 'NOT STARTED'))) ?></strong><span><?= e(strtoupper(str_replace('_',' ', $user['risk_status'] ?? 'CLEAR'))) ?></span></div></div></div>
-    <div class="col-xl-6 dashboard-bills-section"><div class="table-card"><div class="p-4"><h5 class="fw-bold mb-0"><?= e($ui['bill_title']) ?></h5></div><table class="table align-middle mb-0"><tbody><?php foreach ($billRows as $bill): ?><tr><td><i class="fa-solid fa-calendar-day text-warning me-2"></i><?= e($bill['name']) ?><div class="small muted"><?= e($bill['category']) ?> &middot; <?= e($ui['bill_day']) ?> <?= e((string)$bill['due_day']) ?></div></td><td><span class="status-pill status-<?= $bill['autopay']?'success':'warning' ?>"><?= $bill['autopay'] ? e($ui['bill_active']) : e($ui['bill_manual']) ?></span></td></tr><?php endforeach; ?><?php if (!$billRows): ?><tr><td class="text-center muted py-5"><?= e($ui['bill_empty']) ?></td></tr><?php endif; ?></tbody></table></div></div>
-    <div class="col-xl-6 dashboard-recipients-section"><div class="table-card"><div class="p-4"><h5 class="fw-bold mb-0"><?= e($ui['recipient_title']) ?></h5></div><div class="p-3"><?php foreach ($recipientRows as $r): ?><div class="recipient-row"><span class="tx-icon"><i class="fa-solid fa-user"></i></span><div><strong><?= e($r['name']) ?></strong><div class="small muted"><?= e($r['iban'] ? format_iban_display($r['iban']) : ($r['email'] ?: $r['phone'])) ?></div></div><a class="btn btn-sm btn-light border ms-auto" href="user/send_money.php"><?= e($ui['recipient_action']) ?></a></div><?php endforeach; ?><?php if (!$recipientRows): ?><div class="text-center muted py-4"><?= e($ui['recipient_empty']) ?></div><?php endif; ?></div></div></div>
 </div>
 <?php include __DIR__ . '/includes/user_footer.php'; ?>

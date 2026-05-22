@@ -122,6 +122,32 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const txDetailModal = document.querySelector('#transactionDetailsModal');
+    if (txDetailModal) {
+        const amount = txDetailModal.querySelector('[data-tx-detail-amount]');
+        const title = txDetailModal.querySelector('[data-tx-detail-title]');
+        const type = txDetailModal.querySelector('[data-tx-detail-type]');
+        const category = txDetailModal.querySelector('[data-tx-detail-category]');
+        const date = txDetailModal.querySelector('[data-tx-detail-date]');
+        const status = txDetailModal.querySelector('[data-tx-detail-status]');
+        const icon = txDetailModal.querySelector('[data-tx-detail-icon]');
+        document.querySelectorAll('[data-transaction-detail]').forEach(button => {
+            button.addEventListener('click', () => {
+                if (amount) {
+                    amount.textContent = button.dataset.amount || '';
+                    amount.classList.toggle('tx-credit', button.dataset.direction === 'credit');
+                    amount.classList.toggle('tx-debit', button.dataset.direction !== 'credit');
+                }
+                if (title) title.textContent = button.dataset.title || '';
+                if (type) type.textContent = button.dataset.type || '';
+                if (category) category.textContent = button.dataset.category || '';
+                if (date) date.textContent = button.dataset.date || '';
+                if (status) status.textContent = button.dataset.status || '';
+                if (icon) icon.classList.toggle('tx-icon-credit', button.dataset.direction === 'credit');
+            });
+        });
+    }
+
     document.querySelectorAll('[data-quick-amount]').forEach(btn => {
         btn.addEventListener('click', () => {
             const form = btn.closest('form');
@@ -181,15 +207,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const codeTimer = document.querySelector('[data-code-timer]');
     if (codeTimer) {
         let seconds = Number(codeTimer.dataset.codeTimer || 300);
+        const resendButton = document.querySelector('[data-resend-button]');
         const tick = () => {
             const m = String(Math.floor(seconds / 60)).padStart(2, '0');
             const s = String(seconds % 60).padStart(2, '0');
-            codeTimer.textContent = `${m}:${s}`;
+            codeTimer.textContent = seconds > 0 ? `${m}:${s}` : 'You can resend now';
+            if (resendButton) resendButton.disabled = seconds > 0;
             seconds = Math.max(0, seconds - 1);
         };
         tick();
         setInterval(tick, 1000);
     }
+
+    document.querySelectorAll('[data-otp-form]').forEach(form => {
+        form.addEventListener('submit', event => {
+            const submitter = event.submitter;
+            if (submitter?.matches('[data-resend-button]')) return;
+            const button = form.querySelector('[data-otp-submit]');
+            const code = form.querySelector('[name="otp_code"]');
+            if (code && !/^\d{6}$/.test(code.value.trim())) {
+                return;
+            }
+            if (button) {
+                button.disabled = true;
+                button.classList.add('is-loading');
+                button.textContent = 'Verifying...';
+            }
+        });
+    });
 
     document.querySelectorAll('[data-mask-ssn], [data-mask-tax-id]').forEach(input => {
         input.addEventListener('input', () => {

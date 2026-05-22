@@ -2412,3 +2412,324 @@ body,
     min-height: 340px;
   }
 }
+
+/* Premium dashboard refinement: tighter, richer, still data-driven */
+.app-main {
+  background:
+    radial-gradient(circle at top right, rgba(0, 24, 168, 0.045), transparent 34rem),
+    linear-gradient(180deg, #f7f9fd 0%, #f3f6fb 100%);
+}
+
+.topbar {
+  min-height: 64px !important;
+  margin-bottom: 18px !important;
+  padding: 14px 16px !important;
+  border: 1px solid rgba(226, 232, 240, 0.88);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.055);
+  backdrop-filter: blur(14px);
+}
+
+.topbar h1 {
+  color: #111827;
+  font-size: clamp(1.28rem, 1.55vw, 1.68rem) !important;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+}
+
+.topbar .muted {
+  font-size: 0.82rem;
+}
+
+.topbar-kicker,
+.dashboard-section-head .eyebrow,
+.quick-access-card .eyebrow {
+  font-weight: 850;
+  letter-spacing: 0.12em;
+}
+
+.dashboard-page-grid {
+  --bs-gutter-x: 1rem;
+  --bs-gutter-y: 1rem;
+}
+
+.balance-card {
+  background:
+    radial-gradient(circle at 86% 14%, rgba(255,255,255,.19), transparent 9rem),
+    linear-gradient(135deg, #0018a8 0%, #092da7 48%, #08162e 100%) !important;
+  border: 1px solid rgba(255,255,255,.2);
+  box-shadow: 0 22px 56px rgba(0, 24, 168, .18), inset 0 1px 0 rgba(255,255,255,.16) !important;
+}
+
+.balance-card::after {
+  border-color: rgba(255,255,255,.16) !important;
+  background: rgba(255,255,255,.06) !important;
+}
+
+.balance-card .display-5 {
+  font-weight: 850 !important;
+  letter-spacing: -0.055em !important;
+  text-wrap: balance;
+}
+
+.account-summary-card {
+  border: 1px solid rgba(226, 232, 240, .92) !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.98), rgba(248,250,252,.98)),
+    radial-gradient(circle at 86% 12%, rgba(0,24,168,.08), transparent 12rem) !important;
+}
+
+.account-summary-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.account-summary-meta div {
+  padding: 10px 12px;
+  border: 1px solid rgba(226, 232, 240, .9);
+  border-radius: 12px;
+  background: rgba(248, 250, 252, .82);
+}
+
+.account-summary-meta span {
+  display: block;
+  color: #64748b;
+  font-size: .68rem;
+  font-weight: 820;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.account-summary-meta strong {
+  display: block;
+  margin-top: 2px;
+  color: #0f172a;
+  font-size: .82rem;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.dashboard-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid rgba(226, 232, 240, .82);
+}
+
+.dashboard-section-head .eyebrow {
+  display: block;
+  margin-bottom: 4px;
+  color: #0018a8;
+  font-size: .68rem;
+  text-transform: uppercase;
+}
+
+.dashboard-section-head h5 {
+  color: #111827;
+  letter-spacing: -0.02em;
+}
+
+.dashboard-section-head a {
+  color: #0018a8;
+  font-size: .86rem;
+  font-weight: 850;
+}
+
+.dashboard-transactions-card {
+  overflow: hidden;
+  min-height: 0 !important;
+}
+
+.dashboard-empty-state {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 22px;
+  color: #475569;
+}
+
+.dashboard-empty-state .tx-icon {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  background: #eef4ff;
+  color: #0018a8;
+  border-color: #d9e6ff;
+}
+
+.dashboard-empty-state strong {
+  display: block;
+  color: #111827;
+  font-weight: 850;
+}
+
+.dashboard-empty-state p {
+  margin: 3px 0 0;
+  font-size: .88rem;
+}
+
+.transaction-table tbody tr {
+  transition: background .18s ease, transform .18s ease;
+}
+
+.transaction-table tbody tr:hover {
+  background: #f8fbff !important;
+}
+
+.status-pill {
+  letter-spacing: .035em;
+}
+
+.quick-access-card {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.98), rgba(248,250,252,.96)),
+    radial-gradient(circle at top right, rgba(0,24,168,.07), transparent 12rem) !important;
+  border: 1px solid rgba(226, 232, 240, .9) !important;
+}
+
+.quick-grid a {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(219, 230, 255, .95) !important;
+  background:
+    linear-gradient(180deg, #ffffff 0%, #f8fbff 100%) !important;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, .055);
+  color: #0f172a !important;
+}
+
+.quick-grid a::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(0,24,168,.085), transparent 52%);
+  opacity: 0;
+  transition: opacity .18s ease;
+}
+
+.quick-grid a:hover,
+.quick-grid a:focus-visible {
+  transform: translateY(-2px);
+  border-color: rgba(0, 24, 168, .2) !important;
+  box-shadow: 0 16px 34px rgba(0, 24, 168, .1);
+}
+
+.quick-grid a:hover::before,
+.quick-grid a:focus-visible::before {
+  opacity: 1;
+}
+
+.quick-grid i {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background: #eef4ff;
+  color: #0018a8 !important;
+}
+
+.quick-grid span {
+  position: relative;
+  font-weight: 820;
+}
+
+.deposit-protection-badge.dashboard-trust-banner-compact {
+  border: 1px solid rgba(207, 216, 232, .9) !important;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.98), rgba(244,247,252,.96)),
+    radial-gradient(circle at left, rgba(0,24,168,.08), transparent 22rem) !important;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, .06) !important;
+}
+
+.deposit-protection-badge.dashboard-trust-banner-compact .deposit-protection-agency {
+  color: #0018a8 !important;
+  letter-spacing: -0.035em;
+}
+
+@media (min-width: 1200px) {
+  .app-main {
+    padding: 22px 24px !important;
+  }
+
+  .dashboard-page-grid {
+    --bs-gutter-x: .95rem !important;
+    --bs-gutter-y: .95rem !important;
+  }
+
+  .dashboard-balance-section .balance-card,
+  .dashboard-account-summary-section .account-summary-card {
+    min-height: 300px !important;
+  }
+
+  .balance-card {
+    padding: 28px !important;
+  }
+
+  .account-summary-card {
+    padding: 24px !important;
+  }
+
+  .account-summary-card .mb-4 {
+    margin-bottom: 16px !important;
+  }
+
+  .account-summary-details div {
+    min-height: 74px !important;
+    padding: 12px 44px 12px 12px !important;
+  }
+
+  .account-summary-action {
+    min-height: 42px !important;
+    margin-top: 14px !important;
+  }
+
+  .dashboard-transactions-section .table-card,
+  .dashboard-chart-section .table-card,
+  .dashboard-cash-section .table-card,
+  .dashboard-verification-section .premium-card,
+  .dashboard-bills-section .table-card,
+  .dashboard-recipients-section .table-card {
+    min-height: 0 !important;
+  }
+
+  .transaction-table td {
+    padding: 12px 18px !important;
+  }
+}
+
+@media (max-width: 1199.98px) {
+  .topbar {
+    padding: 12px 14px !important;
+    border-radius: 16px;
+  }
+
+  .account-summary-meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 575.98px) {
+  .topbar {
+    margin-bottom: 14px !important;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, .05);
+  }
+
+  .account-summary-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-section-head {
+    padding: 16px;
+  }
+
+  .dashboard-empty-state {
+    padding: 18px 16px;
+    align-items: flex-start;
+  }
+}

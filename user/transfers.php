@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/helpers.php';
+require_once __DIR__ . '/../config/brevo.php';
 $user = require_user();
 require_unrestricted_account($user);
 $account = user_account((int) $user['id']);
@@ -54,6 +55,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $review = $_SESSION['transfer_review'] ?? null;
 
     if ($review && verify_transaction_pin($user, $pin)) {
+        $otpContext = hash('sha256', 'transfer|' . (int) $user['id'] . '|' . json_encode($review));
+        $otpVerified = ($_SESSION['transfer_otp_verified_context'] ?? '') === $otpContext && (time() - (int) ($_SESSION['transfer_otp_verified_at'] ?? 0)) <= 600;
+        if (!$otpVerified) {
+            if (!is_valid_sms_phone((string) ($user['phone'] ?? ''))) {
+                flash('danger', 'Add a valid phone number with country code before submitting transfers.');
+                header('Location: profile.php');
+                exit;
+            }
+            $sent = sms_otp_create((int) $user['id'], (string) $user['phone'], 'transfer', 10);
+            if (($sent['ok'] ?? false) || isset($sent['retry_at'])) {
+                $_SESSION['pending_transfer_context'] = $otpContext;
+                $_SESSION['pending_transfer_return'] = 'user/transfers.php?review=1';
+                flash('info', 'Enter the SMS verification code to continue this transfer.');
+                header('Location: ../otp_verify.php?purpose=transfer');
+                exit;
+            }
+            flash('danger', (string) ($sent['error'] ?? 'SMS verification could not start. Try again.'));
+            header('Location: transfers.php?review=1');
+            exit;
+        }
         $actor = banking_actor('customer', (int) $user['id']);
         if (($review['region'] ?? '') === 'us') {
             $descriptor = 'WIRE TRANSFER TO ' . strtoupper((string) $review['recipient_name']) . ' ROUTING ' . (string) $review['routing_number'];
@@ -84,6 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             flash('success', 'SEPA transfer confirmation complete. Status: pending admin review.');
         }
         unset($_SESSION['transfer_review']);
+        unset($_SESSION['transfer_otp_verified_at'], $_SESSION['transfer_otp_verified_context']);
         header('Location: transfers.php');
         exit;
     }

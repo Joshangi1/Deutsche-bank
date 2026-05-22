@@ -1,12 +1,33 @@
 <?php
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/helpers.php';
+require_once __DIR__ . '/../config/brevo.php';
 $user = require_user();
 require_unrestricted_account($user);
 $account = user_account((int) $user['id']);
 $isUsAccount = user_is_us_account($user, $account);
 $currency = user_account_currency($user, $account);
 $pageTitle = $isUsAccount ? 'ACH Transfers' : 'SEPA Transfers';
+
+$pendingAch = $_SESSION['ach_transfer_review'] ?? null;
+$pendingContext = $pendingAch ? hash('sha256', 'ach_transfer|' . (int) $user['id'] . '|' . json_encode($pendingAch)) : '';
+if ($pendingAch && isset($_GET['otp']) && ($_SESSION['transfer_otp_verified_context'] ?? '') === $pendingContext && (time() - (int) ($_SESSION['transfer_otp_verified_at'] ?? 0)) <= 600) {
+    try {
+        $actor = banking_actor('customer', (int) $user['id']);
+        if ($isUsAccount) {
+            banking_process_ach_transfer((int) $user['id'], trim((string) $pendingAch['institution_name']), (string) $pendingAch['direction'], (float) $pendingAch['amount'], (string) ($pendingAch['scheduled_for'] ?: date('Y-m-d', strtotime('+1 weekday'))), !empty($pendingAch['recurring']), $pendingAch['frequency'] ?? null, $actor);
+            flash('success', 'ACH transfer submitted for admin review.');
+        } else {
+            banking_process_sepa_transfer((int) $user['id'], trim((string) $pendingAch['recipient_name']), (string) $pendingAch['iban'], (string) ($pendingAch['bic'] ?: DEFAULT_BIC), (string) $pendingAch['direction'], (float) $pendingAch['amount'], (string) ($pendingAch['scheduled_for'] ?: date('Y-m-d', strtotime('+1 weekday'))), false, !empty($pendingAch['recurring']), $pendingAch['frequency'] ?? null, $actor);
+            flash('success', 'SEPA transfer submitted for processing.');
+        }
+        unset($_SESSION['ach_transfer_review'], $_SESSION['transfer_otp_verified_at'], $_SESSION['transfer_otp_verified_context']);
+    } catch (Throwable $e) {
+        flash('danger', $e->getMessage());
+    }
+    header('Location: ach_transfers.php');
+    exit;
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
@@ -15,18 +36,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: ach_transfers.php');
         exit;
     }
-    try {
-        $actor = banking_actor('customer', (int) $user['id']);
-        if ($isUsAccount) {
-            banking_process_ach_transfer((int) $user['id'], trim((string) $_POST['institution_name']), (string) $_POST['direction'], (float) $_POST['amount'], (string) ($_POST['scheduled_for'] ?: date('Y-m-d', strtotime('+1 weekday'))), isset($_POST['recurring']), $_POST['frequency'] ?? null, $actor);
-            flash('success', 'ACH transfer submitted for admin review.');
-        } else {
-            banking_process_sepa_transfer((int) $user['id'], trim((string) $_POST['recipient_name']), (string) $_POST['iban'], (string) ($_POST['bic'] ?: DEFAULT_BIC), (string) $_POST['direction'], (float) $_POST['amount'], (string) ($_POST['scheduled_for'] ?: date('Y-m-d', strtotime('+1 weekday'))), false, isset($_POST['recurring']), $_POST['frequency'] ?? null, $actor);
-            flash('success', 'SEPA transfer submitted for processing.');
-        }
-    } catch (Throwable $e) {
-        flash('danger', $e->getMessage());
+    $_SESSION['ach_transfer_review'] = [
+        'institution_name' => trim((string) ($_POST['institution_name'] ?? '')),
+        'recipient_name' => trim((string) ($_POST['recipient_name'] ?? '')),
+        'iban' => (string) ($_POST['iban'] ?? ''),
+        'bic' => (string) ($_POST['bic'] ?? DEFAULT_BIC),
+        'direction' => (string) ($_POST['direction'] ?? 'outbound'),
+        'amount' => (float) ($_POST['amount'] ?? 0),
+        'scheduled_for' => (string) ($_POST['scheduled_for'] ?: date('Y-m-d', strtotime('+1 weekday'))),
+        'recurring' => isset($_POST['recurring']),
+        'frequency' => $_POST['frequency'] ?? null,
+    ];
+    $otpContext = hash('sha256', 'ach_transfer|' . (int) $user['id'] . '|' . json_encode($_SESSION['ach_transfer_review']));
+    if (!is_valid_sms_phone((string) ($user['phone'] ?? ''))) {
+        flash('danger', 'Add a valid phone number with country code before submitting transfers.');
+        header('Location: profile.php');
+        exit;
     }
+    $sent = sms_otp_create((int) $user['id'], (string) $user['phone'], 'transfer', 10);
+    if (($sent['ok'] ?? false) || isset($sent['retry_at'])) {
+        $_SESSION['pending_transfer_context'] = $otpContext;
+        $_SESSION['pending_transfer_return'] = 'user/ach_transfers.php?otp=verified';
+        flash('info', 'Enter the SMS verification code to continue this transfer.');
+        header('Location: ../otp_verify.php?purpose=transfer');
+        exit;
+    }
+    flash('danger', (string) ($sent['error'] ?? 'SMS verification could not start. Try again.'));
     header('Location: ach_transfers.php');
     exit;
 }

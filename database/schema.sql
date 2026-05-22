@@ -98,6 +98,9 @@ CREATE TABLE `admins` (
   `email` varchar(160) NOT NULL,
   `password_hash` varchar(255) NOT NULL,
   `role` enum('Super Admin','Operations','Support') DEFAULT 'Operations',
+  `failed_attempts` int(11) DEFAULT 0,
+  `locked_until` datetime DEFAULT NULL,
+  `last_login` datetime DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
@@ -413,6 +416,32 @@ CREATE TABLE `otp_codes` (
   KEY `idx_otp_user_purpose` (`user_id`,`purpose`),
   KEY `idx_otp_expiry` (`expires_at`),
   CONSTRAINT `otp_codes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `otp_verifications`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `otp_verifications` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) DEFAULT NULL,
+  `phone` varchar(40) NOT NULL,
+  `purpose` enum('signup','login','transfer') NOT NULL,
+  `otp_hash` varchar(255) NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `verified_at` datetime DEFAULT NULL,
+  `attempts` int(11) DEFAULT 0,
+  `max_attempts` int(11) DEFAULT 5,
+  `resend_available_at` datetime NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `ip_address` varchar(64) DEFAULT NULL,
+  `user_agent` varchar(255) DEFAULT NULL,
+  `send_status` enum('sent','failed') DEFAULT 'sent',
+  `last_error` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_otp_user_purpose` (`user_id`,`purpose`,`created_at`),
+  KEY `idx_otp_phone_purpose` (`phone`,`purpose`,`created_at`),
+  KEY `idx_otp_expiry` (`expires_at`),
+  CONSTRAINT `otp_verifications_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `password_resets`;
