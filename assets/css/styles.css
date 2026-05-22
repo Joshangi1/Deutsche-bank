@@ -3512,3 +3512,178 @@ body.dashboard-screen .balance-account-meta b {
     opacity: 1 !important;
   }
 }
+
+/* Final polish pass: sizing, spacing, and subtle interaction only. */
+body.dashboard-screen [data-balance-sensitive] {
+  transition: opacity .16s ease, filter .16s ease, transform .16s ease;
+}
+
+body.dashboard-screen [data-balance-sensitive].is-swapping {
+  opacity: .18 !important;
+  filter: blur(3px);
+  transform: translateY(1px);
+}
+
+body.dashboard-screen .balance-value-row button {
+  transition: transform .18s ease, background .18s ease, box-shadow .18s ease;
+}
+
+body.dashboard-screen .balance-value-row button:active {
+  transform: scale(.96);
+}
+
+@media (min-width: 992px) {
+  body.dashboard-screen .bank-home-grid > .total-balance-panel.bank-app-card {
+    min-height: 274px;
+    padding: 32px 34px;
+    box-shadow: 0 30px 70px rgba(0, 24, 168, .24) !important;
+  }
+
+  body.dashboard-screen .total-balance-panel .balance-label {
+    margin-bottom: .45rem;
+    font-size: .98rem;
+  }
+
+  body.dashboard-screen .total-balance-panel .balance-value-row {
+    grid-template-columns: minmax(0, max-content) auto;
+    justify-content: start;
+    gap: 18px;
+  }
+
+  body.dashboard-screen .total-balance-panel .balance-value-row strong {
+    font-size: clamp(3.35rem, 4.9vw, 5.1rem) !important;
+    letter-spacing: 0;
+  }
+
+  body.dashboard-screen .total-balance-panel .balance-value-row button {
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
+    border-radius: 16px;
+  }
+
+  body.dashboard-screen .total-balance-panel .balance-mask {
+    margin-top: .78rem;
+    font-size: 1.2rem;
+  }
+
+  body.dashboard-screen .total-balance-panel .balance-account-meta {
+    margin-top: 22px;
+    gap: 12px;
+  }
+
+  body.dashboard-screen .total-balance-panel .balance-account-meta div {
+    padding: 14px 16px;
+    border-radius: 16px;
+  }
+
+  body.dashboard-screen .total-balance-panel .balance-account-meta span {
+    margin-bottom: .16rem;
+  }
+
+  body.dashboard-screen .virtual-card-panel,
+  body.dashboard-screen .desktop-insights-panel,
+  body.dashboard-screen .account-stack-panel,
+  body.dashboard-screen .instant-pay-panel {
+    box-shadow: 0 12px 28px rgba(15, 23, 42, .045);
+  }
+
+  body.dashboard-screen .premium-mobile-card {
+    width: 92%;
+    min-height: 106px;
+    max-height: 120px;
+    padding: 13px 16px;
+  }
+
+  body.dashboard-screen .premium-mobile-card .virtual-card-spacer {
+    min-height: 18px;
+  }
+
+  body.dashboard-screen .desktop-insights-panel {
+    padding: 14px;
+  }
+
+  body.dashboard-screen .desktop-insights-panel .section-title-row {
+    margin-bottom: 8px;
+  }
+
+  body.dashboard-screen .desktop-insights-panel .cash-flow {
+    gap: 7px;
+    margin-bottom: 6px;
+  }
+
+  body.dashboard-screen .desktop-insights-panel .cash-flow div {
+    padding: 7px 9px;
+    border-radius: 10px;
+  }
+
+  body.dashboard-screen .desktop-insights-panel .cash-flow span {
+    font-size: .66rem;
+  }
+
+  body.dashboard-screen .desktop-insights-panel .cash-flow strong {
+    font-size: .78rem;
+  }
+
+  body.dashboard-screen .desktop-insights-panel canvas[data-chart] {
+    width: 96px !important;
+    max-width: 96px !important;
+    max-height: 72px !important;
+  }
+
+  body.dashboard-screen .transactions-panel {
+    min-height: 176px;
+  }
+
+  body.dashboard-screen .transactions-panel .app-transaction-list {
+    gap: 12px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  body.dashboard-screen .app-main {
+    padding-top: 8px;
+  }
+
+  body.dashboard-screen .topbar {
+    margin-bottom: .48rem !important;
+  }
+
+  body.dashboard-screen .dashboard-greeting span {
+    margin-bottom: .08rem;
+  }
+
+  body.dashboard-screen .total-balance-panel .balance-value-row {
+    display: flex !important;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+  }
+
+  body.dashboard-screen .total-balance-panel .balance-value-row strong {
+    flex: 0 1 auto;
+  }
+
+  body.dashboard-screen .total-balance-panel .balance-value-row button {
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+    border-radius: 15px;
+  }
+
+  body.dashboard-screen .premium-mobile-card {
+    width: 92%;
+    min-height: 88px;
+    max-height: 135px;
+    padding: .78rem .88rem;
+  }
+
+  body.dashboard-screen .premium-mobile-card .virtual-card-spacer {
+    min-height: 14px;
+  }
+
+  body.dashboard-screen .premium-mobile-card span,
+  body.dashboard-screen .premium-mobile-card strong {
+    font-size: .78rem;
+  }
+}

@@ -163,9 +163,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const sensitiveNodes = panel ? [...panel.querySelectorAll('[data-balance-sensitive]')] : [];
         button.addEventListener('click', () => {
             const isHidden = panel?.classList.toggle('is-balance-hidden') || false;
-            sensitiveNodes.forEach(node => {
-                node.innerHTML = isHidden ? (node.dataset.hiddenValue || '') : (node.dataset.visibleValue || '');
-            });
+            sensitiveNodes.forEach(node => node.classList.add('is-swapping'));
+            window.setTimeout(() => {
+                sensitiveNodes.forEach(node => {
+                    node.innerHTML = isHidden ? (node.dataset.hiddenValue || '') : (node.dataset.visibleValue || '');
+                    node.classList.remove('is-swapping');
+                });
+            }, 130);
             button.setAttribute('aria-pressed', isHidden ? 'true' : 'false');
             button.setAttribute('aria-label', isHidden ? 'Show balance details' : 'Hide balance details');
             button.innerHTML = `<i class="fa-solid ${isHidden ? 'fa-eye-slash' : 'fa-eye'}"></i>`;
