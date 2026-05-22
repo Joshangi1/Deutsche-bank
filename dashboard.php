@@ -173,6 +173,8 @@ $maskedAccountNumber = in_array($bankingRegion, ['us', 'ca', 'uk'], true)
 $routingNumberValue = in_array($bankingRegion, ['us', 'ca', 'uk'], true)
     ? (string) ($account['routing_number'] ?: $regionConfig['routing'])
     : $displayBic;
+$cardType = (string) ($card['card_type'] ?? 'Debit');
+$cardExpiry = !empty($card['created_at']) ? date('m/y', strtotime((string) $card['created_at'] . ' +4 years')) : date('m/y', strtotime('+4 years'));
 ?>
 <div class="mobile-bank-app">
     <section class="mobile-welcome-card">
@@ -185,11 +187,16 @@ $routingNumberValue = in_array($bankingRegion, ['us', 'ca', 'uk'], true)
 
     <div class="bank-home-grid">
         <section class="bank-app-card total-balance-panel">
-            <div class="panel-heading-row">
-                <span><?= e($ui['available']) ?></span>
+            <div class="panel-heading-row balance-hero-top">
                 <span class="account-status-pill <?= e($statusMeta[1]) ?>"><i class="fa-solid <?= e($statusMeta[2]) ?>"></i><?= e($statusMeta[0]) ?></span>
+                <span class="balance-account-select"><?= e($account['account_type']) ?> <i class="fa-solid fa-chevron-down"></i></span>
             </div>
-            <strong><?= money($account['available_balance'], $currency) ?></strong>
+            <span class="balance-label"><?= e($ui['available']) ?></span>
+            <div class="balance-value-row">
+                <strong><?= money($account['available_balance'], $currency) ?></strong>
+                <button type="button" aria-label="Show balance details"><i class="fa-solid fa-eye"></i></button>
+            </div>
+            <div class="balance-mask">&bull;&bull;&bull;&bull; <?= e(substr((string) $account['account_number'], -4)) ?></div>
             <div class="balance-account-meta">
                 <div><span>Account type</span><b><?= e($account['account_type']) ?></b></div>
                 <div><span>Account number</span><b><?= e($maskedAccountNumber) ?></b></div>
@@ -239,12 +246,13 @@ $routingNumberValue = in_array($bankingRegion, ['us', 'ca', 'uk'], true)
         </section>
 
         <section class="bank-app-card virtual-card-panel">
+            <div class="section-title-row"><h3>Virtual Card</h3><a href="user/cards.php">View</a></div>
             <div class="virtual-card premium-mobile-card">
-                <div class="d-flex justify-content-between"><strong>Virtual card</strong><i class="fa-solid fa-credit-card"></i></div>
-                <div class="fs-4 fw-bold">Card ending <?= e($card['card_last4']) ?></div>
-                <div class="d-flex justify-content-between"><span><?= e(strtoupper($user['first_name'] . ' ' . $user['last_name'])) ?></span><span><?= $isNewAccount ? 'PREPARING' : e(strtoupper($card['status'])) ?></span></div>
+                <div class="d-flex justify-content-between"><strong><?= e($cardType) ?></strong><span>&bull;&bull;&bull;&bull; <?= e($card['card_last4']) ?></span></div>
+                <div class="virtual-card-spacer"></div>
+                <div class="d-flex justify-content-between align-items-end"><span>Expires <?= e($cardExpiry) ?></span><strong><?= e($user['first_name'] . ' ' . $user['last_name']) ?></strong></div>
             </div>
-            <button class="btn btn-navy w-100 mt-3" type="button" data-bs-toggle="modal" data-bs-target="#cardApplicationModal"><?= e($ui['link_card']) ?></button>
+            <button class="btn btn-navy w-100 mt-3 virtual-card-action" type="button" data-bs-toggle="modal" data-bs-target="#cardApplicationModal"><?= e($ui['link_card']) ?></button>
         </section>
 
         <section class="bank-app-card transactions-panel">

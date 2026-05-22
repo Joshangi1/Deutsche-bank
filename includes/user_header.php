@@ -20,6 +20,7 @@ $unreadCount = (int) $unreadStmt->fetch()['c'];
 $previewStmt = db()->prepare('SELECT * FROM notifications WHERE user_id=? ORDER BY created_at DESC LIMIT 4');
 $previewStmt->execute([$user['id']]);
 $notificationPreview = $previewStmt->fetchAll();
+$isDashboardPage = basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')) === 'dashboard.php';
 ?>
 <!doctype html>
 <html lang="<?= e($accountLanguage) ?>" class="notranslate" translate="no">
@@ -46,7 +47,7 @@ $notificationPreview = $previewStmt->fetchAll();
         })();
     </script>
 </head>
-<body class="notranslate" translate="no" data-session-timeout="<?= SESSION_IDLE_TIMEOUT ?>" data-session-logout-url="<?= e(url('logout.php')) ?>">
+<body class="notranslate<?= $isDashboardPage ? ' dashboard-screen' : '' ?>" translate="no" data-session-timeout="<?= SESSION_IDLE_TIMEOUT ?>" data-session-logout-url="<?= e(url('logout.php')) ?>">
 <div class="app-shell">
 
 <!-- ═══════════════════════════════════════════
@@ -151,9 +152,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 <i class="fa-solid fa-bars"></i>
             </button>
             <div>
-                <span class="topbar-kicker"><?= e($regionConfig['workspace']) ?></span>
-                <h1 class="h3 mb-0 fw-bold"><?= e($pageTitle ?? 'Dashboard') ?></h1>
-                <span class="muted">Welcome back, <?= e($user['first_name']) ?></span>
+                <?php if ($isDashboardPage): ?>
+                    <h1 class="h3 mb-0 fw-bold"><?= $useGermanLabels ? 'Guten Tag' : 'Good afternoon' ?>, <?= e($user['first_name'] . ' ' . $user['last_name']) ?></h1>
+                <?php else: ?>
+                    <span class="topbar-kicker"><?= e($regionConfig['workspace']) ?></span>
+                    <h1 class="h3 mb-0 fw-bold"><?= e($pageTitle ?? 'Dashboard') ?></h1>
+                    <span class="muted">Welcome back, <?= e($user['first_name']) ?></span>
+                <?php endif; ?>
             </div>
         </div>
 
