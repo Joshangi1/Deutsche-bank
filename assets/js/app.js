@@ -156,6 +156,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    document.querySelectorAll('[data-balance-toggle]').forEach(button => {
+        if (button.dataset.balanceReady === '1') return;
+        button.dataset.balanceReady = '1';
+        const panel = button.closest('.total-balance-panel');
+        const sensitiveNodes = panel ? [...panel.querySelectorAll('[data-balance-sensitive]')] : [];
+        button.addEventListener('click', () => {
+            const isHidden = panel?.classList.toggle('is-balance-hidden') || false;
+            sensitiveNodes.forEach(node => {
+                node.innerHTML = isHidden ? (node.dataset.hiddenValue || '') : (node.dataset.visibleValue || '');
+            });
+            button.setAttribute('aria-pressed', isHidden ? 'true' : 'false');
+            button.setAttribute('aria-label', isHidden ? 'Show balance details' : 'Hide balance details');
+            button.innerHTML = `<i class="fa-solid ${isHidden ? 'fa-eye-slash' : 'fa-eye'}"></i>`;
+        });
+    });
+
     document.querySelectorAll('[data-copy-text]').forEach(button => {
         button.addEventListener('click', async () => {
             const text = button.dataset.copyText || '';

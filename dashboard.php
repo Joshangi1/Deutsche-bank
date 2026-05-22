@@ -193,16 +193,16 @@ $cardExpiry = !empty($card['created_at']) ? date('m/y', strtotime((string) $card
             </div>
             <span class="balance-label"><?= e($ui['available']) ?></span>
             <div class="balance-value-row">
-                <strong><?= money($account['available_balance'], $currency) ?></strong>
-                <button type="button" aria-label="Show balance details"><i class="fa-solid fa-eye"></i></button>
+                <strong data-balance-sensitive data-visible-value="<?= e(money($account['available_balance'], $currency)) ?>" data-hidden-value="&bull;&bull;&bull;&bull;&bull;&bull;"><?= money($account['available_balance'], $currency) ?></strong>
+                <button type="button" data-balance-toggle aria-label="Hide balance details" aria-pressed="false"><i class="fa-solid fa-eye"></i></button>
             </div>
-            <div class="balance-mask">&bull;&bull;&bull;&bull; <?= e(substr((string) $account['account_number'], -4)) ?></div>
+            <div class="balance-mask" data-balance-sensitive data-visible-value="&bull;&bull;&bull;&bull; <?= e(substr((string) $account['account_number'], -4)) ?>" data-hidden-value="&bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull;">&bull;&bull;&bull;&bull; <?= e(substr((string) $account['account_number'], -4)) ?></div>
             <div class="balance-account-meta">
                 <div><span>Account type</span><b><?= e($account['account_type']) ?></b></div>
-                <div><span>Account number</span><b><?= e($maskedAccountNumber) ?></b></div>
+                <div><span>Account number</span><b><span data-balance-sensitive data-visible-value="<?= e($maskedAccountNumber) ?>" data-hidden-value="&bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull;"><?= e($maskedAccountNumber) ?></span></b></div>
                 <div>
                     <span><?= e($regionConfig['routing_label']) ?></span>
-                    <b><?= e(mask_account($routingNumberValue)) ?><button type="button" data-copy-text="<?= e($routingNumberValue) ?>" aria-label="Copy routing number"><i class="fa-regular fa-copy"></i></button></b>
+                    <b><span data-balance-sensitive data-visible-value="<?= e(mask_account($routingNumberValue)) ?>" data-hidden-value="&bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull;"><?= e(mask_account($routingNumberValue)) ?></span><button type="button" data-copy-text="<?= e($routingNumberValue) ?>" aria-label="Copy routing number"><i class="fa-regular fa-copy"></i></button></b>
                 </div>
             </div>
             <div class="balance-subgrid">
