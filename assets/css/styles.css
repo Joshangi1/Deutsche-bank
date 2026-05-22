@@ -3237,6 +3237,26 @@ body.dashboard-screen .balance-account-meta b {
     box-shadow: 0 24px 58px rgba(0, 24, 168, .2);
   }
 
+  body.dashboard-screen .balance-hero-top .account-status-pill {
+    border-color: rgba(178, 245, 210, .78);
+    background: #d9fbea;
+    color: #007a52;
+    box-shadow: none;
+  }
+
+  body.dashboard-screen .balance-hero-top .account-status-pill i {
+    color: #007a52;
+  }
+
+  body.dashboard-screen .balance-account-select {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    color: #fff;
+    font-size: .94rem;
+    font-weight: 850;
+  }
+
   body.dashboard-screen .quick-action-panel {
     grid-column: 1 / span 8;
     grid-row: 2;
@@ -3319,6 +3339,29 @@ body.dashboard-screen .balance-account-meta b {
     margin-top: 18px;
   }
 
+  body.dashboard-screen .balance-account-meta div,
+  body.dashboard-screen .balance-account-meta div:first-child {
+    display: block;
+  }
+
+  body.dashboard-screen .balance-account-meta span {
+    display: block;
+    color: rgba(210, 222, 255, .72);
+    font-size: .72rem;
+    font-weight: 850;
+    text-transform: uppercase;
+  }
+
+  body.dashboard-screen .balance-account-meta b {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    margin-top: .35rem;
+    color: #fff;
+    font-size: .96rem;
+    font-weight: 850;
+  }
+
   body.dashboard-screen .balance-subgrid {
     display: none;
   }
@@ -3328,8 +3371,10 @@ body.dashboard-screen .balance-account-meta b {
   }
 
   body.dashboard-screen .premium-mobile-card {
+    width: 92%;
     min-height: 142px;
     max-height: 160px;
+    margin-inline: auto;
     padding: 16px;
     border-radius: 16px;
     background:
@@ -3383,8 +3428,10 @@ body.dashboard-screen .balance-account-meta b {
   }
 
   body.dashboard-screen .premium-mobile-card {
+    width: 92%;
     min-height: 118px;
     max-height: 180px;
+    margin-inline: auto;
     padding: .95rem;
   }
 
