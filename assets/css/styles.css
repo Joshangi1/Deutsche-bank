@@ -2495,6 +2495,301 @@ body { top: 0 !important; }
   line-height: 1.45;
 }
 
+/* Banking app dashboard polish: compact hierarchy, less repeated branding */
+.mobile-bank-app {
+  gap: .78rem;
+}
+
+.mobile-welcome-card {
+  min-height: 92px;
+  padding: 1rem 1.05rem;
+  background:
+    radial-gradient(circle at 92% 8%, rgba(255,255,255,.2), transparent 7rem),
+    linear-gradient(145deg, #0018a8 0%, #123aa8 52%, #071634 100%);
+}
+
+.mobile-welcome-card h2 {
+  margin: 0 0 .18rem;
+  font-weight: 880;
+  letter-spacing: 0;
+}
+
+.mobile-welcome-card p {
+  font-size: .9rem;
+  font-weight: 650;
+}
+
+.welcome-card-action {
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 16px 34px rgba(0,0,0,.18);
+}
+
+.bank-app-card {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.96), rgba(248,250,252,.94));
+}
+
+.total-balance-panel {
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(209, 220, 236, .9);
+  background:
+    radial-gradient(circle at 88% 10%, rgba(0, 24, 168, .14), transparent 10rem),
+    linear-gradient(180deg, #ffffff 0%, #f4f7fc 100%);
+}
+
+.total-balance-panel::after {
+  content: "";
+  position: absolute;
+  right: -64px;
+  bottom: -78px;
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  background: rgba(0, 24, 168, .055);
+  pointer-events: none;
+}
+
+.total-balance-panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+.total-balance-panel > strong {
+  margin-top: -.15rem;
+  font-weight: 880;
+  letter-spacing: 0;
+}
+
+.balance-account-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .55rem;
+  margin-top: .9rem;
+}
+
+.balance-account-meta div {
+  min-width: 0;
+  border: 1px solid rgba(212, 222, 236, .9);
+  border-radius: 12px;
+  background: rgba(255,255,255,.72);
+  padding: .68rem .72rem;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, .035);
+}
+
+.balance-account-meta span {
+  display: block;
+  color: #64748b;
+  font-size: .68rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.balance-account-meta b {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  min-width: 0;
+  margin-top: .16rem;
+  color: #0f172a;
+  font-size: .88rem;
+  font-weight: 850;
+  overflow-wrap: anywhere;
+}
+
+.balance-account-meta button {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid rgba(0, 24, 168, .13);
+  border-radius: 9px;
+  color: #0018a8;
+  background: #eef4ff;
+}
+
+.balance-account-meta button.copied {
+  width: auto;
+  min-width: 28px;
+  padding: 0 .45rem;
+  color: #067647;
+  background: #e8f7ef;
+}
+
+.balance-account-meta button.copied span {
+  color: inherit;
+  font-size: .68rem;
+  text-transform: none;
+}
+
+@media (min-width: 992px) {
+  .topbar-kicker {
+    display: none;
+  }
+
+  .avatar-sm {
+    width: 50px;
+    height: 50px;
+    border-width: 3px;
+  }
+
+  .total-balance-panel {
+    min-height: 214px;
+  }
+
+  .balance-account-meta {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .balance-subgrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 575.98px) {
+  .app-main {
+    background:
+      radial-gradient(circle at top right, rgba(0, 24, 168, .08), transparent 18rem),
+      linear-gradient(180deg, #f3f6fb 0%, #edf2f8 100%);
+  }
+
+  .topbar {
+    margin-bottom: 10px !important;
+  }
+
+  .topbar-kicker {
+    display: none;
+  }
+
+  .avatar-sm {
+    width: 58px;
+    height: 58px;
+    border-width: 3px;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, .14);
+  }
+
+  .topbar > .d-flex:last-child {
+    grid-template-columns: 46px 46px 58px 50px;
+    align-items: center;
+  }
+
+  .mobile-bank-app {
+    gap: .72rem;
+  }
+
+  .mobile-welcome-card {
+    min-height: 84px;
+    border-radius: 18px;
+    padding: .95rem 1rem;
+  }
+
+  .mobile-welcome-card h2 {
+    font-size: 1.28rem;
+  }
+
+  .mobile-welcome-card p {
+    font-size: .84rem;
+  }
+
+  .bank-app-card {
+    padding: .82rem;
+    border-radius: 16px;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, .065);
+  }
+
+  .section-title-row,
+  .panel-heading-row {
+    margin-bottom: .62rem;
+  }
+
+  .section-title-row h3 {
+    font-size: .95rem;
+    font-weight: 880;
+  }
+
+  .panel-heading-row > span:first-child {
+    font-size: .7rem;
+    font-weight: 880;
+  }
+
+  .total-balance-panel > strong {
+    font-size: clamp(2.18rem, 10.6vw, 3rem);
+  }
+
+  .balance-account-meta {
+    grid-template-columns: 1fr;
+    gap: .45rem;
+    margin-top: .75rem;
+  }
+
+  .balance-account-meta div {
+    display: grid;
+    grid-template-columns: minmax(96px, .62fr) minmax(0, 1fr);
+    align-items: center;
+    gap: .55rem;
+    padding: .58rem .62rem;
+  }
+
+  .balance-account-meta b {
+    justify-content: flex-end;
+    margin-top: 0;
+    font-size: .82rem;
+    text-align: right;
+  }
+
+  .balance-subgrid {
+    margin-top: .55rem;
+    gap: .45rem;
+  }
+
+  .balance-subgrid div {
+    padding: .62rem;
+    border-radius: 12px;
+  }
+
+  .app-quick-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .55rem;
+  }
+
+  .app-quick-grid a,
+  .app-quick-grid button {
+    min-height: 68px;
+    flex-direction: column;
+    gap: .35rem;
+    border-radius: 14px;
+    font-size: .78rem;
+  }
+
+  .app-quick-grid i {
+    width: 34px;
+    height: 34px;
+    border-radius: 11px;
+  }
+
+  .account-card-list,
+  .app-transaction-list {
+    gap: .55rem;
+  }
+
+  .app-transaction-row,
+  .mobile-account-card {
+    padding: .66rem;
+  }
+
+  .premium-mobile-card {
+    min-height: 128px;
+    padding: 1rem;
+  }
+
+  .virtual-card-panel .btn {
+    margin-top: .6rem !important;
+  }
+}
+
 @media (max-width: 640px) {
   .deposit-protection-badge {
     align-items: flex-start;

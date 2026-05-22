@@ -167,13 +167,18 @@ $primaryAccountLabel = in_array($bankingRegion, ['us', 'ca', 'uk'], true)
 $routingLabel = in_array($bankingRegion, ['us', 'ca', 'uk'], true)
     ? e($regionConfig['routing_label']) . ' ' . e((string) ($account['routing_number'] ?: $regionConfig['routing']))
     : 'BIC/SWIFT ' . e($displayBic);
+$maskedAccountNumber = in_array($bankingRegion, ['us', 'ca', 'uk'], true)
+    ? mask_account((string) $account['account_number'])
+    : $displayIban;
+$routingNumberValue = in_array($bankingRegion, ['us', 'ca', 'uk'], true)
+    ? (string) ($account['routing_number'] ?: $regionConfig['routing'])
+    : $displayBic;
 ?>
 <div class="mobile-bank-app">
     <section class="mobile-welcome-card">
         <div>
-            <span><?= e($regionConfig['workspace']) ?></span>
             <h2><?= $useGermanLabels ? 'Guten Tag' : 'Good afternoon' ?>, <?= e($user['first_name']) ?></h2>
-            <p><?= e(date('l, F j, Y - g:i A')) ?></p>
+            <p><?= e($account['account_type']) ?> account overview</p>
         </div>
         <button class="welcome-card-action" type="button" data-bs-toggle="modal" data-bs-target="#cardApplicationModal" aria-label="Open card application"><i class="fa-solid fa-credit-card"></i></button>
     </section>
@@ -185,6 +190,14 @@ $routingLabel = in_array($bankingRegion, ['us', 'ca', 'uk'], true)
                 <span class="account-status-pill <?= e($statusMeta[1]) ?>"><i class="fa-solid <?= e($statusMeta[2]) ?>"></i><?= e($statusMeta[0]) ?></span>
             </div>
             <strong><?= money($account['available_balance'], $currency) ?></strong>
+            <div class="balance-account-meta">
+                <div><span>Account type</span><b><?= e($account['account_type']) ?></b></div>
+                <div><span>Account number</span><b><?= e($maskedAccountNumber) ?></b></div>
+                <div>
+                    <span><?= e($regionConfig['routing_label']) ?></span>
+                    <b><?= e(mask_account($routingNumberValue)) ?><button type="button" data-copy-text="<?= e($routingNumberValue) ?>" aria-label="Copy routing number"><i class="fa-regular fa-copy"></i></button></b>
+                </div>
+            </div>
             <div class="balance-subgrid">
                 <div><span><?= e($ui['pending']) ?></span><b><?= money($account['pending_balance'], $currency) ?></b></div>
                 <div><span><?= e($ui['savings']) ?></span><b><?= money($account['savings_balance'], $currency) ?></b></div>
@@ -227,7 +240,7 @@ $routingLabel = in_array($bankingRegion, ['us', 'ca', 'uk'], true)
 
         <section class="bank-app-card virtual-card-panel">
             <div class="virtual-card premium-mobile-card">
-                <div class="d-flex justify-content-between"><strong><?= e(UI_BRAND_SHORT) ?></strong><i class="fa-solid fa-credit-card"></i></div>
+                <div class="d-flex justify-content-between"><strong>Virtual card</strong><i class="fa-solid fa-credit-card"></i></div>
                 <div class="fs-4 fw-bold">Card ending <?= e($card['card_last4']) ?></div>
                 <div class="d-flex justify-content-between"><span><?= e(strtoupper($user['first_name'] . ' ' . $user['last_name'])) ?></span><span><?= $isNewAccount ? 'PREPARING' : e(strtoupper($card['status'])) ?></span></div>
             </div>
