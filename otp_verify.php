@@ -7,8 +7,35 @@ ensure_banking_schema();
 $purpose = (string) ($_GET['purpose'] ?? $_POST['purpose'] ?? '');
 $purpose = in_array($purpose, ['signup', 'login', 'transfer'], true) ? $purpose : '';
 if (!SMS_OTP_ENABLED) {
-    flash('info', 'SMS verification is temporarily disabled for testing.');
-    header('Location: login.php');
+    if ($purpose === 'login' && !empty($_SESSION['pending_login_user_id'])) {
+        $userId = (int) $_SESSION['pending_login_user_id'];
+        start_authenticated_session('user', $userId);
+        db()->prepare('UPDATE users SET failed_attempts=0, locked_until=NULL, last_login=NOW() WHERE id=?')->execute([$userId]);
+        unset($_SESSION['pending_login_user_id'], $_SESSION['pending_login_return']);
+        flash('info', 'OTP verification is temporarily disabled for testing.');
+        header('Location: dashboard.php');
+        exit;
+    }
+    if ($purpose === 'signup' && !empty($_SESSION['pending_signup_user_id'])) {
+        $userId = (int) $_SESSION['pending_signup_user_id'];
+        db()->prepare('UPDATE users SET status="active", email_verified=1 WHERE id=? AND status="disabled"')->execute([$userId]);
+        $loginUrl = (string) ($_SESSION['pending_signup_login_url'] ?? 'login.php');
+        unset($_SESSION['pending_signup_user_id'], $_SESSION['pending_signup_login_url']);
+        flash('success', 'OTP verification is temporarily disabled for testing. Your account is active.');
+        header('Location: ' . $loginUrl);
+        exit;
+    }
+    if ($purpose === 'transfer' && !empty($_SESSION['pending_transfer_context'])) {
+        $_SESSION['transfer_otp_verified_at'] = time();
+        $_SESSION['transfer_otp_verified_context'] = (string) $_SESSION['pending_transfer_context'];
+        $returnUrl = (string) ($_SESSION['pending_transfer_return'] ?? 'user/transfers.php?review=1');
+        unset($_SESSION['pending_transfer_context'], $_SESSION['pending_transfer_return']);
+        flash('info', 'OTP verification is temporarily disabled for testing.');
+        header('Location: ' . $returnUrl);
+        exit;
+    }
+    flash('info', 'OTP verification is temporarily disabled for testing.');
+    header('Location: dashboard.php');
     exit;
 }
 $otpErrors = [];
