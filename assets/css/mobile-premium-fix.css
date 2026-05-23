@@ -2733,3 +2733,77 @@ body,
     align-items: flex-start;
   }
 }
+
+/* Final loaded stylesheet guard: compact protection banners globally. */
+.deposit-protection-badge.deposit-protection-compact,
+.deposit-protection-badge.dashboard-trust-banner.deposit-protection-compact,
+.deposit-protection-badge.dashboard-trust-banner-compact.deposit-protection-compact {
+  max-height: 65px !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: .65rem !important;
+  padding: .55rem .75rem !important;
+  border: 1px solid rgba(207, 216, 232, .9) !important;
+  border-radius: 14px !important;
+  background: linear-gradient(135deg, rgba(255,255,255,.98), rgba(244,247,252,.96)) !important;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, .055) !important;
+  overflow: hidden !important;
+}
+
+.deposit-protection-badge.deposit-protection-compact .deposit-protection-mark {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: .42rem !important;
+  min-width: 0 !important;
+  width: auto !important;
+  flex: 0 0 auto !important;
+}
+
+.deposit-protection-badge.deposit-protection-compact .deposit-protection-mark i {
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border-radius: 9px !important;
+  color: #067647 !important;
+  background: #e8f7ef !important;
+  font-size: .82rem !important;
+}
+
+.deposit-protection-badge.deposit-protection-compact .deposit-protection-agency {
+  min-width: 0 !important;
+  border: 0 !important;
+  padding: 0 !important;
+  color: #0f172a !important;
+  font-size: .82rem !important;
+  line-height: 1 !important;
+  font-weight: 880 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+.deposit-protection-badge.deposit-protection-compact .deposit-protection-copy {
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+}
+
+.deposit-protection-badge.deposit-protection-compact .deposit-protection-copy strong {
+  margin: 0 !important;
+  color: #0f172a !important;
+  font-size: .8rem !important;
+  line-height: 1.12 !important;
+  font-weight: 850 !important;
+}
+
+.deposit-protection-badge.deposit-protection-compact .deposit-protection-copy p {
+  margin: .06rem 0 0 !important;
+  color: #64748b !important;
+  font-size: .72rem !important;
+  line-height: 1.18 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}

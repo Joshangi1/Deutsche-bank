@@ -24,9 +24,9 @@ function deposit_protection_config_for_user(array $user, ?array $account = null)
     $configPath = __DIR__ . '/../config/deposit_protection.php';
     $config = is_file($configPath) ? require $configPath : [];
     $default = $config['default'] ?? [
-        'agency' => 'Local Deposit Protection',
-        'name' => 'Local deposit protection',
-        'text' => 'Deposit protection may be available under applicable local banking regulations, subject to eligibility and limits.',
+        'agency' => 'Deposit Protection',
+        'name' => 'Deposit Protection',
+        'text' => 'Deposits protected up to applicable limits.',
     ];
     $countries = is_array($config['countries'] ?? null) ? $config['countries'] : [];
 
@@ -42,7 +42,7 @@ function deposit_protection_config_for_user(array $user, ?array $account = null)
         }
     }
 
-    $country = strtolower(trim((string) ($user['country'] ?? '')));
+    $country = strtolower(trim((string) (($account['country'] ?? '') ?: ($user['country'] ?? ''))));
     $region = user_banking_region($user, $account);
     foreach ($countries as $key => $item) {
         $aliases = array_map('strtolower', array_merge([(string) $key], $item['aliases'] ?? []));

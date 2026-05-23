@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="<?= in_array($key, ['home_hero_subtitle','home_services_copy','contact_intro','footer_summary','announcement','deposit_protection_overrides'], true) ? 'col-12' : 'col-md-6' ?>">
                 <label class="form-label"><?= e($label) ?></label>
                 <?php if (in_array($key, ['home_hero_subtitle','home_services_copy','contact_intro','footer_summary','announcement','deposit_protection_overrides'], true)): ?>
-                    <textarea name="<?= e($key) ?>" class="form-control" rows="<?= $key === 'deposit_protection_overrides' ? 5 : 3 ?>" placeholder="<?= $key === 'deposit_protection_overrides' ? e('{"us":{"enabled":true,"agency":"FDIC","name":"Federal Deposit Insurance Corporation","text":"Approved disclosure wording"}}') : '' ?>"><?= e(setting($key)) ?></textarea>
+                    <textarea name="<?= e($key) ?>" class="form-control" rows="<?= $key === 'deposit_protection_overrides' ? 5 : 3 ?>" placeholder="<?= $key === 'deposit_protection_overrides' ? e('{"country_code":{"agency":"Agency","name":"Agency Protected","text":"Short approved disclosure wording"}}') : '' ?>"><?= e(setting($key)) ?></textarea>
                     <?php if ($key === 'deposit_protection_overrides'): ?><div class="small muted mt-2">Optional. Agency claims display only when a country mapping sets enabled to true.</div><?php endif; ?>
                 <?php elseif (str_ends_with($key, '_color') || str_starts_with($key, 'theme_')): ?>
                     <input name="<?= e($key) ?>" type="color" class="form-control form-control-color" value="<?= e(setting($key, '#071b35')) ?>">
