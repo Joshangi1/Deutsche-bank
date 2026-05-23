@@ -59,7 +59,7 @@ function deposit_protection_config_for_user(array $user, ?array $account = null)
 function deposit_protection_badge(array $user, ?array $account = null, string $className = ''): string
 {
     $protection = deposit_protection_config_for_user($user, $account);
-    $classes = trim('deposit-protection-badge ' . $className);
+    $classes = trim('deposit-protection-badge deposit-protection-compact ' . $className);
     return '<section class="' . e($classes) . '" aria-label="Deposit protection information">'
         . '<div class="deposit-protection-mark"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span class="deposit-protection-agency">' . e((string) $protection['agency']) . '</span></div>'
         . '<div class="deposit-protection-copy"><strong>' . e((string) $protection['name']) . '</strong><p>' . e((string) $protection['text']) . '</p></div>'

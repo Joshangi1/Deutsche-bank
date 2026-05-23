@@ -4,7 +4,7 @@ declare(strict_types=1);
 return [
     'default' => [
         'agency' => 'Local Deposit Protection',
-        'name' => 'Local deposit protection',
+        'name' => 'Local Deposit Protection',
         'text' => 'Deposit protection may be available under applicable local banking regulations, subject to eligibility and limits.',
     ],
     'countries' => [
@@ -25,6 +25,12 @@ return [
             'agency' => 'EdB',
             'name' => 'Statutory deposit guarantee',
             'text' => 'Eligible deposits may be protected by the Entschaedigungseinrichtung deutscher Banken under the German statutory deposit guarantee scheme, subject to applicable limits.',
+        ],
+        'eu' => [
+            'aliases' => ['europe', 'european economic area', 'eea'],
+            'agency' => 'DGS',
+            'name' => 'Local Deposit Protection Scheme',
+            'text' => 'Eligible deposits may be protected under the applicable local deposit guarantee scheme, subject to eligibility and limits.',
         ],
         'ca' => [
             'aliases' => ['canada', 'ca'],

@@ -156,6 +156,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    document.querySelectorAll('[data-recipient-pick]').forEach(button => {
+        button.addEventListener('click', () => {
+            const select = document.querySelector('[data-recipient-select]');
+            if (!select) return;
+            select.value = button.dataset.recipientPick || '';
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+            document.querySelectorAll('[data-recipient-pick].is-selected').forEach(item => item.classList.remove('is-selected'));
+            button.classList.add('is-selected');
+            select.closest('form')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+    });
+
     document.querySelectorAll('[data-balance-toggle]').forEach(button => {
         if (button.dataset.balanceReady === '1') return;
         button.dataset.balanceReady = '1';

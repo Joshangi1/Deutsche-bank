@@ -3779,3 +3779,276 @@ body.dashboard-screen .balance-value-row button:active {
     min-height: 9px;
   }
 }
+
+/* Compact international protection banner and Instant Pay app polish */
+.deposit-protection-badge.deposit-protection-compact {
+  min-height: 0;
+  max-height: 60px;
+  align-items: center;
+  gap: .75rem;
+  padding: .62rem .82rem;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(242,246,252,.94));
+  box-shadow: 0 10px 24px rgba(15, 23, 42, .055);
+  overflow: hidden;
+}
+
+.deposit-protection-compact .deposit-protection-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: .46rem;
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.deposit-protection-compact .deposit-protection-mark i {
+  width: 30px;
+  height: 30px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 10px;
+  color: #067647;
+  background: #e8f7ef;
+}
+
+.deposit-protection-compact .deposit-protection-agency {
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  color: #0f172a;
+  font-size: .9rem;
+  line-height: 1;
+  font-weight: 880;
+  letter-spacing: 0;
+}
+
+.deposit-protection-compact .deposit-protection-copy {
+  min-width: 0;
+}
+
+.deposit-protection-compact .deposit-protection-copy strong {
+  margin: 0;
+  font-size: .83rem;
+  line-height: 1.15;
+}
+
+.deposit-protection-compact .deposit-protection-copy p {
+  margin: .08rem 0 0;
+  font-size: .76rem;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.instant-pay-page .send-hero {
+  min-height: 0;
+  padding: 1.05rem 1.15rem;
+  border-radius: 18px;
+  margin-bottom: .95rem !important;
+}
+
+.instant-pay-page .send-hero h2 {
+  font-size: clamp(1.45rem, 3vw, 2.1rem);
+  line-height: 1.02;
+}
+
+.instant-pay-page .send-hero p {
+  max-width: 560px;
+  font-size: .92rem;
+}
+
+.instant-pay-page .send-hero > i {
+  width: 52px;
+  height: 52px;
+  display: inline-grid;
+  place-items: center;
+  align-self: center;
+  border-radius: 17px;
+  background: rgba(255,255,255,.12);
+  font-size: 1.35rem;
+}
+
+.instant-pay-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, .95fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.instant-pay-card {
+  padding: 1rem !important;
+  border-radius: 18px !important;
+}
+
+.instant-pay-card .form-label {
+  margin-bottom: .28rem;
+  color: #64748b;
+  font-size: .76rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.instant-pay-card .form-control,
+.instant-pay-card .form-select {
+  min-height: 46px;
+  border-radius: 12px;
+  background: #f8fafc;
+  font-weight: 720;
+}
+
+.instant-pay-card .quick-amounts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: .5rem;
+}
+
+.instant-pay-card .quick-amounts .btn {
+  min-height: 40px;
+  border-radius: 12px;
+  font-size: .82rem;
+  font-weight: 820;
+}
+
+.instant-recipient-strip {
+  border: 1px solid rgba(221, 229, 240, .95);
+  border-radius: 18px;
+  background: rgba(255,255,255,.94);
+  padding: .9rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, .055);
+}
+
+.instant-recipient-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: .65rem;
+}
+
+.instant-recipient-grid button,
+.instant-recipient-row {
+  border: 1px solid rgba(218, 226, 238, .98);
+  background: #fbfcff;
+  text-align: left;
+}
+
+.instant-recipient-grid button {
+  min-width: 0;
+  min-height: 92px;
+  display: grid;
+  justify-items: center;
+  gap: .24rem;
+  border-radius: 16px;
+  padding: .7rem .45rem;
+}
+
+.instant-recipient-grid button span,
+.recipient-avatar {
+  width: 38px;
+  height: 38px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 14px;
+  color: #0018a8;
+  background: #eef4ff;
+  font-weight: 880;
+}
+
+.instant-recipient-grid button strong {
+  max-width: 100%;
+  color: #0f172a;
+  font-size: .78rem;
+  font-weight: 850;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.instant-recipient-grid button small {
+  max-width: 100%;
+  color: #72809a;
+  font-size: .68rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.instant-recipient-grid button.is-selected,
+.instant-recipient-row.is-selected {
+  border-color: rgba(0,24,168,.35);
+  box-shadow: 0 12px 28px rgba(0,24,168,.1);
+}
+
+.instant-recipient-row {
+  width: 100%;
+  margin-top: .55rem;
+  border-radius: 14px;
+}
+
+.instant-history-card .table > :not(caption) > * > * {
+  padding: .78rem 1rem;
+}
+
+@media (min-width: 992px) {
+  body.dashboard-screen .desktop-insights-panel {
+    min-height: 214px;
+  }
+
+  body.dashboard-screen .desktop-insights-panel canvas[data-chart] {
+    width: 136px !important;
+    max-width: 136px !important;
+    max-height: 104px !important;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .instant-pay-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .instant-recipient-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 575.98px) {
+  .instant-pay-page .send-hero {
+    padding: .92rem;
+    border-radius: 16px;
+  }
+
+  .instant-pay-page .send-hero h2 {
+    font-size: 1.35rem;
+  }
+
+  .instant-pay-page .send-hero p {
+    font-size: .84rem;
+  }
+
+  .instant-pay-page .send-hero > i {
+    display: none;
+  }
+
+  .instant-recipient-strip,
+  .instant-pay-card {
+    border-radius: 16px !important;
+  }
+
+  .instant-recipient-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .5rem;
+  }
+
+  .instant-recipient-grid button {
+    min-height: 82px;
+  }
+
+  .deposit-protection-badge.deposit-protection-compact {
+    max-height: none;
+    align-items: flex-start;
+  }
+
+  .deposit-protection-compact .deposit-protection-copy p {
+    white-space: normal;
+  }
+}
