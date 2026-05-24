@@ -1633,63 +1633,77 @@ body { top: 0 !important; }
 }
 
 .agent-assisted-signup {
-    padding-top: clamp(18px, 3vw, 34px);
+    padding-top: clamp(20px, 3vw, 38px);
+    padding-bottom: clamp(28px, 5vw, 58px);
+    background:
+        linear-gradient(180deg, rgba(255,255,255,.988) 0%, rgba(246,248,252,.992) 100%),
+        url("https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1800&q=80") center / cover no-repeat fixed;
 }
 .agent-assisted-signup .agent-onboarding-banner {
-    width: min(860px, 100%);
-    min-height: 188px;
-    padding: clamp(1.2rem, 2.8vw, 2rem);
-    gap: clamp(1rem, 2vw, 1.55rem);
-    border-radius: 26px;
+    width: min(900px, 100%);
+    min-height: 236px;
+    padding: clamp(1.7rem, 3.4vw, 2.65rem);
+    gap: clamp(1.35rem, 2.8vw, 2.25rem);
+    border-radius: 30px;
     background:
-        radial-gradient(circle at 92% 12%, rgba(0,24,168,.18), transparent 15rem),
-        radial-gradient(circle at 10% 110%, rgba(6,118,71,.1), transparent 12rem),
+        radial-gradient(circle at 92% 12%, rgba(0,24,168,.14), transparent 16rem),
+        radial-gradient(circle at 10% 110%, rgba(6,118,71,.08), transparent 13rem),
         linear-gradient(135deg, rgba(255,255,255,1), rgba(242,246,255,.98));
     border-color: rgba(188, 201, 230, .9);
-    box-shadow: 0 34px 110px rgba(15, 23, 42, .18);
+    box-shadow: 0 38px 120px rgba(15, 23, 42, .17);
 }
 .agent-assisted-signup .agent-onboarding-photo {
-    width: 116px;
-    height: 116px;
-    font-size: 2rem;
-    border: 5px solid #fff;
+    width: 138px;
+    height: 138px;
+    font-size: 2.2rem;
+    border: 6px solid #fff;
+    box-shadow: 0 20px 48px rgba(0, 24, 168, .24);
 }
 .agent-assisted-signup .agent-onboarding-copy span {
-    color: #7a8699;
-    font-size: .95rem;
+    color: #667085;
+    font-size: 1rem;
     font-weight: 760;
+    margin-bottom: .18rem;
 }
 .agent-assisted-signup .agent-onboarding-copy strong {
-    font-size: clamp(2rem, 4vw, 3.1rem);
+    font-size: clamp(2.25rem, 4.3vw, 3.35rem);
     letter-spacing: 0;
-    margin: .18rem 0 .08rem;
+    margin: .2rem 0 .35rem;
 }
 .agent-assisted-signup .agent-onboarding-copy small {
-    color: #536176;
-    font-size: .92rem;
-    font-weight: 760;
+    max-width: 580px;
+    color: #4b5565;
+    font-size: 1rem;
+    line-height: 1.55;
+    font-weight: 720;
+    margin-top: .65rem;
 }
 .agent-assisted-signup .onboarding-flow,
 .agent-assisted-signup .agent-onboarding-message {
-    width: min(860px, 100%);
+    width: min(900px, 100%);
+}
+.agent-assisted-signup .agent-onboarding-message {
+    margin: .35rem auto 1.35rem;
+    padding: .9rem 1.05rem;
+    background: rgba(255,255,255,.92);
 }
 .agent-assisted-signup .onboarding-rail {
     color: #0f172a;
-    padding: 1rem 1.35rem .8rem;
+    padding: .9rem 1.25rem .75rem;
     background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(239,244,255,.9));
     border-bottom: 1px solid rgba(204, 213, 232, .75);
 }
 .agent-assisted-signup .onboarding-rail h1 {
     color: #0f172a;
-    font-size: clamp(1.22rem, 2.2vw, 1.65rem);
+    font-size: clamp(1.05rem, 1.7vw, 1.35rem);
     line-height: 1.12;
-    margin: .12rem 0 .28rem;
+    margin: .1rem 0 .22rem;
 }
 .agent-assisted-signup .onboarding-rail p {
     color: #667085;
     max-width: none;
-    margin-bottom: .65rem;
-    font-size: .9rem;
+    margin-bottom: .55rem;
+    font-size: .86rem;
 }
 .agent-assisted-signup .onboarding-rail .eyebrow {
     color: #0018a8;
@@ -2286,19 +2300,25 @@ body { top: 0 !important; }
     .agent-onboarding-error { border-radius: 16px; margin: .75rem auto; width: calc(100% - 1.5rem); }
     .agent-assisted-signup .agent-onboarding-banner {
         width: calc(100% - 1.5rem);
-        min-height: 0;
+        min-height: 270px;
+        padding: 1.45rem 1.1rem 1.55rem;
         flex-direction: column;
         align-items: center;
         text-align: center;
         border-radius: 22px;
         margin-top: .75rem;
+        margin-bottom: 1rem;
     }
     .agent-assisted-signup .agent-onboarding-photo {
-        width: 108px;
-        height: 108px;
+        width: 118px;
+        height: 118px;
     }
     .agent-assisted-signup .agent-onboarding-copy strong {
-        font-size: 2rem;
+        font-size: 2.15rem;
+    }
+    .agent-assisted-signup .agent-onboarding-copy small {
+        font-size: .94rem;
+        line-height: 1.45;
     }
     .agent-verified-row {
         justify-content: center;
@@ -2306,6 +2326,12 @@ body { top: 0 !important; }
     .agent-assisted-signup .agent-onboarding-message,
     .agent-assisted-signup .onboarding-flow {
         width: calc(100% - 1.5rem);
+    }
+    .agent-assisted-signup .agent-onboarding-message {
+        margin-bottom: 1rem;
+    }
+    .agent-assisted-signup .onboarding-rail h1 {
+        font-size: 1.15rem;
     }
     .biometric-experience { grid-template-columns: 1fr; gap: 1rem; }
     .biometric-camera { max-height: 52vh; }
