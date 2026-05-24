@@ -274,11 +274,11 @@ $onboardingEyebrow = match ($authRegion) {
     default => 'Germany account opening',
 };
 $onboardingTitle = match ($authRegion) {
-    'us' => 'Open your U.S. Deutsche account',
-    'ca' => 'Open your Canadian Deutsche account',
-    'uk' => 'Open your UK Deutsche account',
-    'ch' => 'Open your Swiss Deutsche account',
-    default => 'Open your Germany Deutsche account',
+    'us' => 'Open your U.S. Lead Bank account',
+    'ca' => 'Open your Canadian Lead Bank account',
+    'uk' => 'Open your UK Lead Bank account',
+    'ch' => 'Open your Swiss Lead Bank account',
+    default => 'Open your Germany Lead Bank account',
 };
 $onboardingCopy = match ($authRegion) {
     'us' => 'Complete U.S. onboarding with SSN, address, phone, and identity verification.',
@@ -557,7 +557,7 @@ $onboardingAgentPhoto = $onboardingLink ? admin_profile_photo_url($onboardingLin
             <div class="biometric-success" data-biometric-success hidden>
                 <div class="verification-badge"><i class="fa-solid fa-shield-check"></i></div>
                 <h2>Face verification complete.</h2>
-                <p>Review your application details before submitting to Deutsche.</p>
+                <p>Review your application details before submitting to Lead Bank.</p>
             </div>
             <div class="biometric-actions">
                 <button type="button" class="btn btn-light border" data-biometric-cancel>Return to application</button>

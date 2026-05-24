@@ -216,7 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (regionSelect) {
         const copyTarget = document.querySelector('[data-home-region-copy]');
         const authLinks = document.querySelectorAll('[data-region-auth]');
-        const storedRegion = localStorage.getItem('deutscheBankingRegion');
+        const storedRegion = localStorage.getItem('leadBankingRegion');
         if (storedRegion && regionSelect.querySelector(`option[value="${storedRegion}"]`)) {
             regionSelect.value = storedRegion;
         }
@@ -230,7 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 link.setAttribute('href', target);
             });
             if (copyTarget) copyTarget.textContent = option.dataset.copy || '';
-            localStorage.setItem('deutscheBankingRegion', regionSelect.value);
+            localStorage.setItem('leadBankingRegion', regionSelect.value);
         };
         regionSelect.addEventListener('change', applyRegionLinks);
         applyRegionLinks();

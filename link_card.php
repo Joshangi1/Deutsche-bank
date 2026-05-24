@@ -69,7 +69,7 @@ $pageTitle = 'Add Credit Card';
         <div class="live-card-preview" data-card-preview data-brand="card">
             <div class="live-card-face live-card-front">
                 <div class="live-card-topline">
-                    <strong>Deutsche</strong>
+                    <strong>Lead Bank</strong>
                     <span class="card-brand-badge" data-card-brand>Card</span>
                 </div>
                 <div class="card-chip-row">

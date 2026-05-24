@@ -43,7 +43,7 @@ $cardTx->execute([$user['id']]);
 <div class="row g-4">
     <div class="col-xl-5">
         <div class="virtual-card premium-visa">
-            <div class="d-flex justify-content-between"><strong>Deutsche</strong><i class="fa-brands fa-cc-visa fa-2x"></i></div>
+            <div class="d-flex justify-content-between"><strong>Lead Bank</strong><i class="fa-brands fa-cc-visa fa-2x"></i></div>
             <div class="fs-4 fw-bold">4582 •••• •••• <?= e($card['card_last4']) ?></div>
             <div class="d-flex justify-content-between"><span><?= e(strtoupper($user['first_name'].' '.$user['last_name'])) ?></span><span><?= e(strtoupper($card['status'])) ?></span></div>
         </div>

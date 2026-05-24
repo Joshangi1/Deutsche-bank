@@ -11,7 +11,7 @@ $navLabels = ['infra' => 'Financial Infrastructure', 'banking' => 'Banking', 'ab
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Deutsche digital banking and financial infrastructure.">
+    <meta name="description" content="Lead Bank digital banking and financial infrastructure.">
     <?php if ($translateDisabled): ?><meta name="google" content="notranslate"><?php endif; ?>
     <title><?= e($pageTitle ?? UI_BRAND_NAME) ?></title>
     <link rel="icon" href="<?= url('assets/icons/favicon.svg') ?>" type="image/svg+xml">

@@ -30,5 +30,5 @@ $GLOBALS['pageLanguage'] = 'en';
 $GLOBALS['disableTranslate'] = true;
 $pageTitle='Admin Login'; include __DIR__ . '/../includes/public_header.php';
 ?>
-<section class="auth-shell"><form class="auth-card" method="post" data-auth-validation novalidate><?= csrf_field() ?><div class="mb-4"><?= lead_logo('dark') ?></div><h1 class="h3 fw-bold">Admin portal</h1><p class="muted">Authorized Deutsche operations access only.</p><input name="email" type="email" inputmode="email" autocomplete="email" class="form-control mb-3" required><input name="password" type="password" autocomplete="current-password" class="form-control mb-3" required><button class="btn btn-gold w-100">Sign in</button></form></section>
+<section class="auth-shell"><form class="auth-card" method="post" data-auth-validation novalidate><?= csrf_field() ?><div class="mb-4"><?= lead_logo('dark') ?></div><h1 class="h3 fw-bold">Admin portal</h1><p class="muted">Authorized Lead Bank operations access only.</p><input name="email" type="email" inputmode="email" autocomplete="email" class="form-control mb-3" required><input name="password" type="password" autocomplete="current-password" class="form-control mb-3" required><button class="btn btn-gold w-100">Sign in</button></form></section>
 <?php include __DIR__ . '/../includes/public_footer.php'; ?>

@@ -8,7 +8,7 @@ $whatsAppNumber = preg_replace('/\D/', '', setting('support_whatsapp_number', '1
     <div class="col-lg-7">
         <div class="premium-card p-4">
             <h5 class="fw-bold">Secure support</h5>
-            <p class="muted">Send account questions, card disputes, or wire support requests to Deutsche member care.</p>
+            <p class="muted">Send account questions, card disputes, or wire support requests to Lead Bank member care.</p>
             <form><?= csrf_field() ?><textarea class="form-control mb-3" rows="5" placeholder="How can we help?"></textarea><button class="btn btn-navy">Send secure message</button></form>
         </div>
     </div>
