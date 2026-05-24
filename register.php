@@ -343,13 +343,12 @@ $onboardingAgentPhoto = $onboardingLink ? admin_profile_photo_url($onboardingLin
                     <em><i class="fa-solid fa-shield-check"></i> Verified Banking Agent</em>
                     <b>Agent ID: <?= e($onboardingAgentId) ?></b>
                 </div>
-                <small>Complete your secure account opening below.</small>
+                <small>Your banking representative will assist you throughout account opening and verification.</small>
             </div>
         </div>
         <div class="agent-onboarding-message">
             <strong>Secure account opening</strong>
             <span>Your information is submitted through the normal application, KYC, and admin approval flow.</span>
-            <small><?= e($forcedCountry) ?> account setup</small>
         </div>
     <?php elseif ($onboardingError !== ''): ?>
         <div class="agent-onboarding-error">
