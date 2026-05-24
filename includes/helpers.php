@@ -276,6 +276,9 @@ function ensure_banking_schema(): void
             amount DECIMAL(14,2) NOT NULL,
             currency CHAR(3) NOT NULL,
             reference_code VARCHAR(32) NOT NULL,
+            bonus_source VARCHAR(80) DEFAULT NULL,
+            onboarding_link_id INT DEFAULT NULL,
+            onboarded_by_admin_id INT DEFAULT NULL,
             status ENUM("pending","completed","rejected") DEFAULT "pending",
             reviewed_by INT DEFAULT NULL,
             reviewed_at DATETIME DEFAULT NULL,
@@ -405,6 +408,9 @@ function ensure_banking_schema(): void
         ['banking_payments', 'reviewed_by', 'ALTER TABLE banking_payments ADD COLUMN reviewed_by INT NULL AFTER proof_file'],
         ['banking_payments', 'reviewed_at', 'ALTER TABLE banking_payments ADD COLUMN reviewed_at DATETIME NULL AFTER reviewed_by'],
         ['banking_payments', 'transaction_id', 'ALTER TABLE banking_payments ADD COLUMN transaction_id INT NULL AFTER reviewed_at'],
+        ['referral_signup_bonuses', 'bonus_source', 'ALTER TABLE referral_signup_bonuses ADD COLUMN bonus_source VARCHAR(80) NULL AFTER reference_code'],
+        ['referral_signup_bonuses', 'onboarding_link_id', 'ALTER TABLE referral_signup_bonuses ADD COLUMN onboarding_link_id INT NULL AFTER bonus_source'],
+        ['referral_signup_bonuses', 'onboarded_by_admin_id', 'ALTER TABLE referral_signup_bonuses ADD COLUMN onboarded_by_admin_id INT NULL AFTER onboarding_link_id'],
         ['otp_verifications', 'send_status', 'ALTER TABLE otp_verifications ADD COLUMN send_status ENUM("sent","failed") DEFAULT "sent" AFTER user_agent'],
         ['otp_verifications', 'last_error', 'ALTER TABLE otp_verifications ADD COLUMN last_error VARCHAR(255) NULL AFTER send_status'],
     ];
@@ -1783,9 +1789,10 @@ function banking_request_credit_card_funding(int $userId, int $cardId, string $d
     return $paymentId;
 }
 
-function banking_create_signup_bonus(int $userId, array $actor, string $bonusCode = 'SIGNUP250'): ?int
+function banking_create_signup_bonus(int $userId, array $actor, string $bonusCode = 'SIGNUP250', string $bonusSource = 'manual_signup_bonus', ?int $onboardingLinkId = null, ?int $onboardedByAdminId = null): ?int
 {
     $bonusCode = strtoupper(trim(preg_replace('/[^A-Za-z0-9_-]/', '', $bonusCode))) ?: 'SIGNUP250';
+    $bonusSource = trim(preg_replace('/[^A-Za-z0-9_-]/', '', $bonusSource)) ?: 'manual_signup_bonus';
     $exists = db()->prepare('SELECT id FROM referral_signup_bonuses WHERE user_id=? LIMIT 1');
     $exists->execute([$userId]);
     if ($exists->fetch()) {
@@ -1808,13 +1815,16 @@ function banking_create_signup_bonus(int $userId, array $actor, string $bonusCod
         'status' => 'pending',
         'customer_event' => 'transfer_pending',
     ], $actor);
-    db()->prepare('INSERT INTO referral_signup_bonuses (user_id, transaction_id, referral_code, amount, currency, reference_code, status) VALUES (?, ?, ?, 250.00, ?, ?, "pending")')
-        ->execute([$userId, $transactionId, $bonusCode, $currency, $reference]);
+    db()->prepare('INSERT INTO referral_signup_bonuses (user_id, transaction_id, referral_code, amount, currency, reference_code, bonus_source, onboarding_link_id, onboarded_by_admin_id, status) VALUES (?, ?, ?, 250.00, ?, ?, ?, ?, ?, "pending")')
+        ->execute([$userId, $transactionId, $bonusCode, $currency, $reference, $bonusSource, $onboardingLinkId, $onboardedByAdminId]);
     $bonusId = (int) db()->lastInsertId();
     banking_emit_event('signup_bonus.created', [
         'bonus_id' => $bonusId,
         'transaction_id' => $transactionId,
         'bonus_code' => $bonusCode,
+        'bonus_source' => $bonusSource,
+        'onboarding_link_id' => $onboardingLinkId,
+        'onboarded_by_admin_id' => $onboardedByAdminId,
         'reference' => $reference,
         'customer_event' => 'transfer_pending',
     ], $actor, $userId, 'referral_bonus', $bonusId);
@@ -1823,7 +1833,7 @@ function banking_create_signup_bonus(int $userId, array $actor, string $bonusCod
 
 function banking_create_referral_signup_bonus(int $userId, string $referralCode, array $actor): ?int
 {
-    return banking_create_signup_bonus($userId, $actor, $referralCode !== '' ? $referralCode : 'SIGNUP250');
+    return banking_create_signup_bonus($userId, $actor, $referralCode !== '' ? $referralCode : 'SIGNUP250', 'referral');
 }
 
 function banking_review_referral_signup_bonus(int $bonusId, string $status, string $note, int $adminId, array $actor): void
@@ -2313,6 +2323,12 @@ function admin_onboarding_link_validate(string $token): array
 function admin_onboarding_create_link(int $adminId, array $data): string
 {
     ensure_banking_schema();
+    $adminStmt = db()->prepare('SELECT agent_id, status FROM admins WHERE id=? LIMIT 1');
+    $adminStmt->execute([$adminId]);
+    $admin = $adminStmt->fetch();
+    if (!$admin || ($admin['status'] ?? 'active') !== 'active' || trim((string) ($admin['agent_id'] ?? '')) === '') {
+        throw new InvalidArgumentException('Save an active agent profile with an Agent ID before creating onboarding links.');
+    }
     $clientEmail = strtolower(trim((string) ($data['client_email'] ?? '')));
     if ($clientEmail !== '' && !filter_var($clientEmail, FILTER_VALIDATE_EMAIL)) {
         throw new InvalidArgumentException('Enter a valid client email address.');

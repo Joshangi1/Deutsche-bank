@@ -1535,6 +1535,67 @@ body { top: 0 !important; }
     font-size: .88rem;
     font-weight: 850;
 }
+.agent-verified-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    align-items: center;
+    margin: .38rem 0 .4rem;
+}
+.agent-verified-row em,
+.agent-verified-row b {
+    display: inline-flex;
+    align-items: center;
+    gap: .38rem;
+    border-radius: 999px;
+    padding: .46rem .68rem;
+    font-style: normal;
+    font-size: .8rem;
+    line-height: 1;
+    font-weight: 900;
+}
+.agent-verified-row em {
+    color: #067647;
+    background: #e8f7ef;
+}
+.agent-verified-row b {
+    color: #0018a8;
+    background: #edf2ff;
+}
+.agent-onboarding-message {
+    width: min(720px, 100%);
+    margin: -.2rem auto 1rem;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    flex-wrap: wrap;
+    padding: .72rem .9rem;
+    border: 1px solid rgba(204, 213, 232, .8);
+    border-radius: 14px;
+    background: rgba(255,255,255,.82);
+    box-shadow: 0 10px 30px rgba(15, 23, 42, .06);
+}
+.agent-onboarding-message strong {
+    color: #0f172a;
+    font-size: .92rem;
+    font-weight: 900;
+}
+.agent-onboarding-message span {
+    flex: 1 1 260px;
+    color: #667085;
+    font-size: .84rem;
+    font-weight: 680;
+}
+.agent-onboarding-message small {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: .38rem .58rem;
+    color: #0018a8;
+    background: #eef3ff;
+    font-size: .76rem;
+    font-weight: 880;
+}
 .agent-onboarding-error {
     display: flex;
     gap: .8rem;
@@ -1569,6 +1630,91 @@ body { top: 0 !important; }
     width: 64px;
     height: 64px;
     font-weight: 900;
+}
+
+.agent-assisted-signup {
+    padding-top: clamp(18px, 3vw, 34px);
+}
+.agent-assisted-signup .agent-onboarding-banner {
+    width: min(860px, 100%);
+    min-height: 188px;
+    padding: clamp(1.2rem, 2.8vw, 2rem);
+    gap: clamp(1rem, 2vw, 1.55rem);
+    border-radius: 26px;
+    background:
+        radial-gradient(circle at 92% 12%, rgba(0,24,168,.18), transparent 15rem),
+        radial-gradient(circle at 10% 110%, rgba(6,118,71,.1), transparent 12rem),
+        linear-gradient(135deg, rgba(255,255,255,1), rgba(242,246,255,.98));
+    border-color: rgba(188, 201, 230, .9);
+    box-shadow: 0 34px 110px rgba(15, 23, 42, .18);
+}
+.agent-assisted-signup .agent-onboarding-photo {
+    width: 116px;
+    height: 116px;
+    font-size: 2rem;
+    border: 5px solid #fff;
+}
+.agent-assisted-signup .agent-onboarding-copy span {
+    color: #7a8699;
+    font-size: .95rem;
+    font-weight: 760;
+}
+.agent-assisted-signup .agent-onboarding-copy strong {
+    font-size: clamp(2rem, 4vw, 3.1rem);
+    letter-spacing: 0;
+    margin: .18rem 0 .08rem;
+}
+.agent-assisted-signup .agent-onboarding-copy small {
+    color: #536176;
+    font-size: .92rem;
+    font-weight: 760;
+}
+.agent-assisted-signup .onboarding-flow,
+.agent-assisted-signup .agent-onboarding-message {
+    width: min(860px, 100%);
+}
+.agent-assisted-signup .onboarding-rail {
+    color: #0f172a;
+    padding: 1rem 1.35rem .8rem;
+    background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(239,244,255,.9));
+    border-bottom: 1px solid rgba(204, 213, 232, .75);
+}
+.agent-assisted-signup .onboarding-rail h1 {
+    color: #0f172a;
+    font-size: clamp(1.22rem, 2.2vw, 1.65rem);
+    line-height: 1.12;
+    margin: .12rem 0 .28rem;
+}
+.agent-assisted-signup .onboarding-rail p {
+    color: #667085;
+    max-width: none;
+    margin-bottom: .65rem;
+    font-size: .9rem;
+}
+.agent-assisted-signup .onboarding-rail .eyebrow {
+    color: #0018a8;
+}
+.agent-assisted-signup .onboarding-assurance {
+    margin-bottom: .85rem;
+}
+.agent-assisted-signup .onboarding-assurance span {
+    color: #344054;
+    background: #fff;
+    border-color: rgba(204, 213, 232, .9);
+}
+.agent-assisted-signup .onboarding-stepper {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+.agent-assisted-signup .onboarding-stepper span {
+    color: #667085;
+    background: rgba(255,255,255,.84);
+    border-color: rgba(204, 213, 232, .9);
+}
+.agent-assisted-signup .onboarding-stepper span.active {
+    color: #0018a8;
+    background: #edf2ff;
+    border-color: rgba(0,24,168,.2);
 }
 
 .onboarding-flow {
@@ -2138,6 +2284,29 @@ body { top: 0 !important; }
     .onboarding-actions .btn { flex: 1; min-width: 0; }
     .agent-onboarding-banner { align-items: flex-start; border-radius: 16px; padding: .9rem; }
     .agent-onboarding-error { border-radius: 16px; margin: .75rem auto; width: calc(100% - 1.5rem); }
+    .agent-assisted-signup .agent-onboarding-banner {
+        width: calc(100% - 1.5rem);
+        min-height: 0;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        border-radius: 22px;
+        margin-top: .75rem;
+    }
+    .agent-assisted-signup .agent-onboarding-photo {
+        width: 108px;
+        height: 108px;
+    }
+    .agent-assisted-signup .agent-onboarding-copy strong {
+        font-size: 2rem;
+    }
+    .agent-verified-row {
+        justify-content: center;
+    }
+    .agent-assisted-signup .agent-onboarding-message,
+    .agent-assisted-signup .onboarding-flow {
+        width: calc(100% - 1.5rem);
+    }
     .biometric-experience { grid-template-columns: 1fr; gap: 1rem; }
     .biometric-camera { max-height: 52vh; }
     .biometric-prompt-wrap { flex-direction: column; align-items: flex-start; }

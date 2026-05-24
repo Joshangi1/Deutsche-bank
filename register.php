@@ -17,6 +17,7 @@ if ($onboardingToken !== '') {
     }
 }
 $onboardingRegion = $onboardingLink ? onboarding_country_to_region($onboardingLink['country'] ?? '') : '';
+$onboardingBonusEligible = $onboardingLink && trim((string) ($onboardingLink['agent_id'] ?? '')) !== '';
 $authRegion = $GLOBALS['authRegion'] ?? ($onboardingRegion ?: (str_contains($scriptName, '_us') ? 'us' : (str_contains($scriptName, '_ca') ? 'ca' : (str_contains($scriptName, '_uk') ? 'uk' : (str_contains($scriptName, '_ch') ? 'ch' : (str_contains($scriptName, '_de') ? 'de' : 'us'))))));
 $regionConfig = banking_region_config($authRegion);
 $isUsPortal = $authRegion === 'us';
@@ -202,7 +203,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!banking_submit_biometric_verification($userId, $biometricCaptures, banking_actor('customer', $userId))) {
                 throw new RuntimeException('Biometric verification capture could not be saved.');
             }
-            banking_create_signup_bonus($userId, banking_actor('system'));
+            if ($onboardingBonusEligible) {
+                banking_create_signup_bonus(
+                    $userId,
+                    banking_actor('system'),
+                    'AGENT_ONBOARDING',
+                    'agent_onboarding_link',
+                    (int) $onboardingLink['id'],
+                    (int) $onboardingLink['admin_id']
+                );
+            }
             if ($onboardingLink) {
                 db()->prepare('UPDATE admin_onboarding_links SET used_at=NOW(), status="used" WHERE id=? AND used_at IS NULL AND status="active"')->execute([(int) $onboardingLink['id']]);
                 log_admin((int) $onboardingLink['admin_id'], 'client_onboarding_used', 'Client completed account opening through onboarding link', $userId, null, ['onboarding_link_id' => (int) $onboardingLink['id']]);
@@ -277,10 +287,12 @@ $onboardingCopy = match ($authRegion) {
     'ch' => 'Complete Swiss onboarding with address, phone, identity verification, IBAN, SIC, QR-bill, and transfer tools.',
     default => 'Complete Germany onboarding with tax ID, address, phone, identity verification, IBAN, and SEPA tools.',
 };
-$bonusCopy = $regionConfig['currency'] . ' 250 signup bonus pending after account opening';
 if ($onboardingLink) {
-    $bonusCopy = 'Agent-assisted secure account opening';
+    $onboardingEyebrow = 'Secure account opening';
+    $onboardingTitle = 'Complete your application';
+    $onboardingCopy = 'Your verified banking agent has prepared this secure signup session. Complete the steps below for KYC and admin review.';
 }
+$bonusCopy = $onboardingBonusEligible ? $regionConfig['currency'] . ' 250 agent onboarding bonus pending after account opening' : 'Secure account opening with KYC review';
 $identityLabel = match ($authRegion) {
     'us' => 'SSN',
     'ca' => 'Social Insurance Number',
@@ -314,7 +326,7 @@ $onboardingAgentId = $onboardingLink ? admin_agent_id([
 $onboardingAgentPhoto = $onboardingLink ? admin_profile_photo_url($onboardingLink['profile_photo'] ?? null) : null;
 ?>
 <?php include __DIR__ . '/includes/public_header.php'; ?>
-<section class="onboarding-modern-shell">
+<section class="onboarding-modern-shell<?= $onboardingLink ? ' agent-assisted-signup' : '' ?>">
     <?php if ($onboardingLink): ?>
         <div class="agent-onboarding-banner">
             <div class="agent-onboarding-photo">
@@ -325,11 +337,19 @@ $onboardingAgentPhoto = $onboardingLink ? admin_profile_photo_url($onboardingLin
                 <?php endif; ?>
             </div>
             <div class="agent-onboarding-copy">
-                <span>You&apos;re being onboarded by</span>
+                <span>You are being assisted by</span>
                 <strong><?= e($onboardingAgentName) ?></strong>
-                <p>Agent ID: <?= e($onboardingAgentId) ?></p>
+                <div class="agent-verified-row">
+                    <em><i class="fa-solid fa-shield-check"></i> Verified Banking Agent</em>
+                    <b>Agent ID: <?= e($onboardingAgentId) ?></b>
+                </div>
                 <small>Complete your secure account opening below.</small>
             </div>
+        </div>
+        <div class="agent-onboarding-message">
+            <strong>Secure account opening</strong>
+            <span>Your information is submitted through the normal application, KYC, and admin approval flow.</span>
+            <small><?= e($forcedCountry) ?> account setup</small>
         </div>
     <?php elseif ($onboardingError !== ''): ?>
         <div class="agent-onboarding-error">
@@ -344,7 +364,7 @@ $onboardingAgentPhoto = $onboardingLink ? admin_profile_photo_url($onboardingLin
         <?= csrf_field() ?>
         <?php if ($onboardingLink): ?><input type="hidden" name="onboarding_ref" value="<?= e($onboardingToken) ?>"><?php endif; ?>
         <aside class="onboarding-rail">
-            <?= lead_logo('light') ?>
+            <?php if (!$onboardingLink): ?><?= lead_logo('light') ?><?php endif; ?>
             <div>
                 <div class="eyebrow"><?= e($onboardingEyebrow) ?></div>
                 <h1><?= e($onboardingTitle) ?></h1>

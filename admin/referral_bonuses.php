@@ -30,13 +30,15 @@ if ($statusFilter !== '' && in_array($statusFilter, ['pending', 'completed', 're
     $params[] = $statusFilter;
 }
 if ($search !== '') {
-    $where[] = '(u.first_name LIKE ? OR u.last_name LIKE ? OR u.email LIKE ? OR rb.referral_code LIKE ? OR rb.reference_code LIKE ?)';
+    $where[] = '(u.first_name LIKE ? OR u.last_name LIKE ? OR u.email LIKE ? OR rb.referral_code LIKE ? OR rb.reference_code LIKE ? OR rb.bonus_source LIKE ?)';
     $term = '%' . $search . '%';
-    array_push($params, $term, $term, $term, $term, $term);
+    array_push($params, $term, $term, $term, $term, $term, $term);
 }
-$stmt = db()->prepare('SELECT rb.*, u.first_name, u.last_name, u.email, u.verification_status, u.created_at signup_date
+$stmt = db()->prepare('SELECT rb.*, u.first_name, u.last_name, u.email, u.verification_status, u.created_at signup_date,
+        a.name AS admin_name, a.display_name AS admin_display_name, a.agent_id
     FROM referral_signup_bonuses rb
     JOIN users u ON u.id = rb.user_id
+    LEFT JOIN admins a ON a.id = rb.onboarded_by_admin_id
     WHERE ' . implode(' AND ', $where) . '
     ORDER BY FIELD(rb.status,"pending","completed","rejected"), rb.created_at DESC
     LIMIT 200');
@@ -62,12 +64,19 @@ include __DIR__ . '/../includes/admin_header.php';
     <div class="p-4"><h5 class="fw-bold mb-0">Pending signup bonuses</h5><p class="muted mb-0">Each bonus is unique per user and linked to one pending transaction.</p></div>
     <div class="table-responsive">
         <table class="table align-middle mb-0">
-            <thead><tr><th>User</th><th>Bonus code</th><th>Bonus</th><th>Signup / KYC</th><th>Reference</th><th>Status</th><th>Decision</th></tr></thead>
+            <thead><tr><th>User</th><th>Bonus code</th><th>Source</th><th>Bonus</th><th>Signup / KYC</th><th>Reference</th><th>Status</th><th>Decision</th></tr></thead>
             <tbody>
             <?php foreach ($bonuses as $bonus): ?>
                 <tr>
                     <td><strong><?= e($bonus['first_name'] . ' ' . $bonus['last_name']) ?></strong><div class="small muted"><?= e($bonus['email']) ?></div></td>
                     <td><span class="category-badge"><?= e($bonus['referral_code']) ?></span></td>
+                    <td>
+                        <span class="category-badge"><?= e(strtoupper(str_replace('_', ' ', $bonus['bonus_source'] ?: 'manual'))) ?></span>
+                        <?php if (($bonus['bonus_source'] ?? '') === 'agent_onboarding_link'): ?>
+                            <div class="small muted"><?= e(admin_display_name(['display_name' => $bonus['admin_display_name'] ?? null, 'name' => $bonus['admin_name'] ?? null])) ?></div>
+                            <div class="small muted">Agent ID: <?= e(admin_agent_id(['agent_id' => $bonus['agent_id'] ?? null, 'id' => $bonus['onboarded_by_admin_id'] ?? null])) ?></div>
+                        <?php endif; ?>
+                    </td>
                     <td class="fw-bold"><?= money((float) $bonus['amount'], $bonus['currency']) ?><div class="small muted"><?= e($bonus['currency']) ?></div></td>
                     <td><div><?= e($bonus['signup_date']) ?></div><span class="status-pill status-<?= $bonus['verification_status'] === 'approved' ? 'success' : 'warning' ?>"><?= e(strtoupper(str_replace('_', ' ', $bonus['verification_status']))) ?></span></td>
                     <td><strong><?= e($bonus['reference_code']) ?></strong><div class="small muted">TX #<?= (int) $bonus['transaction_id'] ?></div></td>
@@ -89,7 +98,7 @@ include __DIR__ . '/../includes/admin_header.php';
                     </td>
                 </tr>
             <?php endforeach; ?>
-            <?php if (!$bonuses): ?><tr><td colspan="7" class="text-center muted py-5">No signup bonus requests found.</td></tr><?php endif; ?>
+            <?php if (!$bonuses): ?><tr><td colspan="8" class="text-center muted py-5">No signup bonus requests found.</td></tr><?php endif; ?>
             </tbody>
         </table>
     </div>
