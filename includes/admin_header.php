@@ -33,6 +33,7 @@ $admin = require_admin();
         <?php $nav = [
             ['admin/index.php','fa-chart-line','Analytics'],
             ['admin/users.php','fa-users','Users'],
+            ['admin/onboarding_links.php','fa-user-shield','Onboarding Links'],
             ['admin/transfers.php','fa-money-bill-transfer','Transfers'],
             ['admin/referral_bonuses.php','fa-gift','Signup Bonuses'],
             ['admin/card_approvals.php','fa-credit-card','Manage Credit Cards'],

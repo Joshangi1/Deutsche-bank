@@ -5,7 +5,19 @@ require_once __DIR__ . '/includes/helpers.php';
 ensure_banking_schema();
 
 $scriptName = basename((string) ($_SERVER['SCRIPT_NAME'] ?? 'register.php'));
-$authRegion = $GLOBALS['authRegion'] ?? (str_contains($scriptName, '_us') ? 'us' : (str_contains($scriptName, '_ca') ? 'ca' : (str_contains($scriptName, '_uk') ? 'uk' : (str_contains($scriptName, '_ch') ? 'ch' : (str_contains($scriptName, '_de') ? 'de' : 'us')))));
+$onboardingToken = trim((string) ($_POST['onboarding_ref'] ?? ($_GET['ref'] ?? '')));
+$onboardingLink = null;
+$onboardingError = '';
+if ($onboardingToken !== '') {
+    $onboardingValidation = admin_onboarding_link_validate($onboardingToken);
+    if ($onboardingValidation['ok']) {
+        $onboardingLink = $onboardingValidation['link'];
+    } else {
+        $onboardingError = (string) $onboardingValidation['error'];
+    }
+}
+$onboardingRegion = $onboardingLink ? onboarding_country_to_region($onboardingLink['country'] ?? '') : '';
+$authRegion = $GLOBALS['authRegion'] ?? ($onboardingRegion ?: (str_contains($scriptName, '_us') ? 'us' : (str_contains($scriptName, '_ca') ? 'ca' : (str_contains($scriptName, '_uk') ? 'uk' : (str_contains($scriptName, '_ch') ? 'ch' : (str_contains($scriptName, '_de') ? 'de' : 'us'))))));
 $regionConfig = banking_region_config($authRegion);
 $isUsPortal = $authRegion === 'us';
 $isGermanPortal = false;
@@ -26,7 +38,15 @@ $GLOBALS['pageLoginUrl'] = $pageLoginUrl;
 $GLOBALS['forcePageLanguage'] = true;
 $GLOBALS['disableTranslate'] = true;
 $signupErrors = [];
-$oldSignup = $_POST ?? [];
+$oldSignup = $_POST ?: [];
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' && $onboardingLink) {
+    if (!empty($onboardingLink['client_name'])) {
+        $oldSignup['full_name'] = (string) $onboardingLink['client_name'];
+    }
+    if (!empty($onboardingLink['client_email'])) {
+        $oldSignup['email'] = (string) $onboardingLink['client_email'];
+    }
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
@@ -159,11 +179,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             db()->beginTransaction();
             $pinHash = password_hash($transactionPin, PASSWORD_BCRYPT);
-            $stmt = db()->prepare('INSERT INTO users (first_name,last_name,email,phone,date_of_birth,ssn_last4,tax_id,iban,address_line1,address_line2,city,state_code,postal_code,country,employment_status,annual_income_range,verification_status,risk_status,password_hash,transaction_pin_hash,email_verified,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,"pending","verification_review",?,?,0,"disabled")');
+            $stmt = db()->prepare('INSERT INTO users (first_name,last_name,email,phone,date_of_birth,ssn_last4,tax_id,iban,address_line1,address_line2,city,state_code,postal_code,country,employment_status,annual_income_range,verification_status,risk_status,onboarded_by_admin_id,onboarding_link_id,password_hash,transaction_pin_hash,email_verified,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,"pending","verification_review",?,?,?,?,0,"disabled")');
             $storedTaxId = $isUsOnboarding ? null : $taxId;
             $storedIban = $usesIbanOnboarding ? ($iban !== '' ? $iban : null) : null;
             $storedSsnLast4 = $isUsOnboarding ? substr($ssnDigits, -4) : substr($taxId, -4);
-            $stmt->execute([$first,$last,$email,$phone,$dob,$storedSsnLast4,$storedTaxId,$storedIban,$address1,$address2,$city,$state,$postal,$country,$employment,$income,$hash,$pinHash]);
+            $stmt->execute([$first,$last,$email,$phone,$dob,$storedSsnLast4,$storedTaxId,$storedIban,$address1,$address2,$city,$state,$postal,$country,$employment,$income,$onboardingLink ? (int) $onboardingLink['admin_id'] : null,$onboardingLink ? (int) $onboardingLink['id'] : null,$hash,$pinHash]);
             $userId = (int) db()->lastInsertId();
             if (!$usesIbanOnboarding) {
                 $acct = ($region === 'uk' ? (string) random_int(10000000, 99999999) : '904' . random_int(100000000, 999999999));
@@ -183,6 +203,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new RuntimeException('Biometric verification capture could not be saved.');
             }
             banking_create_signup_bonus($userId, banking_actor('system'));
+            if ($onboardingLink) {
+                db()->prepare('UPDATE admin_onboarding_links SET used_at=NOW(), status="used" WHERE id=? AND used_at IS NULL AND status="active"')->execute([(int) $onboardingLink['id']]);
+                log_admin((int) $onboardingLink['admin_id'], 'client_onboarding_used', 'Client completed account opening through onboarding link', $userId, null, ['onboarding_link_id' => (int) $onboardingLink['id']]);
+            }
             create_customer_notification($userId, 'Account application received', 'Your account application was received and identity verification is pending.', 'info', 'security', 'normal');
             db()->commit();
             $_SESSION['pending_signup_user_id'] = $userId;
@@ -194,7 +218,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 db()->prepare('UPDATE users SET status="active", email_verified=1 WHERE id=?')->execute([$userId]);
                 flash('success', 'Account created. SMS verification is temporarily disabled for testing.');
-                header('Location: ' . $loginUrl . '?email=' . urlencode($email));
+                header('Location: ' . $pageLoginUrl . '?email=' . urlencode($email));
             }
             exit;
         } catch (Throwable $e) {
@@ -254,6 +278,9 @@ $onboardingCopy = match ($authRegion) {
     default => 'Complete Germany onboarding with tax ID, address, phone, identity verification, IBAN, and SEPA tools.',
 };
 $bonusCopy = $regionConfig['currency'] . ' 250 signup bonus pending after account opening';
+if ($onboardingLink) {
+    $bonusCopy = 'Agent-assisted secure account opening';
+}
 $identityLabel = match ($authRegion) {
     'us' => 'SSN',
     'ca' => 'Social Insurance Number',
@@ -276,18 +303,53 @@ $incomeOptions = match ($regionConfig['currency']) {
     'USD' => ['Under USD 35,000', 'USD 35,000 - 74,999', 'USD 75,000 - 124,999', 'USD 125,000 - 199,999', 'USD 200,000+'],
     default => ['Under EUR 25,000', 'EUR 25,000 - 49,999', 'EUR 50,000 - 99,999', 'EUR 100,000 - 149,999', 'EUR 150,000+'],
 };
+$onboardingAgentName = $onboardingLink ? admin_display_name([
+    'display_name' => $onboardingLink['display_name'] ?? null,
+    'name' => $onboardingLink['admin_name'] ?? null,
+]) : '';
+$onboardingAgentId = $onboardingLink ? admin_agent_id([
+    'agent_id' => $onboardingLink['agent_id'] ?? null,
+    'id' => $onboardingLink['admin_id'] ?? null,
+]) : '';
+$onboardingAgentPhoto = $onboardingLink ? admin_profile_photo_url($onboardingLink['profile_photo'] ?? null) : null;
 ?>
 <?php include __DIR__ . '/includes/public_header.php'; ?>
 <section class="onboarding-modern-shell">
+    <?php if ($onboardingLink): ?>
+        <div class="agent-onboarding-banner">
+            <div class="agent-onboarding-photo">
+                <?php if ($onboardingAgentPhoto): ?>
+                    <img src="<?= e($onboardingAgentPhoto) ?>" alt="<?= e($onboardingAgentName) ?>">
+                <?php else: ?>
+                    <span><?= e(initials_from_name($onboardingAgentName)) ?></span>
+                <?php endif; ?>
+            </div>
+            <div class="agent-onboarding-copy">
+                <span>You&apos;re being onboarded by</span>
+                <strong><?= e($onboardingAgentName) ?></strong>
+                <p>Agent ID: <?= e($onboardingAgentId) ?></p>
+                <small>Complete your secure account opening below.</small>
+            </div>
+        </div>
+    <?php elseif ($onboardingError !== ''): ?>
+        <div class="agent-onboarding-error">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <div>
+                <strong>Onboarding link unavailable</strong>
+                <p><?= e($onboardingError) ?> You can continue with normal account opening below.</p>
+            </div>
+        </div>
+    <?php endif; ?>
     <form class="onboarding-flow" method="post" enctype="multipart/form-data" data-onboarding-form data-auth-region="<?= e($authRegion) ?>">
         <?= csrf_field() ?>
+        <?php if ($onboardingLink): ?><input type="hidden" name="onboarding_ref" value="<?= e($onboardingToken) ?>"><?php endif; ?>
         <aside class="onboarding-rail">
             <?= lead_logo('light') ?>
             <div>
                 <div class="eyebrow"><?= e($onboardingEyebrow) ?></div>
                 <h1><?= e($onboardingTitle) ?></h1>
                 <p><?= e($onboardingCopy) ?></p>
-                <div class="referral-chip"><i class="fa-solid fa-gift"></i><span><?= e($bonusCopy) ?></span></div>
+                <div class="referral-chip"><i class="fa-solid <?= $onboardingLink ? 'fa-shield-halved' : 'fa-gift' ?>"></i><span><?= e($bonusCopy) ?></span></div>
             </div>
             <div class="onboarding-assurance">
                 <span><i class="fa-solid fa-key"></i> 4-digit code</span>

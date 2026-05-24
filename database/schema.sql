@@ -70,6 +70,7 @@ CREATE TABLE `user_banking_details` (
   CONSTRAINT `user_banking_details_account_fk` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `admin_onboarding_links`;
 DROP TABLE IF EXISTS `admin_logs`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -95,15 +96,41 @@ DROP TABLE IF EXISTS `admins`;
 CREATE TABLE `admins` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(120) NOT NULL,
+  `display_name` varchar(140) DEFAULT NULL,
+  `agent_id` varchar(40) DEFAULT NULL,
+  `profile_photo` varchar(255) DEFAULT NULL,
   `email` varchar(160) NOT NULL,
   `password_hash` varchar(255) NOT NULL,
   `role` enum('Super Admin','Operations','Support') DEFAULT 'Operations',
+  `status` enum('active','disabled') DEFAULT 'active',
   `failed_attempts` int(11) DEFAULT 0,
   `locked_until` datetime DEFAULT NULL,
   `last_login` datetime DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `admin_onboarding_links`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `admin_onboarding_links` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `token` char(64) NOT NULL,
+  `admin_id` int(11) NOT NULL,
+  `client_name` varchar(140) DEFAULT NULL,
+  `client_email` varchar(160) DEFAULT NULL,
+  `country` varchar(80) DEFAULT NULL,
+  `note` text DEFAULT NULL,
+  `expires_at` datetime DEFAULT NULL,
+  `used_at` datetime DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `status` enum('active','used','expired','disabled') DEFAULT 'active',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_admin_onboarding_token` (`token`),
+  KEY `idx_admin_onboarding_admin` (`admin_id`,`created_at`),
+  KEY `idx_admin_onboarding_status` (`status`,`expires_at`,`used_at`),
+  CONSTRAINT `admin_onboarding_admin_fk` FOREIGN KEY (`admin_id`) REFERENCES `admins` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `banking_events`;
@@ -631,6 +658,8 @@ CREATE TABLE `users` (
   `verification_status` enum('not_started','pending','approved','rejected','reupload_requested') DEFAULT 'not_started',
   `risk_status` enum('clear','fraud_review','verification_review','transfer_restricted') DEFAULT 'clear',
   `restriction_reason` varchar(255) DEFAULT NULL,
+  `onboarded_by_admin_id` int(11) DEFAULT NULL,
+  `onboarding_link_id` int(11) DEFAULT NULL,
   `password_hash` varchar(255) NOT NULL,
   `transaction_pin_hash` varchar(255) DEFAULT NULL,
   `avatar` varchar(255) DEFAULT NULL,

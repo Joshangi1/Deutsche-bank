@@ -10,6 +10,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $admin = $stmt->fetch();
     if ($admin && (int) ($admin['failed_attempts'] ?? 0) >= 5 && strtotime((string) ($admin['locked_until'] ?? '')) > time()) {
         flash('danger', 'Admin account temporarily locked after failed attempts. Try again later.');
+    } elseif ($admin && ($admin['status'] ?? 'active') !== 'active') {
+        flash('danger', 'This admin profile is not active.');
     } elseif ($admin && password_verify((string)$_POST['password'], $admin['password_hash'])) {
         start_authenticated_session('admin', (int) $admin['id']);
         db()->prepare('UPDATE admins SET failed_attempts=0, locked_until=NULL, last_login=NOW() WHERE id=?')->execute([$admin['id']]);

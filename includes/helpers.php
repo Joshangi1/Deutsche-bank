@@ -287,6 +287,23 @@ function ensure_banking_schema(): void
             CONSTRAINT referral_bonus_user_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
             CONSTRAINT referral_bonus_tx_fk FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci',
+        'admin_onboarding_links' => 'CREATE TABLE IF NOT EXISTS admin_onboarding_links (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            token CHAR(64) NOT NULL,
+            admin_id INT NOT NULL,
+            client_name VARCHAR(140) DEFAULT NULL,
+            client_email VARCHAR(160) DEFAULT NULL,
+            country VARCHAR(80) DEFAULT NULL,
+            note TEXT DEFAULT NULL,
+            expires_at DATETIME DEFAULT NULL,
+            used_at DATETIME DEFAULT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            status ENUM("active","used","expired","disabled") DEFAULT "active",
+            UNIQUE KEY idx_admin_onboarding_token (token),
+            INDEX idx_admin_onboarding_admin (admin_id, created_at),
+            INDEX idx_admin_onboarding_status (status, expires_at, used_at),
+            CONSTRAINT admin_onboarding_admin_fk FOREIGN KEY (admin_id) REFERENCES admins(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci',
         'loan_applications' => 'CREATE TABLE IF NOT EXISTS loan_applications (
             id INT AUTO_INCREMENT PRIMARY KEY,
             user_id INT NOT NULL,
@@ -343,9 +360,13 @@ function ensure_banking_schema(): void
         ['admin_logs', 'affected_user_id', 'ALTER TABLE admin_logs ADD COLUMN affected_user_id INT NULL AFTER action'],
         ['admin_logs', 'before_values', 'ALTER TABLE admin_logs ADD COLUMN before_values LONGTEXT NULL AFTER details'],
         ['admin_logs', 'after_values', 'ALTER TABLE admin_logs ADD COLUMN after_values LONGTEXT NULL AFTER before_values'],
+        ['admins', 'display_name', 'ALTER TABLE admins ADD COLUMN display_name VARCHAR(140) NULL AFTER name'],
+        ['admins', 'agent_id', 'ALTER TABLE admins ADD COLUMN agent_id VARCHAR(40) NULL AFTER display_name'],
+        ['admins', 'profile_photo', 'ALTER TABLE admins ADD COLUMN profile_photo VARCHAR(255) NULL AFTER agent_id'],
         ['admins', 'failed_attempts', 'ALTER TABLE admins ADD COLUMN failed_attempts INT DEFAULT 0 AFTER role'],
         ['admins', 'locked_until', 'ALTER TABLE admins ADD COLUMN locked_until DATETIME NULL AFTER failed_attempts'],
         ['admins', 'last_login', 'ALTER TABLE admins ADD COLUMN last_login DATETIME NULL AFTER locked_until'],
+        ['admins', 'status', 'ALTER TABLE admins ADD COLUMN status ENUM("active","disabled") DEFAULT "active" AFTER role'],
         ['users', 'date_of_birth', 'ALTER TABLE users ADD COLUMN date_of_birth DATE NULL AFTER phone'],
         ['users', 'ssn_last4', 'ALTER TABLE users ADD COLUMN ssn_last4 CHAR(4) NULL AFTER date_of_birth'],
         ['users', 'address_line1', 'ALTER TABLE users ADD COLUMN address_line1 VARCHAR(160) NULL AFTER ssn_last4'],
@@ -361,6 +382,8 @@ function ensure_banking_schema(): void
         ['users', 'verification_status', 'ALTER TABLE users ADD COLUMN verification_status ENUM("not_started","pending","approved","rejected","reupload_requested") DEFAULT "not_started" AFTER annual_income_range'],
         ['users', 'risk_status', 'ALTER TABLE users ADD COLUMN risk_status ENUM("clear","fraud_review","verification_review","transfer_restricted") DEFAULT "clear" AFTER verification_status'],
         ['users', 'restriction_reason', 'ALTER TABLE users ADD COLUMN restriction_reason VARCHAR(255) NULL AFTER risk_status'],
+        ['users', 'onboarded_by_admin_id', 'ALTER TABLE users ADD COLUMN onboarded_by_admin_id INT NULL AFTER restriction_reason'],
+        ['users', 'onboarding_link_id', 'ALTER TABLE users ADD COLUMN onboarding_link_id INT NULL AFTER onboarded_by_admin_id'],
         ['linked_accounts', 'joint_owner_name', 'ALTER TABLE linked_accounts ADD COLUMN joint_owner_name VARCHAR(140) NULL AFTER institution_name'],
         ['linked_accounts', 'iban', 'ALTER TABLE linked_accounts ADD COLUMN iban VARCHAR(34) NULL AFTER routing_number'],
         ['linked_accounts', 'bic', 'ALTER TABLE linked_accounts ADD COLUMN bic VARCHAR(16) NULL AFTER iban'],
@@ -939,6 +962,12 @@ function require_admin(): array
     enforce_session_activity('admin');
     $admin = current_admin();
     if (!$admin) {
+        header('Location: ' . url('admin/login.php'));
+        exit;
+    }
+    if (($admin['status'] ?? 'active') !== 'active') {
+        clear_current_session();
+        flash('danger', 'This admin profile is not active.');
         header('Location: ' . url('admin/login.php'));
         exit;
     }
@@ -2146,6 +2175,175 @@ function save_setting(string $key, string $value): void
 function avatar_url(?string $avatar): string
 {
     return $avatar ? url('uploads/avatars/' . $avatar) : url('assets/icons/default-avatar.svg');
+}
+
+function admin_display_name(array $admin): string
+{
+    return trim((string) ($admin['display_name'] ?? '')) ?: trim((string) ($admin['name'] ?? 'Banking Agent')) ?: 'Banking Agent';
+}
+
+function admin_agent_id(array $admin): string
+{
+    $agentId = trim((string) ($admin['agent_id'] ?? ''));
+    return $agentId !== '' ? $agentId : 'AGT-' . str_pad((string) ((int) ($admin['id'] ?? 0)), 5, '0', STR_PAD_LEFT);
+}
+
+function initials_from_name(string $name): string
+{
+    $parts = preg_split('/\s+/', trim($name)) ?: [];
+    $letters = '';
+    foreach ($parts as $part) {
+        if ($part !== '') {
+            $letters .= strtoupper(substr($part, 0, 1));
+        }
+        if (strlen($letters) >= 2) {
+            break;
+        }
+    }
+    return $letters !== '' ? $letters : 'DA';
+}
+
+function admin_profile_photo_url(?string $photo): ?string
+{
+    $photo = trim((string) $photo);
+    return $photo !== '' ? url('uploads/admin_profiles/' . $photo) : null;
+}
+
+function secure_admin_profile_photo_upload(array $file): ?string
+{
+    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+        return null;
+    }
+    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+        throw new RuntimeException('Agent profile photo upload failed.');
+    }
+    $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+    $mime = mime_content_type($file['tmp_name']);
+    if (!isset($allowed[$mime]) || ($file['size'] ?? 0) > 4 * 1024 * 1024) {
+        throw new RuntimeException('Agent photo must be JPG, PNG, or WEBP and under 4 MB.');
+    }
+    $imageInfo = @getimagesize($file['tmp_name']);
+    if (!$imageInfo || ($imageInfo[0] ?? 0) < 120 || ($imageInfo[1] ?? 0) < 120) {
+        throw new RuntimeException('Agent photo must be a readable image at least 120px wide and tall.');
+    }
+    $dir = __DIR__ . '/../uploads/admin_profiles';
+    if (!is_dir($dir)) {
+        mkdir($dir, 0755, true);
+    }
+    $name = 'agent_' . bin2hex(random_bytes(16)) . '.' . $allowed[$mime];
+    $path = $dir . DIRECTORY_SEPARATOR . $name;
+    return move_uploaded_file($file['tmp_name'], $path) ? $name : null;
+}
+
+function onboarding_country_to_region(?string $country): string
+{
+    $country = strtolower(trim((string) $country));
+    return match (true) {
+        in_array($country, ['united states', 'usa', 'us'], true) => 'us',
+        in_array($country, ['canada', 'ca'], true) => 'ca',
+        in_array($country, ['united kingdom', 'uk', 'gb', 'great britain'], true) => 'uk',
+        in_array($country, ['switzerland', 'ch'], true) => 'ch',
+        in_array($country, ['germany', 'de', 'deutschland'], true) => 'de',
+        default => '',
+    };
+}
+
+function admin_onboarding_link_public_url(string $token): string
+{
+    $path = url('register.php?ref=' . rawurlencode($token));
+    $host = $_SERVER['HTTP_HOST'] ?? '';
+    if ($host === '') {
+        return $path;
+    }
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    return $scheme . '://' . $host . $path;
+}
+
+function admin_onboarding_link_effective_status(array $link): string
+{
+    if (($link['status'] ?? '') !== 'active') {
+        return (string) ($link['status'] ?? 'disabled');
+    }
+    if (!empty($link['used_at'])) {
+        return 'used';
+    }
+    if (!empty($link['expires_at']) && strtotime((string) $link['expires_at']) < time()) {
+        return 'expired';
+    }
+    return 'active';
+}
+
+function admin_onboarding_link_by_token(string $token): ?array
+{
+    $token = trim($token);
+    if (!preg_match('/^[A-Fa-f0-9]{64}$/', $token)) {
+        return null;
+    }
+    $stmt = db()->prepare('SELECT l.*, a.name AS admin_name, a.display_name, a.agent_id, a.profile_photo, a.role AS admin_role, a.status AS admin_status
+        FROM admin_onboarding_links l
+        JOIN admins a ON a.id = l.admin_id
+        WHERE l.token = ?
+        LIMIT 1');
+    $stmt->execute([$token]);
+    return $stmt->fetch() ?: null;
+}
+
+function admin_onboarding_link_validate(string $token): array
+{
+    $link = admin_onboarding_link_by_token($token);
+    if (!$link) {
+        return ['ok' => false, 'error' => 'This onboarding link is invalid or no longer available.', 'link' => null];
+    }
+    if (($link['admin_status'] ?? 'active') !== 'active') {
+        return ['ok' => false, 'error' => 'This onboarding agent is currently unavailable.', 'link' => $link];
+    }
+    $status = admin_onboarding_link_effective_status($link);
+    if ($status === 'expired') {
+        return ['ok' => false, 'error' => 'This onboarding link has expired.', 'link' => $link];
+    }
+    if ($status === 'used') {
+        return ['ok' => false, 'error' => 'This onboarding link has already been used.', 'link' => $link];
+    }
+    if ($status !== 'active') {
+        return ['ok' => false, 'error' => 'This onboarding link is not active.', 'link' => $link];
+    }
+    return ['ok' => true, 'error' => '', 'link' => $link];
+}
+
+function admin_onboarding_create_link(int $adminId, array $data): string
+{
+    ensure_banking_schema();
+    $clientEmail = strtolower(trim((string) ($data['client_email'] ?? '')));
+    if ($clientEmail !== '' && !filter_var($clientEmail, FILTER_VALIDATE_EMAIL)) {
+        throw new InvalidArgumentException('Enter a valid client email address.');
+    }
+    $expiresAt = trim((string) ($data['expires_at'] ?? ''));
+    if ($expiresAt !== '') {
+        $timestamp = strtotime($expiresAt . ' 23:59:59');
+        if ($timestamp === false) {
+            throw new InvalidArgumentException('Choose a valid expiry date.');
+        }
+        $expiresAt = date('Y-m-d H:i:s', $timestamp);
+    } else {
+        $expiresAt = null;
+    }
+    do {
+        $token = bin2hex(random_bytes(32));
+        $exists = db()->prepare('SELECT COUNT(*) c FROM admin_onboarding_links WHERE token=?');
+        $exists->execute([$token]);
+    } while ((int) $exists->fetch()['c'] > 0);
+
+    $stmt = db()->prepare('INSERT INTO admin_onboarding_links (token, admin_id, client_name, client_email, country, note, expires_at, status) VALUES (?, ?, ?, ?, ?, ?, ?, "active")');
+    $stmt->execute([
+        $token,
+        $adminId,
+        trim((string) ($data['client_name'] ?? '')) ?: null,
+        $clientEmail ?: null,
+        trim((string) ($data['country'] ?? '')) ?: null,
+        trim((string) ($data['note'] ?? '')) ?: null,
+        $expiresAt,
+    ]);
+    return $token;
 }
 
 function verify_transaction_pin(array $user, string $pin): bool
