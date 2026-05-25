@@ -38,6 +38,7 @@ $isDashboardPage = basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')) === 'dashb
     <link href="<?= url('assets/css/styles.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/styles.css') ?>" rel="stylesheet">
     <link href="<?= url('assets/css/premium-banking.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/premium-banking.css') ?>" rel="stylesheet">
     <link href="<?= url('assets/css/mobile-premium-fix.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/mobile-premium-fix.css') ?>" rel="stylesheet">
+    <link href="<?= url('assets/css/lead-bank-theme.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/lead-bank-theme.css') ?>" rel="stylesheet">
     <script>
         (function () {
             document.cookie = 'googtrans=;path=/;expires=Thu, 01 Jan 1970 00:00:00 GMT';
