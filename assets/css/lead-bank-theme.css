@@ -190,6 +190,51 @@ button.btn-primary:hover {
 }
 
 /* Auth, signup and onboarding surfaces */
+.auth-shell,
+.onboarding-modern-shell {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.auth-shell {
+  background:
+    linear-gradient(112deg, rgba(7, 27, 69, .2) 0%, rgba(246, 248, 252, .8) 43%, rgba(246, 248, 252, .93) 100%),
+    url("https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1800&q=80") center / cover no-repeat !important;
+}
+
+.onboarding-modern-shell {
+  background:
+    linear-gradient(110deg, rgba(7, 27, 69, .16) 0%, rgba(246, 248, 252, .82) 45%, rgba(246, 248, 252, .94) 100%),
+    url("https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1800&q=80") center / cover no-repeat fixed !important;
+}
+
+.auth-shell::before,
+.onboarding-modern-shell::before {
+  content: "";
+  position: absolute;
+  right: clamp(1.5rem, 6vw, 5.5rem);
+  bottom: clamp(1.25rem, 5vw, 4rem);
+  width: clamp(10rem, 17vw, 16rem);
+  aspect-ratio: 1;
+  background: url("../icons/lead-bank-logo.jpg") center / contain no-repeat;
+  mix-blend-mode: multiply;
+  opacity: .065;
+  pointer-events: none;
+}
+
+.auth-shell > *,
+.onboarding-modern-shell > * {
+  position: relative;
+  z-index: 1;
+}
+
+.auth-suite,
+.onboarding-flow {
+  background: rgba(255, 255, 255, .94) !important;
+  backdrop-filter: blur(14px);
+}
+
 .auth-panel,
 .onboarding-rail {
   background:
@@ -869,7 +914,30 @@ body.dashboard-screen .app-quick-grid i {
   display: grid;
   place-items: center;
   padding: clamp(1.5rem, 5vw, 4rem) 0;
-  background: var(--lead-surface) !important;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    linear-gradient(112deg, rgba(7, 27, 69, .13) 0%, rgba(246, 248, 252, .82) 34%, rgba(246, 248, 252, .9) 100%),
+    url("https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1800&q=80") center / cover no-repeat !important;
+}
+
+.country-choice-shell::before {
+  content: "";
+  position: absolute;
+  right: clamp(1.5rem, 6vw, 5.5rem);
+  top: clamp(1.75rem, 7vw, 4.25rem);
+  width: clamp(11rem, 18vw, 17rem);
+  aspect-ratio: 1;
+  background: url("../icons/lead-bank-logo.jpg") center / contain no-repeat;
+  mix-blend-mode: multiply;
+  opacity: .06;
+  pointer-events: none;
+}
+
+.country-choice-shell > .container {
+  position: relative;
+  z-index: 1;
 }
 
 .country-choice-portal {
@@ -879,8 +947,9 @@ body.dashboard-screen .app-quick-grid i {
   padding: clamp(1.5rem, 3vw, 2.7rem);
   border: 1px solid var(--lead-border);
   border-radius: 26px;
-  background: var(--lead-panel);
-  box-shadow: var(--lead-shadow);
+  background: rgba(255, 255, 255, .91);
+  box-shadow: 0 30px 74px rgba(7, 27, 69, .13);
+  backdrop-filter: blur(15px);
 }
 
 .country-choice-head {
@@ -989,6 +1058,18 @@ body.dashboard-screen .app-quick-grid i {
 }
 
 @media (max-width: 575.98px) {
+  .auth-shell,
+  .onboarding-modern-shell {
+    background-attachment: scroll !important;
+  }
+
+  .auth-shell::before,
+  .onboarding-modern-shell::before,
+  .country-choice-shell::before {
+    width: clamp(6.5rem, 24vw, 8.5rem);
+    opacity: .05;
+  }
+
   .country-choice-portal {
     padding: 1.2rem;
     border-radius: 20px;
