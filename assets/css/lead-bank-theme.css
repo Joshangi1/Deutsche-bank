@@ -3,7 +3,7 @@
   --lead-primary: #2F5BFF;
   --lead-primary-hover: #4DB5FF;
   --lead-sky: #4DB5FF;
-  --lead-accent: #2F5BFF;
+  --lead-accent: #071B45;
   --lead-ink: #071B45;
   --lead-text: #071B45;
   --lead-muted: rgba(7, 27, 69, .64);
@@ -11,10 +11,10 @@
   --lead-panel: #ffffff;
   --lead-border: rgba(47, 91, 255, .14);
   --lead-tint: rgba(77, 181, 255, .13);
-  --lead-gradient: linear-gradient(135deg, #4DB5FF 0%, #2F5BFF 100%);
+  --lead-gradient: linear-gradient(135deg, #071B45 0%, #071B45 38%, #2F5BFF 100%);
   --lead-gradient-soft: linear-gradient(135deg, rgba(77, 181, 255, .15), rgba(47, 91, 255, .07));
   --lead-shadow: 0 18px 44px rgba(7, 27, 69, .08);
-  --lead-shadow-strong: 0 24px 54px rgba(47, 91, 255, .2);
+  --lead-shadow-strong: 0 24px 54px rgba(7, 27, 69, .22);
 
   --lead-blue: var(--lead-primary);
   --lead-blue-2: var(--lead-primary-hover);
@@ -28,7 +28,7 @@
 
   --navy: var(--lead-ink);
   --navy-mid: var(--lead-ink);
-  --navy-card: var(--lead-primary);
+  --navy-card: var(--lead-ink);
   --blue: var(--lead-primary);
   --blue-light: var(--lead-sky);
   --blue-glow: rgba(77, 181, 255, .18);
@@ -41,8 +41,8 @@
   --shadow-md: var(--lead-shadow);
   --shadow-lg: var(--lead-shadow-strong);
 
-  --brand-navy: var(--lead-primary);
-  --brand-navy-deep: var(--lead-primary-hover);
+  --brand-navy: var(--lead-ink);
+  --brand-navy-deep: var(--lead-ink);
   --brand-cyan: var(--lead-sky);
   --card-grad: var(--lead-gradient);
   --surface-bg: var(--lead-surface);
@@ -193,7 +193,7 @@ button.btn-primary:hover {
 .auth-panel,
 .onboarding-rail {
   background:
-    radial-gradient(circle at 16% 12%, rgba(255, 255, 255, .2), transparent 14rem),
+    radial-gradient(circle at 16% 12%, rgba(77, 181, 255, .12), transparent 14rem),
     var(--lead-gradient) !important;
 }
 
@@ -209,7 +209,7 @@ button.btn-primary:hover {
 .agent-onboarding-photo,
 .admin-agent-photo {
   background: var(--lead-gradient) !important;
-  box-shadow: 0 12px 28px rgba(47, 91, 255, .2) !important;
+  box-shadow: 0 12px 28px rgba(7, 27, 69, .2) !important;
 }
 
 .agent-verified-row em,
@@ -275,7 +275,7 @@ body.dashboard-screen .bank-home-grid > .total-balance-panel.bank-app-card {
   color: #fff !important;
   border-color: transparent !important;
   background:
-    radial-gradient(circle at 86% 12%, rgba(255, 255, 255, .24), transparent 13rem),
+    radial-gradient(circle at 86% 12%, rgba(77, 181, 255, .14), transparent 13rem),
     var(--lead-gradient) !important;
   box-shadow: var(--lead-shadow-strong) !important;
 }
@@ -294,9 +294,9 @@ body.dashboard-screen .premium-mobile-card,
 .premium-visa {
   color: #fff;
   background:
-    radial-gradient(circle at 82% 10%, rgba(255, 255, 255, .18), transparent 8rem),
+    radial-gradient(circle at 82% 10%, rgba(77, 181, 255, .13), transparent 8rem),
     var(--lead-gradient) !important;
-  box-shadow: 0 18px 38px rgba(47, 91, 255, .2) !important;
+  box-shadow: 0 18px 38px rgba(7, 27, 69, .2) !important;
 }
 
 .live-card-back {
@@ -306,7 +306,7 @@ body.dashboard-screen .premium-mobile-card,
 .app-quick-grid i,
 body.dashboard-screen .app-quick-grid i {
   color: #fff !important;
-  background: var(--lead-gradient) !important;
+  background: var(--lead-primary) !important;
   box-shadow: 0 10px 20px rgba(47, 91, 255, .2) !important;
 }
 
