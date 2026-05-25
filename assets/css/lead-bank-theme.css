@@ -1291,3 +1291,16 @@ body.dashboard-screen .app-quick-grid i {
     margin-bottom: calc(54px + env(safe-area-inset-bottom)) !important;
   }
 }
+
+/* Desktop sidebar brand header: give the identity mark intentional breathing room. */
+@media (min-width: 992px) {
+  .sidebar > .sidebar-brand {
+    flex: 0 0 auto;
+    min-height: 96px;
+    padding: 25px 10px 20px !important;
+  }
+
+  .sidebar > .nav {
+    padding-top: 18px;
+  }
+}
