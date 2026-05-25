@@ -4446,3 +4446,277 @@ body.dashboard-screen .balance-value-row button:active {
     visibility: visible !important;
   }
 }
+
+/* Desktop dashboard workspace: distinct from the compact mobile banking stack. */
+body.dashboard-screen .assigned-agent-panel {
+  display: none;
+}
+
+@media (min-width: 1100px) {
+  body.dashboard-screen .app-main {
+    padding: 20px 28px 30px !important;
+  }
+
+  body.dashboard-screen .bank-home-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 18px;
+    align-items: start;
+  }
+
+  body.dashboard-screen .bank-home-grid > .total-balance-panel.bank-app-card {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    min-height: 258px;
+    padding: 30px 34px;
+  }
+
+  body.dashboard-screen .virtual-card-panel {
+    grid-column: 1 / span 4;
+    grid-row: 2;
+    min-height: 196px;
+  }
+
+  body.dashboard-screen .account-stack-panel {
+    grid-column: 5 / span 4;
+    grid-row: 2;
+    min-height: 196px;
+  }
+
+  body.dashboard-screen .assigned-agent-panel {
+    display: block;
+    grid-column: 9 / span 4;
+    grid-row: 2;
+    min-height: 196px;
+    padding: 18px;
+  }
+
+  body.dashboard-screen .quick-action-panel {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    padding: 18px;
+  }
+
+  body.dashboard-screen .quick-action-panel .app-quick-grid {
+    gap: 14px;
+  }
+
+  body.dashboard-screen .quick-action-panel .app-quick-grid a,
+  body.dashboard-screen .quick-action-panel .app-quick-grid button {
+    min-height: 82px;
+  }
+
+  body.dashboard-screen .transactions-panel {
+    grid-column: 1 / span 8;
+    grid-row: 4;
+    min-height: 0;
+    padding: 18px;
+  }
+
+  body.dashboard-screen .desktop-insights-panel {
+    grid-column: 9 / span 4;
+    grid-row: 4;
+    min-height: 0;
+    padding: 18px;
+  }
+
+  body.dashboard-screen .instant-pay-panel {
+    display: none;
+  }
+
+  body.dashboard-screen .premium-mobile-card {
+    width: 100%;
+    margin-inline: 0;
+    min-height: 112px;
+    max-height: 112px;
+  }
+
+  body.dashboard-screen .account-card-list {
+    margin-top: 4px;
+  }
+
+  body.dashboard-screen .mobile-account-card {
+    min-height: 66px;
+  }
+
+  body.dashboard-screen .assigned-agent-profile {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 18px;
+  }
+
+  body.dashboard-screen .assigned-agent-photo {
+    width: 66px;
+    height: 66px;
+    flex: 0 0 66px;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border-radius: 50%;
+    background: var(--lead-gradient-soft);
+    color: var(--lead-primary);
+    font-size: 1.2rem;
+    font-weight: 850;
+  }
+
+  body.dashboard-screen .assigned-agent-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  body.dashboard-screen .assigned-agent-details {
+    min-width: 0;
+    display: grid;
+    gap: 4px;
+  }
+
+  body.dashboard-screen .assigned-agent-details small {
+    color: var(--muted);
+    font-size: .69rem;
+    font-weight: 730;
+    text-transform: uppercase;
+  }
+
+  body.dashboard-screen .assigned-agent-details strong {
+    overflow: hidden;
+    color: var(--ink);
+    font-size: 1rem;
+    font-weight: 820;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  body.dashboard-screen .assigned-agent-details span {
+    color: var(--muted);
+    font-size: .79rem;
+    font-weight: 650;
+  }
+
+  body.dashboard-screen .assigned-agent-details em {
+    width: max-content;
+    margin-top: 4px;
+    padding: 5px 9px;
+    border-radius: 999px;
+    color: #067647;
+    background: #e8f7ef;
+    font-size: .7rem;
+    font-style: normal;
+    font-weight: 760;
+  }
+
+  body.dashboard-screen .assigned-agent-details em i {
+    margin-right: 4px;
+  }
+
+  body.dashboard-screen .assigned-agent-empty {
+    min-height: 114px;
+    display: grid;
+    align-content: center;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 12px;
+    border: 1px solid #e8edf5;
+    border-radius: 14px;
+  }
+
+  body.dashboard-screen .assigned-agent-empty strong {
+    color: var(--ink);
+    font-size: .91rem;
+  }
+
+  body.dashboard-screen .assigned-agent-empty p {
+    margin: 0;
+    color: var(--muted);
+    font-size: .76rem;
+    line-height: 1.4;
+  }
+
+  body.dashboard-screen .desktop-insights-panel .cash-flow {
+    margin-bottom: 14px;
+  }
+
+  body.dashboard-screen .dashboard-analytics-block,
+  body.dashboard-screen .dashboard-payment-stats {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #edf1f7;
+  }
+
+  body.dashboard-screen .analytics-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  body.dashboard-screen .analytics-heading h4 {
+    margin: 0;
+    color: var(--ink);
+    font-size: .86rem;
+    font-weight: 800;
+  }
+
+  body.dashboard-screen .analytics-heading span {
+    color: var(--muted);
+    font-size: .69rem;
+    font-weight: 650;
+  }
+
+  body.dashboard-screen .spending-analytics-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  body.dashboard-screen .spending-analytics-row canvas[data-chart] {
+    width: 82px !important;
+    max-width: 82px !important;
+    max-height: 82px !important;
+    margin: 0;
+  }
+
+  body.dashboard-screen .spending-analytics-row small {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--muted);
+    font-size: .7rem;
+    font-weight: 650;
+  }
+
+  body.dashboard-screen .spending-analytics-row strong {
+    color: var(--ink);
+    font-size: .95rem;
+    font-weight: 820;
+  }
+
+  body.dashboard-screen .payment-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  body.dashboard-screen .payment-stat-grid div {
+    padding: 9px 7px;
+    border: 1px solid #edf1f7;
+    border-radius: 10px;
+    text-align: center;
+  }
+
+  body.dashboard-screen .payment-stat-grid span {
+    display: block;
+    color: var(--muted);
+    font-size: .64rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  body.dashboard-screen .payment-stat-grid b {
+    display: block;
+    margin-top: 4px;
+    color: var(--ink);
+    font-size: .9rem;
+    font-weight: 820;
+  }
+}

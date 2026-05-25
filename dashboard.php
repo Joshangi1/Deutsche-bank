@@ -47,6 +47,26 @@ $monthlyIncome = db()->prepare('SELECT COALESCE(SUM(amount),0) total FROM transa
 $monthlyIncome->execute([$user['id']]);
 $monthlyExpense = db()->prepare('SELECT COALESCE(SUM(ABS(amount)),0) total FROM transactions WHERE user_id=? AND amount < 0 AND created_at >= DATE_FORMAT(CURDATE(), "%Y-%m-01")');
 $monthlyExpense->execute([$user['id']]);
+$monthlyIncomeTotal = (float) ($monthlyIncome->fetch()['total'] ?? 0);
+$monthlyExpenseTotal = (float) ($monthlyExpense->fetch()['total'] ?? 0);
+
+$activityStmt = db()->prepare('SELECT COUNT(*) total_count, COALESCE(SUM(CASE WHEN amount > 0 THEN 1 ELSE 0 END), 0) credit_count, COALESCE(SUM(CASE WHEN amount < 0 THEN 1 ELSE 0 END), 0) debit_count FROM transactions WHERE user_id=?');
+$activityStmt->execute([$user['id']]);
+$activitySummary = $activityStmt->fetch() ?: ['total_count' => 0, 'credit_count' => 0, 'debit_count' => 0];
+
+$assignedAgent = null;
+if (!empty($user['onboarded_by_admin_id'])) {
+    $agentStmt = db()->prepare('SELECT id, name, display_name, agent_id, profile_photo, role, status FROM admins WHERE id=? LIMIT 1');
+    $agentStmt->execute([(int) $user['onboarded_by_admin_id']]);
+    $assignedAgent = $agentStmt->fetch() ?: null;
+} elseif (!empty($user['onboarding_link_id'])) {
+    $agentStmt = db()->prepare('SELECT a.id, a.name, a.display_name, a.agent_id, a.profile_photo, a.role, a.status FROM admin_onboarding_links l JOIN admins a ON a.id=l.admin_id WHERE l.id=? LIMIT 1');
+    $agentStmt->execute([(int) $user['onboarding_link_id']]);
+    $assignedAgent = $agentStmt->fetch() ?: null;
+}
+$assignedAgentName = $assignedAgent ? admin_display_name($assignedAgent) : '';
+$assignedAgentCode = $assignedAgent ? admin_agent_id($assignedAgent) : '';
+$assignedAgentPhoto = $assignedAgent ? admin_profile_photo_url($assignedAgent['profile_photo'] ?? null) : null;
 
 $isNewAccount = $txCount === 0 && (float) $account['available_balance'] === 0.0 && (float) $account['pending_balance'] === 0.0 && (float) $account['savings_balance'] === 0.0;
 $accountStatus = strtolower((string) ($user['status'] ?? 'active'));
@@ -237,6 +257,33 @@ $cardExpiry = !empty($card['created_at']) ? date('m/y', strtotime((string) $card
             </div>
         </section>
 
+        <section class="bank-app-card assigned-agent-panel">
+            <div class="section-title-row"><h3>Assigned Banking Agent</h3></div>
+            <?php if ($assignedAgent): ?>
+                <div class="assigned-agent-profile">
+                    <span class="assigned-agent-photo">
+                        <?php if ($assignedAgentPhoto): ?>
+                            <img src="<?= e($assignedAgentPhoto) ?>" alt="<?= e($assignedAgentName) ?>">
+                        <?php else: ?>
+                            <b><?= e(initials_from_name($assignedAgentName)) ?></b>
+                        <?php endif; ?>
+                    </span>
+                    <div class="assigned-agent-details">
+                        <small>Dedicated account support</small>
+                        <strong><?= e($assignedAgentName) ?></strong>
+                        <span>Agent ID: <?= e($assignedAgentCode) ?></span>
+                        <em><i class="fa-solid fa-circle-check"></i> Verified Banking Agent</em>
+                    </div>
+                </div>
+            <?php else: ?>
+                <div class="assigned-agent-empty">
+                    <span class="account-card-icon"><i class="fa-solid fa-user-shield"></i></span>
+                    <strong>No assigned banking agent</strong>
+                    <p>An agent profile appears here when your account is opened through assisted onboarding.</p>
+                </div>
+            <?php endif; ?>
+        </section>
+
         <section class="bank-app-card instant-pay-panel">
             <div class="section-title-row"><h3><?= $isUsAccount ? 'Instant Pay' : e($regionConfig['rail_primary']) ?></h3><a href="user/send_money.php"><?= e($ui['recipient_action']) ?></a></div>
             <?php foreach ($recipientRows as $r): ?>
@@ -272,8 +319,26 @@ $cardExpiry = !empty($card['created_at']) ? date('m/y', strtotime((string) $card
 
         <section class="bank-app-card desktop-insights-panel">
             <div class="section-title-row"><h3><?= e($ui['cash']) ?></h3></div>
-            <div class="cash-flow"><div><span><?= e($ui['income']) ?></span><strong class="tx-credit"><?= money($monthlyIncome->fetch()['total'], $currency) ?></strong></div><div><span><?= e($ui['expenses']) ?></span><strong class="tx-debit"><?= money($monthlyExpense->fetch()['total'], $currency) ?></strong></div></div>
-            <?php if ($isNewAccount): ?><div class="empty-mini mt-3">Income and expenses will appear after your first posted transaction.</div><?php else: ?><canvas data-chart="doughnut" height="90" data-chart-region="<?= $isUsAccount ? 'us' : 'eu' ?>"></canvas><?php endif; ?>
+            <div class="cash-flow"><div><span><?= e($ui['income']) ?></span><strong class="tx-credit"><?= money($monthlyIncomeTotal, $currency) ?></strong></div><div><span><?= e($ui['expenses']) ?></span><strong class="tx-debit"><?= money($monthlyExpenseTotal, $currency) ?></strong></div></div>
+            <div class="dashboard-analytics-block">
+                <div class="analytics-heading"><h4>Spending Analytics</h4><span>This month</span></div>
+                <?php if ($isNewAccount): ?>
+                    <div class="empty-mini">Spending trends will appear after your first posted transaction.</div>
+                <?php else: ?>
+                    <div class="spending-analytics-row">
+                        <canvas data-chart="doughnut" height="90" data-chart-region="<?= $isUsAccount ? 'us' : 'eu' ?>"></canvas>
+                        <div><small>Monthly outflow</small><strong><?= money($monthlyExpenseTotal, $currency) ?></strong></div>
+                    </div>
+                <?php endif; ?>
+            </div>
+            <div class="dashboard-payment-stats">
+                <div class="analytics-heading"><h4>Payment Statistics</h4></div>
+                <div class="payment-stat-grid">
+                    <div><span>Activity</span><b><?= (int) $activitySummary['total_count'] ?></b></div>
+                    <div><span>Credits</span><b><?= (int) $activitySummary['credit_count'] ?></b></div>
+                    <div><span>Debits</span><b><?= (int) $activitySummary['debit_count'] ?></b></div>
+                </div>
+            </div>
         </section>
     </div>
 
