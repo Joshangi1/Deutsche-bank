@@ -197,16 +197,53 @@ $cardType = (string) ($card['card_type'] ?? 'Debit');
 $cardExpiry = !empty($card['created_at']) ? date('m/y', strtotime((string) $card['created_at'] . ' +4 years')) : date('m/y', strtotime('+4 years'));
 ?>
 <div class="mobile-bank-app">
-    <section class="mobile-welcome-card">
-        <div>
-            <h2><?= $useGermanLabels ? 'Guten Tag' : 'Good afternoon' ?>, <?= e($user['first_name']) ?></h2>
-            <p><?= e($account['account_type']) ?> account overview</p>
-        </div>
-        <button class="welcome-card-action" type="button" data-bs-toggle="modal" data-bs-target="#cardApplicationModal" aria-label="Open card application"><i class="fa-solid fa-credit-card"></i></button>
-    </section>
-
     <div class="bank-home-grid">
         <section class="bank-app-card total-balance-panel">
+            <header class="dashboard-hero-header">
+                <div class="dashboard-hero-identity">
+                    <button class="btn btn-navy mobile-toggle dashboard-menu-toggle" data-toggle-sidebar aria-label="Open menu" aria-controls="sidebarOverlay">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <div class="dashboard-hero-greeting">
+                        <span><?= $useGermanLabels ? 'Guten Tag' : 'Good afternoon' ?></span>
+                        <strong><?= e($user['first_name'] . ' ' . $user['last_name']) ?></strong>
+                    </div>
+                </div>
+                <div class="dashboard-hero-actions">
+                    <div class="dropdown notification-menu">
+                        <button class="btn btn-light border position-relative" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
+                            <i class="fa-solid fa-bell"></i>
+                            <?php if ($unreadCount > 0): ?>
+                                <span class="unread-dot"><?= $unreadCount > 9 ? '9+' : $unreadCount ?></span>
+                            <?php endif; ?>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end notification-dropdown p-0">
+                            <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+                                <strong>Alerts</strong>
+                                <a class="small fw-bold" href="<?= url('user/notifications.php') ?>">View all</a>
+                            </div>
+                            <?php foreach ($notificationPreview as $notice): ?>
+                                <?php $noticeCategory = $notice['category'] ?? 'account'; ?>
+                                <a class="dropdown-item notification-preview" href="<?= url('user/notifications.php') ?>">
+                                    <span class="tx-icon tx-icon-credit">
+                                        <i class="fa-solid <?= $noticeCategory === 'security' ? 'fa-shield-halved' : ($noticeCategory === 'transfer' ? 'fa-right-left' : 'fa-bell') ?>"></i>
+                                    </span>
+                                    <span>
+                                        <strong><?= e($notice['title']) ?></strong>
+                                        <small><?= e($notice['message']) ?></small>
+                                    </span>
+                                </a>
+                            <?php endforeach; ?>
+                            <?php if (!$notificationPreview): ?>
+                                <div class="p-3 muted small">No notifications yet.</div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <a class="dashboard-profile-link" href="<?= url('user/profile.php') ?>" aria-label="Open profile">
+                        <img class="avatar-sm" src="<?= e(avatar_url($user['avatar'] ?? null)) ?>" alt="<?= e($user['first_name']) ?>'s profile picture">
+                    </a>
+                </div>
+            </header>
             <div class="panel-heading-row balance-hero-top">
                 <span class="account-status-pill <?= e($statusMeta[1]) ?>"><i class="fa-solid <?= e($statusMeta[2]) ?>"></i><?= e($statusMeta[0]) ?></span>
                 <span class="balance-account-select"><?= e($account['account_type']) ?> <i class="fa-solid fa-chevron-down"></i></span>
@@ -317,26 +354,31 @@ $cardExpiry = !empty($card['created_at']) ? date('m/y', strtotime((string) $card
             </div>
         </section>
 
-        <section class="bank-app-card desktop-insights-panel">
-            <div class="section-title-row"><h3><?= e($ui['cash']) ?></h3></div>
-            <div class="cash-flow"><div><span><?= e($ui['income']) ?></span><strong class="tx-credit"><?= money($monthlyIncomeTotal, $currency) ?></strong></div><div><span><?= e($ui['expenses']) ?></span><strong class="tx-debit"><?= money($monthlyExpenseTotal, $currency) ?></strong></div></div>
-            <div class="dashboard-analytics-block">
-                <div class="analytics-heading"><h4>Spending Analytics</h4><span>This month</span></div>
-                <?php if ($isNewAccount): ?>
-                    <div class="empty-mini">Spending trends will appear after your first posted transaction.</div>
-                <?php else: ?>
-                    <div class="spending-analytics-row">
-                        <canvas data-chart="doughnut" height="90" data-chart-region="<?= $isUsAccount ? 'us' : 'eu' ?>"></canvas>
-                        <div><small>Monthly outflow</small><strong><?= money($monthlyExpenseTotal, $currency) ?></strong></div>
+        <section class="bank-app-card dashboard-analytics-panel" aria-label="Account analytics">
+            <div class="section-title-row"><h3>Account Analytics</h3><a href="user/transactions.php"><?= e($ui['view_all']) ?></a></div>
+            <div class="dashboard-lower-analytics">
+                <div class="dashboard-cash-flow">
+                    <div class="analytics-heading"><h4><?= e($ui['cash']) ?></h4><span>This month</span></div>
+                    <div class="cash-flow"><div><span><?= e($ui['income']) ?></span><strong class="tx-credit"><?= money($monthlyIncomeTotal, $currency) ?></strong></div><div><span><?= e($ui['expenses']) ?></span><strong class="tx-debit"><?= money($monthlyExpenseTotal, $currency) ?></strong></div></div>
+                </div>
+                <div class="dashboard-analytics-block">
+                    <div class="analytics-heading"><h4>Spending Analytics</h4><span>This month</span></div>
+                    <?php if ($isNewAccount): ?>
+                        <div class="empty-mini">Spending trends will appear after your first posted transaction.</div>
+                    <?php else: ?>
+                        <div class="spending-analytics-row">
+                            <canvas data-chart="doughnut" height="90" data-chart-region="<?= $isUsAccount ? 'us' : 'eu' ?>"></canvas>
+                            <div><small>Monthly outflow</small><strong><?= money($monthlyExpenseTotal, $currency) ?></strong></div>
+                        </div>
+                    <?php endif; ?>
+                </div>
+                <div class="dashboard-payment-stats">
+                    <div class="analytics-heading"><h4>Payment Statistics</h4></div>
+                    <div class="payment-stat-grid">
+                        <div><span>Activity</span><b><?= (int) $activitySummary['total_count'] ?></b></div>
+                        <div><span>Credits</span><b><?= (int) $activitySummary['credit_count'] ?></b></div>
+                        <div><span>Debits</span><b><?= (int) $activitySummary['debit_count'] ?></b></div>
                     </div>
-                <?php endif; ?>
-            </div>
-            <div class="dashboard-payment-stats">
-                <div class="analytics-heading"><h4>Payment Statistics</h4></div>
-                <div class="payment-stat-grid">
-                    <div><span>Activity</span><b><?= (int) $activitySummary['total_count'] ?></b></div>
-                    <div><span>Credits</span><b><?= (int) $activitySummary['credit_count'] ?></b></div>
-                    <div><span>Debits</span><b><?= (int) $activitySummary['debit_count'] ?></b></div>
                 </div>
             </div>
         </section>
