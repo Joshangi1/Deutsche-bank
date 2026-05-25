@@ -308,18 +308,18 @@ function email_template(string $title, string $bodyHtml): string
 <!doctype html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#f3f8fd;font-family:Arial,sans-serif;color:#203854;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f3f8fd;padding:40px 20px;">
+<body style="margin:0;padding:0;background:#F6F8FC;font-family:Arial,sans-serif;color:#071B45;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F6F8FC;padding:40px 20px;">
     <tr><td align="center">
-      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;max-width:600px;width:100%;border:1px solid #d8e7f4;">
-        <tr><td style="background:#ffffff;padding:26px 40px;border-top:5px solid #0ea5e9;border-bottom:1px solid #e6eff8;">
-          <span style="color:#2563eb;font-size:22px;font-weight:bold;letter-spacing:0;">{$brand}</span>
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;max-width:600px;width:100%;border:1px solid #4DB5FF;">
+        <tr><td style="background:#ffffff;padding:26px 40px;border-top:5px solid #4DB5FF;border-bottom:1px solid #4DB5FF;">
+          <span style="color:#2F5BFF;font-size:22px;font-weight:bold;letter-spacing:0;">{$brand}</span>
         </td></tr>
-        <tr><td style="padding:36px 40px;font-size:15px;line-height:1.7;color:#203854;">
-          <h2 style="color:#102544;margin-top:0;">{$safeTitle}</h2>
+        <tr><td style="padding:36px 40px;font-size:15px;line-height:1.7;color:#071B45;">
+          <h2 style="color:#071B45;margin-top:0;">{$safeTitle}</h2>
           {$bodyHtml}
         </td></tr>
-        <tr><td style="background:#f3f8fd;padding:20px 40px;font-size:12px;color:#617894;border-top:1px solid #e6eff8;">
+        <tr><td style="background:#F6F8FC;padding:20px 40px;font-size:12px;color:#071B45;border-top:1px solid #4DB5FF;">
           <p style="margin:0;">This message was sent by {$brand}. Please do not reply to this email.</p>
           <p style="margin:6px 0 0;">&copy; {$year} {$brand}. All rights reserved.</p>
         </td></tr>

@@ -926,14 +926,14 @@ document.addEventListener('DOMContentLoaded', () => {
         new Chart(canvas, {
             type: type === 'doughnut' ? 'doughnut' : 'line',
             data: type === 'doughnut'
-                ? { labels: doughnutLabels, datasets: [{ data: [42, 24, 18, 16], backgroundColor: adminTheme ? ['#2563eb', '#38bdf8', '#4f46e5', '#bfdbfe'] : ['#2563eb', '#0ea5e9', '#4f46e5', '#93c5fd'], borderWidth: 0 }] }
-                : { labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], datasets: [{ label: 'Balance', data: [18200, 19400, 18850, 22100, 23600, 24800], borderColor: '#2563eb', backgroundColor: adminTheme ? 'rgba(37,99,235,.12)' : 'rgba(14,165,233,.16)', tension: .42, fill: true }] },
+                ? { labels: doughnutLabels, datasets: [{ data: [42, 24, 18, 16], backgroundColor: ['#2F5BFF', '#4DB5FF', '#2F5BFF', '#4DB5FF'], borderWidth: 0 }] }
+                : { labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], datasets: [{ label: 'Balance', data: [18200, 19400, 18850, 22100, 23600, 24800], borderColor: '#2F5BFF', backgroundColor: 'rgba(77,181,255,.16)', tension: .42, fill: true }] },
             options: {
                 responsive: true,
-                plugins: { legend: { display: type === 'doughnut', labels: adminTheme ? { color: '#64748b', usePointStyle: true, boxWidth: 12 } : undefined } },
+                plugins: { legend: { display: type === 'doughnut', labels: adminTheme ? { color: '#071B45', usePointStyle: true, boxWidth: 12 } : undefined } },
                 scales: type === 'doughnut' ? {} : {
-                    x: adminTheme ? { grid: { display: false }, ticks: { color: '#64748b' } } : {},
-                    y: adminTheme ? { beginAtZero: false, grid: { color: 'rgba(226,232,240,.85)' }, ticks: { color: '#64748b' } } : { beginAtZero: false }
+                    x: adminTheme ? { grid: { display: false }, ticks: { color: '#071B45' } } : {},
+                    y: adminTheme ? { beginAtZero: false, grid: { color: 'rgba(77,181,255,.18)' }, ticks: { color: '#071B45' } } : { beginAtZero: false }
                 }
             }
         });

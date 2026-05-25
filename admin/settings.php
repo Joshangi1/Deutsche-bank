@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <textarea name="<?= e($key) ?>" class="form-control" rows="<?= $key === 'deposit_protection_overrides' ? 5 : 3 ?>" placeholder="<?= $key === 'deposit_protection_overrides' ? e('{"country_code":{"agency":"Agency","name":"Agency Protected","text":"Short approved disclosure wording"}}') : '' ?>"><?= e(setting($key)) ?></textarea>
                     <?php if ($key === 'deposit_protection_overrides'): ?><div class="small muted mt-2">Optional. Agency claims display only when a country mapping sets enabled to true.</div><?php endif; ?>
                 <?php elseif (str_ends_with($key, '_color') || str_starts_with($key, 'theme_')): ?>
-                    <input name="<?= e($key) ?>" type="color" class="form-control form-control-color" value="<?= e(setting($key, $key === 'theme_navy' ? '#2563eb' : '#0ea5e9')) ?>">
+                    <input name="<?= e($key) ?>" type="color" class="form-control form-control-color" value="<?= e(setting($key, $key === 'theme_navy' ? '#2F5BFF' : '#4DB5FF')) ?>">
                 <?php else: ?>
                     <input name="<?= e($key) ?>" class="form-control" value="<?= e(setting($key)) ?>">
                 <?php endif; ?>

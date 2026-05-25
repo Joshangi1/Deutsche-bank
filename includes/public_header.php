@@ -20,8 +20,8 @@ $navLabels = ['infra' => 'Financial Infrastructure', 'banking' => 'Banking', 'ab
     <link href="<?= url('assets/css/styles.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/styles.css') ?>" rel="stylesheet">
     <style>
         :root {
-            --navy: <?= e($publicStaticMode ? '#2563eb' : setting('theme_navy', '#2563eb')) ?>;
-            --gold: <?= e($publicStaticMode ? '#0ea5e9' : setting('theme_gold', '#0ea5e9')) ?>;
+            --navy: <?= e($publicStaticMode ? '#2F5BFF' : setting('theme_navy', '#2F5BFF')) ?>;
+            --gold: <?= e($publicStaticMode ? '#4DB5FF' : setting('theme_gold', '#4DB5FF')) ?>;
         }
     </style>
     <link href="<?= url('assets/css/lead-bank-theme.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/lead-bank-theme.css') ?>" rel="stylesheet">

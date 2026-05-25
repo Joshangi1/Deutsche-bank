@@ -1,24 +1,24 @@
 /* Lead Bank global palette layer. Loaded last to recolor existing layouts only. */
 :root {
-  --lead-primary: #2563eb;
-  --lead-primary-hover: #1d4ed8;
-  --lead-sky: #0ea5e9;
-  --lead-accent: #4f46e5;
-  --lead-ink: #102544;
-  --lead-text: #203854;
-  --lead-muted: #617894;
-  --lead-surface: #f3f8fd;
+  --lead-primary: #2F5BFF;
+  --lead-primary-hover: #4DB5FF;
+  --lead-sky: #4DB5FF;
+  --lead-accent: #2F5BFF;
+  --lead-ink: #071B45;
+  --lead-text: #071B45;
+  --lead-muted: rgba(7, 27, 69, .64);
+  --lead-surface: #F6F8FC;
   --lead-panel: #ffffff;
-  --lead-border: #d8e7f4;
-  --lead-tint: #eaf5ff;
-  --lead-gradient: linear-gradient(135deg, #0ea5e9 0%, #2563eb 54%, #4f46e5 100%);
-  --lead-gradient-soft: linear-gradient(135deg, #dff5ff 0%, #eef4ff 48%, #eeecff 100%);
-  --lead-shadow: 0 18px 44px rgba(37, 99, 235, .1);
-  --lead-shadow-strong: 0 24px 54px rgba(37, 99, 235, .2);
+  --lead-border: rgba(47, 91, 255, .14);
+  --lead-tint: rgba(77, 181, 255, .13);
+  --lead-gradient: linear-gradient(135deg, #4DB5FF 0%, #2F5BFF 100%);
+  --lead-gradient-soft: linear-gradient(135deg, rgba(77, 181, 255, .15), rgba(47, 91, 255, .07));
+  --lead-shadow: 0 18px 44px rgba(7, 27, 69, .08);
+  --lead-shadow-strong: 0 24px 54px rgba(47, 91, 255, .2);
 
   --lead-blue: var(--lead-primary);
   --lead-blue-2: var(--lead-primary-hover);
-  --lead-cyan: #dff5ff;
+  --lead-cyan: rgba(77, 181, 255, .15);
   --ink: var(--lead-ink);
   --text: var(--lead-text);
   --muted: var(--lead-muted);
@@ -27,23 +27,23 @@
   --panel: var(--lead-panel);
 
   --navy: var(--lead-ink);
-  --navy-mid: #244f91;
+  --navy-mid: var(--lead-ink);
   --navy-card: var(--lead-primary);
   --blue: var(--lead-primary);
   --blue-light: var(--lead-sky);
-  --blue-glow: rgba(14, 165, 233, .18);
+  --blue-glow: rgba(77, 181, 255, .18);
   --gold: var(--lead-sky);
-  --gold-light: #7dd3fc;
+  --gold-light: var(--lead-sky);
   --off-white: var(--lead-surface);
   --border: rgba(255, 255, 255, .2);
-  --border-light: rgba(37, 99, 235, .12);
-  --shadow-sm: 0 4px 14px rgba(37, 99, 235, .08);
+  --border-light: rgba(47, 91, 255, .12);
+  --shadow-sm: 0 4px 14px rgba(7, 27, 69, .08);
   --shadow-md: var(--lead-shadow);
   --shadow-lg: var(--lead-shadow-strong);
 
   --brand-navy: var(--lead-primary);
   --brand-navy-deep: var(--lead-primary-hover);
-  --brand-cyan: #dff5ff;
+  --brand-cyan: var(--lead-sky);
   --card-grad: var(--lead-gradient);
   --surface-bg: var(--lead-surface);
   --surface-card: var(--lead-panel);
@@ -61,7 +61,7 @@ main {
 }
 
 .loader span {
-  border-color: #d9effe;
+  border-color: rgba(77, 181, 255, .28);
   border-top-color: var(--lead-sky);
 }
 
@@ -70,7 +70,7 @@ main {
 }
 
 .bank-navbar {
-  border-bottom-color: rgba(37, 99, 235, .11);
+  border-bottom-color: rgba(47, 91, 255, .11);
   background: rgba(255, 255, 255, .96);
 }
 
@@ -93,8 +93,8 @@ main {
 button.btn-primary {
   color: #fff !important;
   border-color: transparent !important;
-  background: var(--lead-gradient) !important;
-  box-shadow: 0 12px 25px rgba(37, 99, 235, .2);
+  background: var(--lead-primary) !important;
+  box-shadow: 0 12px 25px rgba(47, 91, 255, .2);
 }
 
 .btn-primary-pill:hover,
@@ -103,13 +103,13 @@ button.btn-primary {
 .btn-primary:hover,
 button.btn-primary:hover {
   color: #fff !important;
-  background: linear-gradient(135deg, #0284c7, #1d4ed8 56%, #4338ca) !important;
-  box-shadow: 0 16px 34px rgba(37, 99, 235, .26);
+  background: var(--lead-sky) !important;
+  box-shadow: 0 16px 34px rgba(77, 181, 255, .26);
 }
 
 .btn-outline-primary {
   color: var(--lead-primary) !important;
-  border-color: rgba(37, 99, 235, .34) !important;
+  border-color: rgba(47, 91, 255, .34) !important;
 }
 
 .btn-outline-primary:hover {
@@ -120,7 +120,7 @@ button.btn-primary:hover {
 .form-control:focus,
 .form-select:focus {
   border-color: var(--lead-sky) !important;
-  box-shadow: 0 0 0 4px rgba(14, 165, 233, .14) !important;
+  box-shadow: 0 0 0 4px rgba(77, 181, 255, .18) !important;
 }
 
 .hero,
@@ -160,7 +160,7 @@ button.btn-primary:hover {
 .empty-state-card,
 .instant-recipient-grid button,
 .instant-recipient-row {
-  background: #f7fbff !important;
+  background: var(--lead-surface) !important;
   border-color: var(--lead-border) !important;
 }
 
@@ -173,14 +173,12 @@ button.btn-primary:hover {
 .instant-recipient-grid button span {
   color: var(--lead-primary) !important;
   background: var(--lead-tint) !important;
-  border-color: #cbe5fb !important;
+  border-color: rgba(77, 181, 255, .3) !important;
 }
 
 .cta-band,
 .site-footer {
-  background:
-    radial-gradient(circle at 12% 0%, rgba(14, 165, 233, .22), transparent 24rem),
-    linear-gradient(120deg, #1d4ed8 0%, #2563eb 56%, #4f46e5 100%) !important;
+  background: var(--lead-ink) !important;
 }
 
 .site-footer .brand-mark-light,
@@ -201,17 +199,17 @@ button.btn-primary:hover {
 
 .agent-onboarding-banner,
 .agent-assisted-signup .agent-onboarding-banner {
-  border-color: rgba(14, 165, 233, .18) !important;
+  border-color: rgba(77, 181, 255, .22) !important;
   background:
-    radial-gradient(circle at 8% 16%, rgba(14, 165, 233, .12), transparent 12rem),
-    linear-gradient(135deg, #ffffff 0%, #f3faff 60%, #eef0ff 100%) !important;
+    radial-gradient(circle at 8% 16%, rgba(77, 181, 255, .12), transparent 12rem),
+    linear-gradient(135deg, #ffffff 0%, var(--lead-surface) 100%) !important;
   box-shadow: var(--lead-shadow) !important;
 }
 
 .agent-onboarding-photo,
 .admin-agent-photo {
   background: var(--lead-gradient) !important;
-  box-shadow: 0 12px 28px rgba(37, 99, 235, .2) !important;
+  box-shadow: 0 12px 28px rgba(47, 91, 255, .2) !important;
 }
 
 .agent-verified-row em,
@@ -222,7 +220,7 @@ button.btn-primary:hover {
 
 .agent-onboarding-message,
 .verified-agent-card {
-  border-color: rgba(14, 165, 233, .2) !important;
+  border-color: rgba(77, 181, 255, .24) !important;
   background: var(--lead-gradient-soft) !important;
 }
 
@@ -237,11 +235,9 @@ button.btn-primary:hover {
 .user-sidebar,
 nav.sidebar,
 .admin-sidebar {
-  background:
-    radial-gradient(circle at 15% 0%, rgba(255, 255, 255, .16), transparent 15rem),
-    linear-gradient(180deg, #0ea5e9 0%, #2563eb 46%, #4f46e5 100%) !important;
+  background: var(--lead-ink) !important;
   border-right-color: rgba(255, 255, 255, .2) !important;
-  box-shadow: 12px 0 38px rgba(37, 99, 235, .12);
+  box-shadow: 12px 0 38px rgba(7, 27, 69, .18);
 }
 
 .sidebar .nav-link,
@@ -252,12 +248,12 @@ nav.sidebar,
 .sidebar .nav-link.active,
 .sidebar .nav-link:hover {
   color: #fff !important;
-  background: rgba(255, 255, 255, .2) !important;
+  background: rgba(77, 181, 255, .24) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18);
 }
 
 .sidebar .nav-link.active::before {
-  background: #fff !important;
+  background: var(--lead-sky) !important;
 }
 
 .sidebar-session {
@@ -266,9 +262,9 @@ nav.sidebar,
 }
 
 .topbar {
-  border-color: rgba(37, 99, 235, .1) !important;
+  border-color: rgba(47, 91, 255, .1) !important;
   background: rgba(255, 255, 255, .91) !important;
-  box-shadow: 0 12px 30px rgba(37, 99, 235, .06) !important;
+  box-shadow: 0 12px 30px rgba(7, 27, 69, .06) !important;
 }
 
 /* Dashboard and banking cards */
@@ -299,24 +295,24 @@ body.dashboard-screen .premium-mobile-card,
   color: #fff;
   background:
     radial-gradient(circle at 82% 10%, rgba(255, 255, 255, .18), transparent 8rem),
-    linear-gradient(135deg, #0b82dc 0%, #2563eb 54%, #4f46e5 100%) !important;
-  box-shadow: 0 18px 38px rgba(37, 99, 235, .2) !important;
+    var(--lead-gradient) !important;
+  box-shadow: 0 18px 38px rgba(47, 91, 255, .2) !important;
 }
 
 .live-card-back {
-  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%) !important;
+  background: var(--lead-gradient) !important;
 }
 
 .app-quick-grid i,
 body.dashboard-screen .app-quick-grid i {
   color: #fff !important;
   background: var(--lead-gradient) !important;
-  box-shadow: 0 10px 20px rgba(37, 99, 235, .2) !important;
+  box-shadow: 0 10px 20px rgba(47, 91, 255, .2) !important;
 }
 
 .app-quick-grid a:hover,
 .app-quick-grid button:hover {
-  border-color: rgba(37, 99, 235, .25) !important;
+  border-color: rgba(47, 91, 255, .25) !important;
 }
 
 .status-info,
@@ -355,16 +351,16 @@ body.dashboard-screen .app-quick-grid i {
 
 /* Admin console: Lead Bank operations workspace */
 .admin-console {
-  --admin-primary: #2563eb;
-  --admin-secondary: #38bdf8;
-  --admin-accent: #4f46e5;
-  --admin-bg: #f8fafc;
+  --admin-primary: #2F5BFF;
+  --admin-secondary: #4DB5FF;
+  --admin-accent: #2F5BFF;
+  --admin-bg: #F6F8FC;
   --admin-panel: #ffffff;
-  --admin-text: #0f172a;
-  --admin-muted: #64748b;
-  --admin-border: #e2e8f0;
-  --admin-sidebar: #0b1730;
-  --admin-sidebar-deep: #071123;
+  --admin-text: #071B45;
+  --admin-muted: rgba(7, 27, 69, .64);
+  --admin-border: rgba(47, 91, 255, .14);
+  --admin-sidebar: #071B45;
+  --admin-sidebar-deep: #071B45;
   font-family: "Manrope", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   background: var(--admin-bg);
   color: var(--admin-text);
@@ -373,7 +369,7 @@ body.dashboard-screen .app-quick-grid i {
 .admin-console .app-shell,
 .admin-console .app-main {
   background:
-    radial-gradient(circle at 86% 4%, rgba(37, 99, 235, .065), transparent 25rem),
+    radial-gradient(circle at 86% 4%, rgba(77, 181, 255, .08), transparent 25rem),
     var(--admin-bg) !important;
 }
 
@@ -381,11 +377,9 @@ body.dashboard-screen .app-quick-grid i {
   width: 276px;
   gap: 1.15rem;
   padding: 20px 14px 16px;
-  background:
-    radial-gradient(circle at 78% 0%, rgba(56, 189, 248, .12), transparent 14rem),
-    linear-gradient(180deg, var(--admin-sidebar) 0%, var(--admin-sidebar-deep) 100%) !important;
-  border-right: 1px solid rgba(148, 163, 184, .16) !important;
-  box-shadow: 16px 0 38px rgba(15, 23, 42, .08);
+  background: var(--admin-sidebar) !important;
+  border-right: 1px solid rgba(77, 181, 255, .18) !important;
+  box-shadow: 16px 0 38px rgba(7, 27, 69, .12);
 }
 
 .admin-console .app-main {
@@ -464,14 +458,14 @@ body.dashboard-screen .app-quick-grid i {
 
 .admin-console .sidebar .nav-link:hover {
   color: #fff !important;
-  background: rgba(37, 99, 235, .16) !important;
+  background: rgba(77, 181, 255, .18) !important;
   box-shadow: none;
 }
 
 .admin-console .sidebar .nav-link.active {
   color: #fff !important;
-  background: var(--admin-primary) !important;
-  box-shadow: 0 11px 25px rgba(37, 99, 235, .26);
+  background: rgba(77, 181, 255, .28) !important;
+  box-shadow: inset 3px 0 0 var(--admin-secondary);
 }
 
 .admin-console .sidebar .nav-link:hover i,
@@ -524,7 +518,7 @@ body.dashboard-screen .app-quick-grid i {
 
 .admin-console .sidebar-signout-btn:hover {
   color: #fff;
-  background: rgba(37, 99, 235, .14);
+  background: rgba(77, 181, 255, .16);
 }
 
 .admin-console .topbar {
@@ -567,9 +561,9 @@ body.dashboard-screen .app-quick-grid i {
 }
 
 .admin-console .admin-header-actions .btn-outline-danger:hover {
-  border-color: rgba(37, 99, 235, .18);
+  border-color: rgba(47, 91, 255, .18);
   color: var(--admin-primary);
-  background: #eff6ff;
+  background: rgba(77, 181, 255, .12);
 }
 
 .admin-console .admin-overview-intro {
@@ -606,11 +600,11 @@ body.dashboard-screen .app-quick-grid i {
   display: inline-flex;
   align-items: center;
   gap: .48rem;
-  border: 1px solid #dbeafe;
+  border: 1px solid rgba(77, 181, 255, .3);
   border-radius: 999px;
   padding: .62rem .9rem;
   color: var(--admin-primary);
-  background: #eff6ff;
+  background: rgba(77, 181, 255, .12);
   font-size: .78rem;
   font-weight: 700;
 }
@@ -626,7 +620,7 @@ body.dashboard-screen .app-quick-grid i {
   border: 1px solid var(--admin-border);
   border-radius: 16px;
   background: var(--admin-panel);
-  box-shadow: 0 10px 28px rgba(15, 23, 42, .055);
+  box-shadow: 0 10px 28px rgba(7, 27, 69, .055);
 }
 
 .admin-console .admin-stat-card {
@@ -648,22 +642,22 @@ body.dashboard-screen .app-quick-grid i {
 
 .admin-console .icon-members {
   color: var(--admin-primary);
-  background: #eff6ff;
+  background: rgba(77, 181, 255, .13);
 }
 
 .admin-console .icon-deposits {
-  color: #0284c7;
-  background: #e0f2fe;
+  color: var(--admin-primary);
+  background: rgba(77, 181, 255, .13);
 }
 
 .admin-console .icon-transfers {
-  color: var(--admin-accent);
-  background: #eef2ff;
+  color: var(--admin-primary);
+  background: rgba(77, 181, 255, .13);
 }
 
 .admin-console .icon-volume {
-  color: #059669;
-  background: #ecfdf5;
+  color: var(--admin-primary);
+  background: rgba(77, 181, 255, .13);
 }
 
 .admin-console .admin-stat-copy small {
@@ -686,7 +680,7 @@ body.dashboard-screen .app-quick-grid i {
 .admin-console .admin-stat-copy span {
   display: block;
   margin-top: .26rem;
-  color: #94a3b8;
+  color: var(--admin-muted);
   font-size: .72rem;
   font-weight: 600;
 }
@@ -714,7 +708,7 @@ body.dashboard-screen .app-quick-grid i {
 .admin-console .admin-panel-heading small {
   display: block;
   margin-bottom: .35rem;
-  color: #94a3b8;
+  color: var(--admin-muted);
   font-size: .68rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -731,7 +725,7 @@ body.dashboard-screen .app-quick-grid i {
   border-radius: 999px;
   padding: .42rem .72rem;
   color: var(--admin-primary);
-  background: #eff6ff;
+  background: rgba(77, 181, 255, .13);
   font-size: .72rem;
   font-weight: 700;
 }
@@ -775,7 +769,7 @@ body.dashboard-screen .app-quick-grid i {
     inset: 0;
     z-index: 49;
     display: block;
-    background: rgba(15, 23, 42, .38);
+    background: rgba(7, 27, 69, .38);
   }
 
   body.admin-nav-open {
@@ -855,18 +849,156 @@ body.dashboard-screen .app-quick-grid i {
   --admin-text: var(--lead-ink);
   --admin-muted: var(--lead-muted);
   --admin-border: var(--lead-border);
-  --admin-sidebar: var(--lead-sky);
-  --admin-sidebar-deep: var(--lead-accent);
+  --admin-sidebar: var(--lead-ink);
+  --admin-sidebar-deep: var(--lead-ink);
 }
 
 .admin-console .sidebar {
-  background:
-    radial-gradient(circle at 16% 0%, rgba(255, 255, 255, .18), transparent 15rem),
-    linear-gradient(180deg, var(--lead-sky) 0%, var(--lead-primary) 48%, var(--lead-accent) 100%) !important;
-  border-right-color: rgba(255, 255, 255, .2) !important;
+  background: var(--lead-ink) !important;
+  border-right-color: rgba(77, 181, 255, .18) !important;
 }
 
 .admin-console .sidebar .nav-link.active,
 .admin-console .sidebar .nav-link:hover {
-  background: rgba(255, 255, 255, .2) !important;
+  background: rgba(77, 181, 255, .2) !important;
+}
+
+/* Region selector: quiet, centered private-banking entry point. */
+.country-choice-shell {
+  min-height: calc(100vh - 76px);
+  display: grid;
+  place-items: center;
+  padding: clamp(1.5rem, 5vw, 4rem) 0;
+  background: var(--lead-surface) !important;
+}
+
+.country-choice-portal {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: clamp(1.5rem, 3vw, 2.7rem);
+  border: 1px solid var(--lead-border);
+  border-radius: 26px;
+  background: var(--lead-panel);
+  box-shadow: var(--lead-shadow);
+}
+
+.country-choice-head {
+  max-width: 620px;
+  margin: 0 auto clamp(1.5rem, 3vw, 2.5rem);
+  text-align: center;
+}
+
+.country-choice-head .eyebrow {
+  display: inline-block;
+  margin-bottom: .7rem;
+  color: var(--lead-primary);
+  font-size: .73rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.country-choice-head h1 {
+  margin: 0 0 .7rem;
+  color: var(--lead-ink);
+  font-size: clamp(1.85rem, 3.1vw, 2.65rem);
+  line-height: 1.1;
+  font-weight: 800;
+}
+
+.country-choice-head p {
+  margin: 0;
+  color: var(--lead-muted);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.country-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.country-choice-card {
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem;
+  border: 1px solid var(--lead-border) !important;
+  border-radius: 18px;
+  color: var(--lead-ink) !important;
+  background: var(--lead-panel) !important;
+  box-shadow: 0 12px 28px rgba(7, 27, 69, .05);
+  text-decoration: none;
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.country-choice-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--lead-sky) !important;
+  box-shadow: 0 18px 34px rgba(47, 91, 255, .12);
+}
+
+.country-choice-flag {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  background: var(--lead-tint);
+  overflow: hidden;
+}
+
+.country-choice-flag img {
+  width: 36px;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  box-shadow: 0 3px 8px rgba(7, 27, 69, .1);
+}
+
+.country-choice-icon {
+  display: none !important;
+}
+
+.country-choice-card strong {
+  display: block;
+  color: var(--lead-ink);
+  font-size: 1.04rem;
+  font-weight: 800;
+}
+
+.country-choice-card small {
+  display: block;
+  margin-top: .45rem;
+  color: var(--lead-muted);
+  line-height: 1.45;
+}
+
+.country-choice-card > i {
+  margin-top: auto;
+  color: var(--lead-primary);
+}
+
+@media (max-width: 991.98px) {
+  .country-choice-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 575.98px) {
+  .country-choice-portal {
+    padding: 1.2rem;
+    border-radius: 20px;
+  }
+
+  .country-choice-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .country-choice-card {
+    min-height: 168px;
+  }
 }

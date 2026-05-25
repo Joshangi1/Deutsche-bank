@@ -13,7 +13,7 @@
   --navy-mid:    #0f2040;
   --navy-card:   #112248;
   --blue:        #1a4fd6;
-  --blue-light:  #2563eb;
+  --blue-light:  #2F5BFF;
   --blue-glow:   rgba(26, 79, 214, 0.18);
   --gold:        #c9a84c;
   --gold-light:  #e6c76a;
@@ -25,7 +25,7 @@
   --success:     #22c55e;
   --danger:      #ef4444;
   --warning:     #f59e0b;
-  --info:        #38bdf8;
+  --info:        #4DB5FF;
   --shadow-sm:   0 2px 8px rgba(10,22,40,0.12);
   --shadow-md:   0 4px 20px rgba(10,22,40,0.18);
   --shadow-lg:   0 8px 40px rgba(10,22,40,0.28);
@@ -654,7 +654,7 @@ h1.page-title,
 .status-success { background: rgba(34,197,94,0.1);   color: #16a34a; }
 .status-danger  { background: rgba(239,68,68,0.1);   color: #dc2626; }
 .status-warning { background: rgba(245,158,11,0.1);  color: #d97706; }
-.status-info    { background: rgba(56,189,248,0.1);  color: #0284c7; }
+.status-info    { background: rgba(77,181,255,0.13); color: #2F5BFF; }
 
 /* ── QUICK ACCESS GRID ────────────────────────────────────── */
 .quick-grid {
