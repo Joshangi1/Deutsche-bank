@@ -1083,3 +1083,211 @@ body.dashboard-screen .app-quick-grid i {
     min-height: 168px;
   }
 }
+
+/* Dashboard layout refinement: preserve the mobile card stack, widen desktop workspace. */
+@media (min-width: 1024px) {
+  body.dashboard-screen .app-main {
+    padding: 18px clamp(20px, 2vw, 32px) 26px !important;
+  }
+
+  body.dashboard-screen .topbar,
+  body.dashboard-screen .mobile-bank-app {
+    width: min(100%, 1480px) !important;
+  }
+
+  body.dashboard-screen .topbar {
+    min-height: 56px !important;
+    margin-bottom: 6px !important;
+    padding: 0 28px 8px !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none;
+  }
+
+  body.dashboard-screen .dashboard-greeting {
+    display: grid;
+    gap: 1px;
+  }
+
+  body.dashboard-screen .dashboard-greeting span {
+    line-height: 1.1;
+  }
+
+  body.dashboard-screen .dashboard-greeting strong {
+    line-height: 1.05;
+  }
+
+  body.dashboard-screen .bank-home-grid {
+    gap: 18px !important;
+  }
+
+  body.dashboard-screen .bank-home-grid > .total-balance-panel.bank-app-card {
+    height: 300px;
+    min-height: 300px !important;
+    max-height: 300px !important;
+    display: flex;
+    flex-direction: column;
+    padding: 22px 28px !important;
+  }
+
+  body.dashboard-screen .balance-hero-top {
+    margin-bottom: 10px !important;
+  }
+
+  body.dashboard-screen .total-balance-panel .balance-label {
+    margin-bottom: 4px !important;
+  }
+
+  body.dashboard-screen .total-balance-panel .balance-mask {
+    margin-top: 8px !important;
+  }
+
+  body.dashboard-screen .total-balance-panel .balance-account-meta {
+    margin-top: auto !important;
+    gap: 12px !important;
+  }
+
+  body.dashboard-screen .virtual-card-panel,
+  body.dashboard-screen .account-stack-panel,
+  body.dashboard-screen .assigned-agent-panel {
+    min-height: 202px !important;
+    height: 202px;
+    padding: 20px !important;
+  }
+
+  body.dashboard-screen .premium-mobile-card {
+    width: 100% !important;
+  }
+}
+
+@media (min-width: 1600px) {
+  body.dashboard-screen .topbar,
+  body.dashboard-screen .mobile-bank-app {
+    width: min(100%, 1560px) !important;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 1199.98px) {
+  body.dashboard-screen .bank-home-grid {
+    display: grid !important;
+    grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+    align-items: stretch !important;
+  }
+
+  body.dashboard-screen .total-balance-panel {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 !important;
+  }
+
+  body.dashboard-screen .virtual-card-panel {
+    grid-column: 1 / span 5 !important;
+    grid-row: 2 !important;
+  }
+
+  body.dashboard-screen .account-stack-panel {
+    grid-column: 6 / -1 !important;
+    grid-row: 2 !important;
+  }
+
+  body.dashboard-screen .assigned-agent-panel {
+    grid-column: 1 / -1 !important;
+    grid-row: 3 !important;
+  }
+
+  body.dashboard-screen .quick-action-panel {
+    grid-column: 1 / -1 !important;
+    grid-row: 4 !important;
+  }
+
+  body.dashboard-screen .transactions-panel {
+    grid-column: 1 / -1 !important;
+    grid-row: 5 !important;
+  }
+
+  body.dashboard-screen .instant-pay-panel {
+    grid-column: 1 / -1 !important;
+    grid-row: 6 !important;
+  }
+
+  body.dashboard-screen .desktop-insights-panel {
+    grid-column: 1 / -1 !important;
+    grid-row: 7 !important;
+  }
+
+  body.dashboard-screen .virtual-card-panel,
+  body.dashboard-screen .account-stack-panel {
+    min-height: 196px !important;
+    padding: 18px !important;
+  }
+
+  body.dashboard-screen .premium-mobile-card {
+    width: 100% !important;
+    min-height: 126px !important;
+    max-height: 126px !important;
+    margin-inline: 0 !important;
+  }
+
+  body.dashboard-screen .assigned-agent-panel {
+    min-height: 126px !important;
+  }
+
+  body.dashboard-screen .total-balance-panel .balance-value-row {
+    display: flex !important;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+  }
+
+  body.dashboard-screen .total-balance-panel .balance-value-row strong {
+    font-size: clamp(3rem, 8.5vw, 4rem) !important;
+    line-height: .96;
+  }
+
+  body.dashboard-screen .total-balance-panel .balance-value-row button {
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+    border-radius: 15px;
+  }
+}
+
+/* Mobile navigation drawer: content scrolls while session and sign out remain reachable. */
+@media (max-width: 991.98px) {
+  .sidebar {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    overflow: hidden !important;
+  }
+
+  .sidebar .sidebar-brand,
+  .sidebar .sidebar-session,
+  .sidebar .sidebar-signout-wrap {
+    flex: 0 0 auto;
+  }
+
+  .sidebar .nav {
+    flex: 1 1 auto !important;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .sidebar .sidebar-session {
+    margin-top: 0 !important;
+  }
+
+  .sidebar .sidebar-signout-wrap {
+    margin-top: 0 !important;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .sidebar .sidebar-signout-wrap {
+    margin-bottom: calc(54px + env(safe-area-inset-bottom)) !important;
+  }
+}
