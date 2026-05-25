@@ -4452,75 +4452,34 @@ body.dashboard-screen .assigned-agent-panel {
   display: none;
 }
 
-body.dashboard-screen .dashboard-hero-header,
-body.dashboard-screen .dashboard-hero-identity,
-body.dashboard-screen .dashboard-hero-actions {
-  display: flex;
-  align-items: center;
-}
-
-body.dashboard-screen .dashboard-hero-header {
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-body.dashboard-screen .dashboard-hero-identity,
-body.dashboard-screen .dashboard-hero-actions {
-  gap: .65rem;
-  min-width: 0;
-}
-
-body.dashboard-screen .dashboard-hero-greeting span,
-body.dashboard-screen .dashboard-hero-greeting strong {
-  display: block;
-}
-
-body.dashboard-screen .dashboard-hero-greeting span {
-  font-size: .8rem;
-  font-weight: 650;
-  line-height: 1.1;
-  opacity: .76;
-}
-
-body.dashboard-screen .dashboard-hero-greeting strong {
-  margin-top: .12rem;
-  font-size: clamp(1.08rem, 1.5vw, 1.35rem);
-  font-weight: 820;
-  line-height: 1.14;
-}
-
-body.dashboard-screen .dashboard-profile-link {
-  display: inline-flex;
-  border-radius: 50%;
-}
-
-body.dashboard-screen .dashboard-menu-toggle {
-  display: none;
-}
-
-body.dashboard-screen .dashboard-lower-analytics {
-  display: grid;
-  gap: 12px;
-}
-
-@media (min-width: 1100px) {
+@media (min-width: 1024px) {
   body.dashboard-screen .app-main {
-    padding: 16px 24px 22px !important;
+    padding: 18px 26px 24px !important;
+  }
+
+  body.dashboard-screen .topbar,
+  body.dashboard-screen .mobile-bank-app {
+    width: min(100%, 1280px);
+    margin-inline: auto;
+  }
+
+  body.dashboard-screen .topbar {
+    padding-bottom: 12px !important;
   }
 
   body.dashboard-screen .bank-home-grid {
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
-    gap: 12px;
+    gap: 14px;
     align-items: start;
   }
 
   body.dashboard-screen .bank-home-grid > .total-balance-panel.bank-app-card {
     grid-column: 1 / -1;
     grid-row: 1;
-    min-height: 0;
-    padding: 22px 28px;
+    min-height: 272px;
+    max-height: 320px;
+    padding: 24px 28px;
   }
 
   body.dashboard-screen .virtual-card-panel {
@@ -4565,11 +4524,18 @@ body.dashboard-screen .dashboard-lower-analytics {
     padding: 18px;
   }
 
-  body.dashboard-screen .dashboard-analytics-panel {
+  body.dashboard-screen .desktop-insights-panel {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 16px;
     grid-column: 1 / -1;
     grid-row: 5;
     min-height: 0;
     padding: 18px;
+  }
+
+  body.dashboard-screen .desktop-insights-panel .section-title-row {
+    grid-column: 1 / -1;
   }
 
   body.dashboard-screen .instant-pay-panel {
@@ -4685,21 +4651,15 @@ body.dashboard-screen .dashboard-lower-analytics {
     line-height: 1.4;
   }
 
-  body.dashboard-screen .dashboard-lower-analytics {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  body.dashboard-screen .desktop-insights-panel .cash-flow {
+    margin-bottom: 0;
   }
 
-  body.dashboard-screen .dashboard-cash-flow,
   body.dashboard-screen .dashboard-analytics-block,
   body.dashboard-screen .dashboard-payment-stats {
-    min-width: 0;
     margin-top: 0;
-    padding: 12px;
-    border-radius: 12px;
-  }
-
-  body.dashboard-screen .dashboard-cash-flow .cash-flow {
-    margin-bottom: 0;
+    padding-top: 0;
+    border-top: 0;
   }
 
   body.dashboard-screen .analytics-heading {
@@ -4779,17 +4739,124 @@ body.dashboard-screen .dashboard-lower-analytics {
   }
 }
 
-@media (max-width: 1099.98px) {
-  body.dashboard-screen .dashboard-menu-toggle {
-    display: inline-grid;
+@media (max-width: 1023.98px) {
+  body.dashboard-screen .app-main {
+    padding-bottom: calc(5.75rem + env(safe-area-inset-bottom)) !important;
+  }
+
+  body.dashboard-screen .bank-home-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: .75rem !important;
+  }
+
+  body.dashboard-screen .total-balance-panel { order: 1 !important; }
+  body.dashboard-screen .virtual-card-panel { order: 2 !important; }
+  body.dashboard-screen .quick-action-panel { order: 3 !important; }
+  body.dashboard-screen .transactions-panel { order: 4 !important; }
+  body.dashboard-screen .account-stack-panel { order: 5 !important; }
+  body.dashboard-screen .instant-pay-panel { order: 6 !important; }
+
+  body.dashboard-screen .assigned-agent-panel {
+    display: block;
+    order: 7 !important;
+  }
+
+  body.dashboard-screen .desktop-insights-panel {
+    display: block !important;
+    order: 8 !important;
+  }
+
+  body.dashboard-screen .assigned-agent-profile {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+  }
+
+  body.dashboard-screen .assigned-agent-photo {
+    width: 52px;
+    height: 52px;
+    flex: 0 0 52px;
+    display: grid;
     place-items: center;
+    overflow: hidden;
+    border-radius: 50%;
   }
 
-  body.dashboard-screen .dashboard-hero-header {
-    margin-bottom: .8rem;
+  body.dashboard-screen .assigned-agent-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
-  body.dashboard-screen .dashboard-lower-analytics {
-    grid-template-columns: 1fr;
+  body.dashboard-screen .assigned-agent-details {
+    display: grid;
+    gap: .2rem;
+    min-width: 0;
+  }
+
+  body.dashboard-screen .assigned-agent-details em {
+    margin-top: .2rem;
+    font-size: .7rem;
+    font-style: normal;
+    font-weight: 760;
+  }
+
+  body.dashboard-screen .assigned-agent-empty p {
+    margin: .35rem 0 0;
+  }
+
+  body.dashboard-screen .dashboard-analytics-block,
+  body.dashboard-screen .dashboard-payment-stats {
+    margin-top: .8rem;
+    padding-top: .8rem;
+    border-top: 1px solid var(--line);
+  }
+
+  body.dashboard-screen .analytics-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: .5rem;
+    margin-bottom: .65rem;
+  }
+
+  body.dashboard-screen .analytics-heading h4 {
+    margin: 0;
+    font-size: .9rem;
+    font-weight: 800;
+  }
+
+  body.dashboard-screen .analytics-heading span {
+    font-size: .7rem;
+  }
+
+  body.dashboard-screen .spending-analytics-row {
+    display: flex;
+    align-items: center;
+    gap: .85rem;
+  }
+
+  body.dashboard-screen .spending-analytics-row canvas[data-chart] {
+    width: 98px !important;
+    max-width: 98px !important;
+    max-height: 98px !important;
+    margin: 0;
+  }
+
+  body.dashboard-screen .payment-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .45rem;
+  }
+
+  body.dashboard-screen .payment-stat-grid div {
+    padding: .55rem .35rem;
+    text-align: center;
+  }
+
+  body.dashboard-screen .payment-stat-grid span,
+  body.dashboard-screen .payment-stat-grid b {
+    display: block;
   }
 }

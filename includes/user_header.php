@@ -144,7 +144,6 @@ document.addEventListener('DOMContentLoaded', function () {
      ═══════════════════════════════════════════ -->
 <main class="app-main">
 
-    <?php if (!$isDashboardPage): ?>
     <!-- ── TOPBAR ── -->
     <div class="topbar">
 
@@ -154,9 +153,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 <i class="fa-solid fa-bars"></i>
             </button>
             <div>
-                <span class="topbar-kicker"><?= e($regionConfig['workspace']) ?></span>
-                <h1 class="h3 mb-0 fw-bold"><?= e($pageTitle ?? 'Dashboard') ?></h1>
-                <span class="muted">Welcome back, <?= e($user['first_name']) ?></span>
+                <?php if ($isDashboardPage): ?>
+                    <div class="dashboard-greeting">
+                        <span><?= $useGermanLabels ? 'Guten Tag' : 'Good afternoon' ?>,</span>
+                        <strong><?= e($user['first_name'] . ' ' . $user['last_name']) ?></strong>
+                    </div>
+                <?php else: ?>
+                    <span class="topbar-kicker"><?= e($regionConfig['workspace']) ?></span>
+                    <h1 class="h3 mb-0 fw-bold"><?= e($pageTitle ?? 'Dashboard') ?></h1>
+                    <span class="muted">Welcome back, <?= e($user['first_name']) ?></span>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -214,7 +220,6 @@ document.addEventListener('DOMContentLoaded', function () {
             </a>
         </div>
     </div><!-- /topbar -->
-    <?php endif; ?>
 
     <!-- Restriction banner -->
     <?php if ($isRestricted): ?>
