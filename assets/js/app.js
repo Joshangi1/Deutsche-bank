@@ -921,13 +921,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!window.Chart) return;
         const type = canvas.dataset.chart;
         const region = canvas.dataset.chartRegion || 'eu';
+        const adminTheme = canvas.dataset.chartTheme === 'admin';
         const doughnutLabels = region === 'us' ? ['Cards', 'ACH', 'Bill Pay', 'Wire'] : ['Cards', 'SEPA', 'Deposits', 'Loans'];
         new Chart(canvas, {
             type: type === 'doughnut' ? 'doughnut' : 'line',
             data: type === 'doughnut'
-                ? { labels: doughnutLabels, datasets: [{ data: [42, 24, 18, 16], backgroundColor: ['#071b35', '#d7b56d', '#18568e', '#9aa8b8'], borderWidth: 0 }] }
-                : { labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], datasets: [{ label: 'Balance', data: [18200, 19400, 18850, 22100, 23600, 24800], borderColor: '#d7b56d', backgroundColor: 'rgba(215,181,109,.15)', tension: .42, fill: true }] },
-            options: { responsive: true, plugins: { legend: { display: type === 'doughnut' } }, scales: type === 'doughnut' ? {} : { y: { beginAtZero: false } } }
+                ? { labels: doughnutLabels, datasets: [{ data: [42, 24, 18, 16], backgroundColor: adminTheme ? ['#2563eb', '#38bdf8', '#4f46e5', '#bfdbfe'] : ['#2563eb', '#0ea5e9', '#4f46e5', '#93c5fd'], borderWidth: 0 }] }
+                : { labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], datasets: [{ label: 'Balance', data: [18200, 19400, 18850, 22100, 23600, 24800], borderColor: '#2563eb', backgroundColor: adminTheme ? 'rgba(37,99,235,.12)' : 'rgba(14,165,233,.16)', tension: .42, fill: true }] },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: type === 'doughnut', labels: adminTheme ? { color: '#64748b', usePointStyle: true, boxWidth: 12 } : undefined } },
+                scales: type === 'doughnut' ? {} : {
+                    x: adminTheme ? { grid: { display: false }, ticks: { color: '#64748b' } } : {},
+                    y: adminTheme ? { beginAtZero: false, grid: { color: 'rgba(226,232,240,.85)' }, ticks: { color: '#64748b' } } : { beginAtZero: false }
+                }
+            }
         });
     });
 });
