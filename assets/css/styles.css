@@ -4747,6 +4747,7 @@ body.dashboard-screen .assigned-agent-panel {
   body.dashboard-screen .bank-home-grid {
     display: flex !important;
     flex-direction: column !important;
+    align-items: stretch !important;
     gap: .75rem !important;
   }
 
@@ -4858,5 +4859,12 @@ body.dashboard-screen .assigned-agent-panel {
   body.dashboard-screen .payment-stat-grid span,
   body.dashboard-screen .payment-stat-grid b {
     display: block;
+  }
+}
+
+@media (max-width: 400px) {
+  body.dashboard-screen .total-balance-panel .balance-value-row strong {
+    font-size: clamp(2.5rem, 11.2vw, 2.8rem) !important;
+    white-space: nowrap;
   }
 }
