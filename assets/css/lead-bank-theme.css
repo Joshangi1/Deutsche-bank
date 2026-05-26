@@ -1051,9 +1051,358 @@ body.dashboard-screen .app-quick-grid i {
   color: var(--lead-primary);
 }
 
+/* Deposit center and gift card review surfaces */
+.deposit-page-hero,
+.admin-deposit-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.25rem;
+  padding: clamp(1.35rem, 2.5vw, 2rem);
+  border-radius: 20px;
+  color: #fff;
+  background: var(--lead-gradient);
+  box-shadow: var(--lead-shadow-strong);
+}
+
+.deposit-page-hero .eyebrow,
+.admin-deposit-hero .eyebrow {
+  color: rgba(255, 255, 255, .7);
+}
+
+.deposit-page-hero h2,
+.admin-deposit-hero h2 {
+  margin: .25rem 0 .45rem;
+  color: #fff;
+  font-size: clamp(1.3rem, 2.2vw, 1.8rem);
+  font-weight: 800;
+}
+
+.deposit-page-hero p,
+.admin-deposit-hero p {
+  margin: 0;
+  max-width: 660px;
+  color: rgba(255, 255, 255, .76);
+}
+
+.deposit-hero-icon,
+.admin-deposit-hero > span {
+  width: 58px;
+  height: 58px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 17px;
+  color: #fff;
+  font-size: 1.35rem;
+  background: rgba(255, 255, 255, .13);
+  border: 1px solid rgba(255, 255, 255, .17);
+}
+
+.deposit-workspace {
+  display: grid;
+  grid-template-columns: minmax(350px, 1.05fr) minmax(320px, .95fr);
+  gap: 1.2rem;
+  align-items: start;
+}
+
+.deposit-methods {
+  display: grid;
+  gap: 1.2rem;
+}
+
+.gift-card-deposit-card,
+.check-deposit-card,
+.deposit-history-card,
+.admin-deposit-review-card {
+  border: 1px solid var(--lead-border);
+  border-radius: 18px;
+  background: var(--lead-panel);
+  box-shadow: var(--lead-shadow);
+}
+
+.gift-card-deposit-card {
+  padding: clamp(1.15rem, 2.5vw, 1.6rem);
+}
+
+.gift-card-deposit-heading {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1.1rem;
+}
+
+.gift-card-deposit-heading h3 {
+  margin: .18rem 0 .2rem;
+  color: var(--lead-ink);
+  font-size: 1.32rem;
+  font-weight: 800;
+}
+
+.gift-card-deposit-heading p {
+  margin: 0;
+  color: var(--lead-muted);
+}
+
+.gift-card-brand-icon {
+  width: 56px;
+  height: 56px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 17px;
+  color: #fff;
+  font-size: 1.6rem;
+  background: var(--lead-gradient);
+}
+
+.gift-card-notice {
+  display: flex;
+  gap: .7rem;
+  align-items: flex-start;
+  padding: .78rem .85rem;
+  border: 1px solid rgba(77, 181, 255, .26);
+  border-radius: 12px;
+  color: var(--lead-muted);
+  background: rgba(77, 181, 255, .09);
+  font-size: .86rem;
+  line-height: 1.45;
+}
+
+.gift-card-notice i {
+  margin-top: .16rem;
+  color: var(--lead-primary);
+}
+
+.gift-upload-drop {
+  position: relative;
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  padding: .8rem .9rem;
+  border: 1px dashed rgba(47, 91, 255, .3);
+  border-radius: 12px;
+  cursor: pointer;
+  background: var(--lead-surface);
+  transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.gift-upload-drop:hover {
+  border-color: var(--lead-sky);
+  background: rgba(77, 181, 255, .08);
+  box-shadow: 0 10px 24px rgba(7, 27, 69, .06);
+}
+
+.gift-upload-drop i {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: var(--lead-primary);
+  background: var(--lead-tint);
+}
+
+.gift-upload-drop span {
+  display: grid;
+  gap: .12rem;
+}
+
+.gift-upload-drop strong {
+  color: var(--lead-ink);
+  font-size: .9rem;
+}
+
+.gift-upload-drop small,
+.form-note {
+  color: var(--lead-muted);
+  font-size: .76rem;
+}
+
+.gift-upload-drop input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.check-deposit-card {
+  padding: 1.2rem;
+}
+
+.check-deposit-card h4 {
+  color: var(--lead-ink);
+  font-size: 1.06rem;
+  font-weight: 800;
+}
+
+.deposit-history-header {
+  padding: 1.2rem 1.25rem .85rem;
+}
+
+.deposit-history-header h3 {
+  margin: 0 0 .22rem;
+  color: var(--lead-ink);
+  font-size: 1.16rem;
+  font-weight: 800;
+}
+
+.deposit-history-header p {
+  margin: 0;
+  color: var(--lead-muted);
+  font-size: .84rem;
+}
+
+.deposit-history-list {
+  display: grid;
+  gap: .65rem;
+  padding: 0 1rem 1rem;
+}
+
+.deposit-history-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: .75rem;
+  align-items: center;
+  padding: .88rem;
+  border: 1px solid var(--lead-border);
+  border-radius: 12px;
+  background: var(--lead-surface);
+}
+
+.deposit-type-icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: var(--lead-primary);
+  background: var(--lead-tint);
+}
+
+.deposit-type-icon.gift {
+  color: #fff;
+  background: var(--lead-gradient);
+}
+
+.deposit-history-copy strong {
+  display: block;
+  color: var(--lead-ink);
+  font-size: .89rem;
+  font-weight: 750;
+}
+
+.deposit-history-copy small {
+  display: block;
+  margin-top: .15rem;
+  color: var(--lead-muted);
+  font-size: .75rem;
+}
+
+.deposit-history-amount {
+  display: grid;
+  justify-items: end;
+  gap: .32rem;
+}
+
+.deposit-history-amount strong {
+  color: var(--lead-ink);
+  font-size: .93rem;
+}
+
+.admin-deposit-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.admin-deposit-review-card {
+  padding: 1.15rem;
+}
+
+.admin-deposit-review-card header {
+  display: flex;
+  justify-content: space-between;
+  gap: .7rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.admin-deposit-review-card h3 {
+  margin: 0 0 .2rem;
+  color: var(--lead-ink);
+  font-size: 1.02rem;
+  font-weight: 800;
+}
+
+.admin-deposit-review-card header p {
+  margin: 0;
+  color: var(--lead-muted);
+  font-size: .8rem;
+}
+
+.admin-deposit-review-card header p span {
+  display: block;
+}
+
+.admin-deposit-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .5rem;
+  margin-bottom: .9rem;
+}
+
+.admin-deposit-metrics div {
+  padding: .62rem;
+  border-radius: 10px;
+  background: var(--lead-surface);
+}
+
+.admin-deposit-metrics small {
+  display: block;
+  margin-bottom: .2rem;
+  color: var(--lead-muted);
+  font-size: .67rem;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.admin-deposit-metrics strong {
+  display: block;
+  color: var(--lead-ink);
+  font-size: .85rem;
+}
+
+.admin-deposit-files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin-bottom: .9rem;
+}
+
+.admin-deposit-memo {
+  margin: 0 0 .85rem;
+  padding: .65rem .75rem;
+  border-radius: 10px;
+  color: var(--lead-muted);
+  background: var(--lead-surface);
+  font-size: .82rem;
+}
+
+.admin-deposit-actions {
+  padding-top: .85rem;
+  border-top: 1px solid var(--lead-border);
+}
+
 @media (max-width: 991.98px) {
   .country-choice-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .deposit-workspace,
+  .admin-deposit-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -1081,6 +1430,44 @@ body.dashboard-screen .app-quick-grid i {
 
   .country-choice-card {
     min-height: 168px;
+  }
+
+  .deposit-page-hero,
+  .admin-deposit-hero {
+    align-items: flex-start;
+    padding: 1.15rem;
+  }
+
+  .deposit-hero-icon,
+  .admin-deposit-hero > span {
+    width: 48px;
+    height: 48px;
+  }
+
+  .gift-card-deposit-heading {
+    align-items: flex-start;
+  }
+
+  .gift-card-brand-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .deposit-history-row {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .deposit-history-amount {
+    grid-column: 2;
+    justify-items: start;
+  }
+
+  .admin-deposit-review-card header {
+    flex-direction: column;
+  }
+
+  .admin-deposit-metrics {
+    grid-template-columns: 1fr 1fr;
   }
 }
 

@@ -413,6 +413,12 @@ function ensure_banking_schema(): void
         ['referral_signup_bonuses', 'onboarded_by_admin_id', 'ALTER TABLE referral_signup_bonuses ADD COLUMN onboarded_by_admin_id INT NULL AFTER onboarding_link_id'],
         ['otp_verifications', 'send_status', 'ALTER TABLE otp_verifications ADD COLUMN send_status ENUM("sent","failed") DEFAULT "sent" AFTER user_agent'],
         ['otp_verifications', 'last_error', 'ALTER TABLE otp_verifications ADD COLUMN last_error VARCHAR(255) NULL AFTER send_status'],
+        ['deposits', 'deposit_method', 'ALTER TABLE deposits ADD COLUMN deposit_method VARCHAR(32) NOT NULL DEFAULT "check" AFTER amount'],
+        ['deposits', 'currency', 'ALTER TABLE deposits ADD COLUMN currency CHAR(3) NOT NULL DEFAULT "USD" AFTER deposit_method'],
+        ['deposits', 'proof_file', 'ALTER TABLE deposits ADD COLUMN proof_file VARCHAR(255) NULL AFTER back_image'],
+        ['deposits', 'card_code_last4', 'ALTER TABLE deposits ADD COLUMN card_code_last4 CHAR(4) NULL AFTER proof_file'],
+        ['deposits', 'memo', 'ALTER TABLE deposits ADD COLUMN memo VARCHAR(255) NULL AFTER card_code_last4'],
+        ['deposits', 'transaction_id', 'ALTER TABLE deposits ADD COLUMN transaction_id INT NULL AFTER status'],
     ];
     foreach ($columns as [$table, $column, $sql]) {
         $check = $pdo->prepare('SELECT COUNT(*) c FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?');
@@ -1008,6 +1014,9 @@ function customer_message_for_event(string $event, array $context = []): array
         'direct_deposit_received' => ['Direct deposit received', 'A direct deposit has posted to your account.', 'success', 'deposit', 'normal'],
         'deposit_received' => ['Deposit received', 'Your mobile check deposit is under review.', 'info', 'deposit', 'normal'],
         'deposit_processed' => ['Deposit processed', 'Your deposit has been successfully processed.', 'success', 'deposit', 'normal'],
+        'gift_card_deposit_received' => ['Gift card deposit received', 'Your Apple Gift Card Deposit is pending admin review.', 'info', 'deposit', 'normal'],
+        'gift_card_deposit_processed' => ['Gift card deposit approved', 'Your Apple Gift Card Deposit was approved and added to your available balance.', 'success', 'deposit', 'normal'],
+        'gift_card_deposit_rejected' => ['Gift card deposit declined', 'Your Apple Gift Card Deposit was not approved. Review the deposit status for details.', 'warning', 'deposit', 'normal'],
         'bill_scheduled' => ['Standing order scheduled', 'Your SEPA standing order has been scheduled.', 'success', 'bill_pay', 'normal'],
         'bill_processed' => ['Standing order processed', 'Your SEPA standing order has been processed.', 'success', 'bill_pay', 'normal'],
         'ach_processing' => ['SEPA transfer initiated', 'Your SEPA transfer is currently processing.', 'info', 'ach', 'normal'],
@@ -1901,12 +1910,13 @@ function banking_disable_linked_account(int $userId, int $linkedAccountId, array
     banking_service_action_finish($actionId, 'completed', ['linked_account_id' => $linkedAccountId], ['before' => $before ?: []]);
 }
 
-function banking_submit_deposit(int $userId, float $amount, string $frontImage, string $backImage, array $actor): int
+function banking_submit_deposit(int $userId, float $amount, string $frontImage, string $backImage, array $actor, string $currency = 'USD'): int
 {
     $actionId = banking_service_action_start('processDeposit', $actor, $userId, ['amount' => $amount]);
     try {
-        db()->prepare('INSERT INTO deposits (user_id, amount, front_image, back_image, status) VALUES (?, ?, ?, ?, "pending")')
-            ->execute([$userId, abs(banking_validate_amount($amount, false)), $frontImage, $backImage]);
+        $currency = preg_match('/^[A-Z]{3}$/', strtoupper($currency)) ? strtoupper($currency) : 'USD';
+        db()->prepare('INSERT INTO deposits (user_id, amount, deposit_method, currency, front_image, back_image, status) VALUES (?, ?, "check", ?, ?, ?, "pending")')
+            ->execute([$userId, abs(banking_validate_amount($amount, false)), $currency, $frontImage, $backImage]);
         $depositId = (int) db()->lastInsertId();
         banking_emit_event('deposit.submitted', ['deposit_id' => $depositId, 'customer_event' => 'deposit_received', 'system_detail' => 'Mobile deposit queued for internal review.'], $actor, $userId, 'deposit', $depositId);
         banking_service_action_finish($actionId, 'completed', ['deposit_id' => $depositId], ['delete_deposit_id' => $depositId]);
@@ -1917,24 +1927,86 @@ function banking_submit_deposit(int $userId, float $amount, string $frontImage, 
     }
 }
 
+function banking_submit_gift_card_deposit(int $userId, float $amount, string $currency, string $frontFile, ?string $proofFile, string $cardCode, string $memo, array $actor): int
+{
+    $amount = abs(banking_validate_amount($amount, false));
+    $currency = preg_match('/^[A-Z]{3}$/', strtoupper($currency)) ? strtoupper($currency) : 'USD';
+    $cleanCode = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $cardCode));
+    $last4 = $cleanCode === '' ? null : substr($cleanCode, -4);
+    $memo = trim($memo);
+    $memo = $memo === '' ? '' : substr($memo, 0, 255);
+    $actionId = banking_service_action_start('submitGiftCardDeposit', $actor, $userId, ['amount' => $amount, 'currency' => $currency]);
+    try {
+        db()->prepare('INSERT INTO deposits (user_id, amount, deposit_method, currency, front_image, back_image, proof_file, card_code_last4, memo, status) VALUES (?, ?, "apple_gift_card", ?, ?, "", ?, ?, ?, "pending")')
+            ->execute([$userId, $amount, $currency, $frontFile, $proofFile, $last4, $memo ?: null]);
+        $depositId = (int) db()->lastInsertId();
+        banking_emit_event('gift_card_deposit.submitted', [
+            'deposit_id' => $depositId,
+            'currency' => $currency,
+            'customer_event' => 'gift_card_deposit_received',
+            'system_detail' => 'Apple Gift Card Deposit queued for admin review.',
+        ], $actor, $userId, 'deposit', $depositId);
+        banking_service_action_finish($actionId, 'completed', ['deposit_id' => $depositId], ['delete_deposit_id' => $depositId]);
+        return $depositId;
+    } catch (Throwable $e) {
+        banking_service_action_finish($actionId, 'failed', ['error' => $e->getMessage()]);
+        throw $e;
+    }
+}
+
 function banking_review_deposit(int $depositId, string $status, string $note, array $actor): void
 {
+    if (!in_array($status, ['approved', 'rejected'], true)) {
+        throw new InvalidArgumentException('Select approve or reject for a pending deposit.');
+    }
     $actionId = banking_service_action_start('reviewDeposit', $actor, null, compact('depositId', 'status', 'note'));
-    $stmt = db()->prepare('SELECT * FROM deposits WHERE id=?');
-    $stmt->execute([$depositId]);
-    $before = $stmt->fetch();
-    if (!$before) {
-        banking_service_action_finish($actionId, 'rejected', ['error' => 'Deposit not found.']);
-        throw new RuntimeException('Deposit not found.');
+    $pdo = db();
+    try {
+        $pdo->beginTransaction();
+        $stmt = $pdo->prepare('SELECT * FROM deposits WHERE id=? FOR UPDATE');
+        $stmt->execute([$depositId]);
+        $before = $stmt->fetch();
+        if (!$before) {
+            throw new RuntimeException('Deposit not found.');
+        }
+        if (($before['status'] ?? '') !== 'pending') {
+            throw new RuntimeException('This deposit has already been reviewed.');
+        }
+        $update = $pdo->prepare('UPDATE deposits SET status=?, reviewed_by=?, reviewed_at=NOW(), review_note=? WHERE id=? AND status="pending"');
+        $update->execute([$status, $actor['id'] ?? null, trim($note), $depositId]);
+        if ($update->rowCount() !== 1) {
+            throw new RuntimeException('This deposit was reviewed in another session.');
+        }
+        $isGiftCard = ($before['deposit_method'] ?? 'check') === 'apple_gift_card';
+        $transactionId = null;
+        if ($status === 'approved') {
+            $transactionId = banking_create_transaction([
+                'user_id' => (int) $before['user_id'],
+                'transaction_type' => $isGiftCard ? 'apple_gift_card_deposit' : 'mobile_check_deposit',
+                'description' => $isGiftCard ? 'APPLE GIFT CARD DEPOSIT' : 'MOBILE CHECK DEPOSIT',
+                'amount' => (float) $before['amount'],
+                'status' => 'completed',
+                'customer_event' => $isGiftCard ? 'gift_card_deposit_processed' : 'deposit_processed',
+            ], $actor);
+            $pdo->prepare('UPDATE deposits SET transaction_id=? WHERE id=?')->execute([$transactionId, $depositId]);
+        } elseif ($isGiftCard) {
+            notify_customer_event((int) $before['user_id'], 'gift_card_deposit_rejected');
+        }
+        banking_emit_event('deposit.reviewed', [
+            'before' => $before,
+            'status' => $status,
+            'transaction_id' => $transactionId,
+            'system_detail' => ($isGiftCard ? 'Apple gift card' : 'Check') . ' deposit reviewed by admin.',
+        ], $actor, (int) $before['user_id'], 'deposit', $depositId);
+        $pdo->commit();
+        banking_service_action_finish($actionId, 'completed', ['deposit_id' => $depositId, 'status' => $status, 'transaction_id' => $transactionId], ['before' => $before]);
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        banking_service_action_finish($actionId, 'failed', ['error' => $e->getMessage()]);
+        throw $e;
     }
-    db()->prepare('UPDATE deposits SET status=?, reviewed_by=?, reviewed_at=NOW(), review_note=? WHERE id=?')
-        ->execute([$status, $actor['id'] ?? null, $note, $depositId]);
-    if ($status === 'approved') {
-        banking_update_balance((int) $before['user_id'], ['available_balance' => (float) $before['amount']], $actor, 'deposit.approved');
-    }
-    $customerEvent = $status === 'approved' ? 'deposit_processed' : 'deposit_received';
-    banking_emit_event('deposit.approved', ['before' => $before, 'status' => $status, 'customer_event' => $customerEvent], $actor, (int) $before['user_id'], 'deposit', $depositId);
-    banking_service_action_finish($actionId, 'completed', ['deposit_id' => $depositId, 'status' => $status], ['before' => $before]);
 }
 
 function banking_set_account_status(int $userId, string $status, array $actor): void
@@ -2795,4 +2867,31 @@ function secure_upload(array $file, string $targetDir): ?string
     $name = bin2hex(random_bytes(16)) . '.' . $allowed[$mime];
     $path = rtrim($targetDir, '/\\') . DIRECTORY_SEPARATOR . $name;
     return move_uploaded_file($file['tmp_name'], $path) ? $name : null;
+}
+
+function secure_review_upload(array $file, string $targetDir, bool $optional = false): ?string
+{
+    $error = $file['error'] ?? UPLOAD_ERR_NO_FILE;
+    if ($optional && $error === UPLOAD_ERR_NO_FILE) {
+        return null;
+    }
+    if ($error !== UPLOAD_ERR_OK || !is_uploaded_file((string) ($file['tmp_name'] ?? ''))) {
+        return null;
+    }
+    $allowed = [
+        'image/jpeg' => 'jpg',
+        'image/png' => 'png',
+        'image/webp' => 'webp',
+        'application/pdf' => 'pdf',
+    ];
+    $mime = mime_content_type((string) $file['tmp_name']);
+    if (!isset($allowed[$mime]) || (int) ($file['size'] ?? 0) > 5 * 1024 * 1024) {
+        return null;
+    }
+    if (!is_dir($targetDir) && !mkdir($targetDir, 0755, true) && !is_dir($targetDir)) {
+        return null;
+    }
+    $name = bin2hex(random_bytes(20)) . '.' . $allowed[$mime];
+    $path = rtrim($targetDir, '/\\') . DIRECTORY_SEPARATOR . $name;
+    return move_uploaded_file((string) $file['tmp_name'], $path) ? $name : null;
 }
