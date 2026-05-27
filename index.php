@@ -1,7 +1,7 @@
-﻿<?php
+<?php
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/helpers.php';
-$pageTitle = 'Deutsche | Modern Banking';
+$pageTitle = 'Lead Bank | Programmable Banking';
 $GLOBALS['publicStaticMode'] = true;
 include __DIR__ . '/includes/public_header.php';
 ?>
@@ -73,9 +73,9 @@ include __DIR__ . '/includes/public_header.php';
 <section class="section-pad cta-band">
     <div class="container">
         <div class="row g-4">
-            <div class="col-lg-4"><h2 class="fw-bold">Members trust Deutsche Bank.</h2><p class="text-white-50">Modern banking support without losing a human standard of care.</p></div>
+            <div class="col-lg-4"><h2 class="fw-bold">Members trust Lead Bank.</h2><p class="text-white-50">Modern banking support without losing a human standard of care.</p></div>
             <?php foreach ([['Maya R.','The dashboard feels clean and fast. Transfers are clear before I confirm them.'],['Jordan P.','Our business accounts, card controls, and alerts finally live in one place.'],['Elena S.','The security notices are plain-English and useful. That matters.']] as $quote): ?>
-            <div class="col-lg-4"><div class="p-4 bg-white text-dark h-100"><div class="text-primary mb-2">â˜…â˜…â˜…â˜…â˜…</div><p>"<?= e($quote[1]) ?>"</p><strong><?= e($quote[0]) ?></strong></div></div>
+            <div class="col-lg-4"><div class="p-4 bg-white text-dark h-100"><div class="text-primary mb-2">★★★★★</div><p>"<?= e($quote[1]) ?>"</p><strong><?= e($quote[0]) ?></strong></div></div>
             <?php endforeach; ?>
         </div>
     </div>
@@ -95,4 +95,3 @@ include __DIR__ . '/includes/public_header.php';
     </div>
 </section>
 <?php include __DIR__ . '/includes/public_footer.php'; ?>
-

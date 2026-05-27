@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/helpers.php';
 require_once __DIR__ . '/config/brevo.php';
@@ -190,4 +190,3 @@ include __DIR__ . '/includes/public_header.php';
   </div>
 </section>
 <?php include __DIR__ . '/includes/public_footer.php'; ?>
-
