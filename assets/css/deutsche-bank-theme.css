@@ -1747,7 +1747,7 @@ body.dashboard-screen .app-quick-grid i {
     display: flex !important;
     align-items: center !important;
     justify-content: flex-start !important;
-    padding: 0 0 0 2px !important;
+    padding: 16px 0 0 18px !important;
   }
 
   .sidebar > .sidebar-brand .brand-mark {
