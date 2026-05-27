@@ -1760,14 +1760,14 @@ body.dashboard-screen .app-quick-grid i {
     flex: 0 0 auto;
     position: absolute;
     left: 78px;
-    top: 18px;
+    top: 30px;
     width: 36px;
     height: 36px;
     margin: 0;
   }
 
   .sidebar > .nav {
-    padding-top: 0;
+    padding-top: 34px;
   }
 }
 
