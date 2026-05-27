@@ -1739,29 +1739,33 @@ body.dashboard-screen .app-quick-grid i {
   }
 }
 
-/* Desktop sidebar brand header: give the identity mark intentional breathing room. */
+/* Desktop sidebar brand header: compact side mark, nav starts high. */
 @media (min-width: 992px) {
   .sidebar > .sidebar-brand {
     flex: 0 0 auto;
-    min-height: 132px;
-    display: grid !important;
-    place-items: center !important;
-    padding: 0 !important;
+    min-height: 44px;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding: 0 0 0 2px !important;
   }
 
   .sidebar > .sidebar-brand .brand-mark {
-    width: auto;
-    justify-content: center;
-    text-align: center;
+    width: auto !important;
+    justify-content: flex-start !important;
+    text-align: left;
+    gap: 0;
   }
 
   .sidebar > .sidebar-brand .brand-symbol {
     flex: 0 0 auto;
-    margin: 0 auto;
+    width: 36px;
+    height: 36px;
+    margin: 0;
   }
 
   .sidebar > .nav {
-    padding-top: 18px;
+    padding-top: 0;
   }
 }
 
