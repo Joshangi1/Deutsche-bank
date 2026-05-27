@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/config/brevo.php';
 require_once __DIR__ . '/includes/helpers.php';
@@ -567,3 +567,4 @@ $onboardingAgentPhoto = $onboardingLink ? admin_profile_photo_url($onboardingLin
     </div>
 </div>
 <?php include __DIR__ . '/includes/public_footer.php'; ?>
+
