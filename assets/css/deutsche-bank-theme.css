@@ -1,24 +1,24 @@
 /* Deutsche Bank global palette layer. Loaded last to recolor existing layouts only. */
 :root {
-  --lead-primary: #0A3D91;
-  --lead-primary-hover: #001F5B;
-  --lead-sky: #4DB5FF;
+  --lead-primary: #001F5B;
+  --lead-primary-hover: #0A3D91;
+  --lead-sky: #0A3D91;
   --lead-accent: #001F5B;
   --lead-ink: #001F5B;
   --lead-text: #001F5B;
   --lead-muted: rgba(0, 31, 91, .64);
   --lead-surface: #F6F8FC;
   --lead-panel: #ffffff;
-  --lead-border: rgba(47, 91, 255, .14);
-  --lead-tint: rgba(77, 181, 255, .13);
+  --lead-border: rgba(0, 31, 91, .14);
+  --lead-tint: rgba(0, 31, 91, .08);
   --lead-gradient: linear-gradient(135deg, #001F5B 0%, #062E78 48%, #0A3D91 100%);
-  --lead-gradient-soft: linear-gradient(135deg, rgba(77, 181, 255, .15), rgba(47, 91, 255, .07));
+  --lead-gradient-soft: linear-gradient(135deg, rgba(0, 31, 91, .11), rgba(10, 61, 145, .07));
   --lead-shadow: 0 18px 44px rgba(7, 27, 69, .08);
   --lead-shadow-strong: 0 24px 54px rgba(7, 27, 69, .22);
 
   --lead-blue: var(--lead-primary);
   --lead-blue-2: var(--lead-primary-hover);
-  --lead-cyan: rgba(77, 181, 255, .15);
+  --lead-cyan: rgba(0, 31, 91, .1);
   --ink: var(--lead-ink);
   --text: var(--lead-text);
   --muted: var(--lead-muted);
@@ -31,7 +31,7 @@
   --navy-card: var(--lead-ink);
   --blue: var(--lead-primary);
   --blue-light: var(--lead-sky);
-  --blue-glow: rgba(77, 181, 255, .18);
+  --blue-glow: rgba(0, 31, 91, .14);
   --gold: var(--lead-sky);
   --gold-light: var(--lead-sky);
   --off-white: var(--lead-surface);
@@ -86,7 +86,7 @@ h6,
 }
 
 .brand-mark-dark {
-  color: var(--lead-primary);
+  color: var(--lead-ink) !important;
 }
 
 .brand-mark {
@@ -118,7 +118,7 @@ h6,
 .account-card-icon,
 .translate-widget > i,
 .otp-resend-row .btn-link {
-  color: var(--lead-primary) !important;
+  color: var(--lead-ink) !important;
 }
 
 .btn-primary-pill,
@@ -206,9 +206,9 @@ button.btn-primary:hover {
 .account-card-icon,
 .recipient-avatar,
 .instant-recipient-grid button span {
-  color: var(--lead-primary) !important;
+  color: var(--lead-ink) !important;
   background: var(--lead-tint) !important;
-  border-color: rgba(77, 181, 255, .3) !important;
+  border-color: rgba(0, 31, 91, .16) !important;
 }
 
 .cta-band,
@@ -451,9 +451,9 @@ body.dashboard-screen .app-quick-grid i {
 
 /* Admin console: Deutsche Bank operations workspace */
 .admin-console {
-  --admin-primary: #0052FF;
-  --admin-secondary: #2F7DFF;
-  --admin-accent: #0052FF;
+  --admin-primary: #001F5B;
+  --admin-secondary: #0A3D91;
+  --admin-accent: #001F5B;
   --admin-bg: #F7F9FD;
   --admin-panel: #ffffff;
   --admin-text: #001E60;
@@ -1016,7 +1016,7 @@ body.dashboard-screen .app-quick-grid i {
 .country-choice-head .eyebrow {
   display: inline-block;
   margin-bottom: .7rem;
-  color: var(--lead-primary);
+  color: var(--lead-ink);
   font-size: .73rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -1061,7 +1061,7 @@ body.dashboard-screen .app-quick-grid i {
 
 .country-choice-card:hover {
   transform: translateY(-2px);
-  border-color: var(--lead-sky) !important;
+  border-color: rgba(0, 31, 91, .34) !important;
   box-shadow: 0 20px 42px rgba(0, 31, 91, .13);
 }
 
@@ -1103,7 +1103,7 @@ body.dashboard-screen .app-quick-grid i {
 
 .country-choice-card > i {
   margin-top: auto;
-  color: var(--lead-primary);
+  color: var(--lead-ink);
   transition: transform .2s ease;
 }
 
@@ -1743,19 +1743,21 @@ body.dashboard-screen .app-quick-grid i {
 @media (min-width: 992px) {
   .sidebar > .sidebar-brand {
     flex: 0 0 auto;
-    min-height: 96px;
-    justify-content: center;
-    padding: 25px 16px 20px !important;
+    min-height: 132px;
+    display: grid !important;
+    place-items: center !important;
+    padding: 0 !important;
   }
 
   .sidebar > .sidebar-brand .brand-mark {
-    width: 100%;
+    width: auto;
     justify-content: center;
     text-align: center;
   }
 
   .sidebar > .sidebar-brand .brand-symbol {
     flex: 0 0 auto;
+    margin: 0 auto;
   }
 
   .sidebar > .nav {
@@ -1771,9 +1773,9 @@ body.dashboard-screen .app-quick-grid i {
 
 .brand-deutsche-bank .nav-link.active,
 .brand-deutsche-bank.admin-console .nav-link.active {
-  background: rgba(47, 125, 255, .22) !important;
+  background: rgba(10, 61, 145, .24) !important;
   color: #fff !important;
-  border-color: rgba(47, 125, 255, .35) !important;
+  border-color: rgba(10, 61, 145, .35) !important;
 }
 
 .brand-deutsche-bank .total-balance-panel,
@@ -1793,7 +1795,7 @@ body.dashboard-screen .app-quick-grid i {
   font-size: .78rem;
   font-weight: 800;
   letter-spacing: .02em;
-  color: var(--lead-primary);
+  color: var(--lead-ink);
 }
 
 .country-choice-grid {
@@ -1828,4 +1830,23 @@ body.dashboard-screen .bank-home-grid > .total-balance-panel.bank-app-card::afte
   border: 1px solid rgba(255, 255, 255, .055);
   transform: rotate(45deg);
   pointer-events: none;
+}
+
+/* No light-blue ink: all readable labels and links stay in Deutsche navy. */
+.brand-deutsche-bank .brand-mark-dark,
+.brand-deutsche-bank .bank-navbar .brand-mark,
+.brand-deutsche-bank .bank-navbar .nav-link,
+.brand-deutsche-bank .section-title-row a,
+.brand-deutsche-bank .dashboard-section-head a,
+.brand-deutsche-bank .auth-kicker,
+.brand-deutsche-bank .country-choice-head .eyebrow,
+.brand-deutsche-bank .country-choice-card em,
+.brand-deutsche-bank .country-choice-card > i,
+.brand-deutsche-bank .account-card-icon,
+.brand-deutsche-bank .translate-widget > i,
+.brand-deutsche-bank .otp-resend-row .btn-link,
+.brand-deutsche-bank .auth-card a,
+.brand-deutsche-bank .account-stack-panel a,
+.brand-deutsche-bank .transactions-panel a {
+  color: var(--lead-ink) !important;
 }
