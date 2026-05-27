@@ -1,17 +1,17 @@
-/* Lead Bank global palette layer. Loaded last to recolor existing layouts only. */
+/* Deutsche Bank global palette layer. Loaded last to recolor existing layouts only. */
 :root {
-  --lead-primary: #2F5BFF;
-  --lead-primary-hover: #4DB5FF;
-  --lead-sky: #4DB5FF;
-  --lead-accent: #071B45;
-  --lead-ink: #071B45;
-  --lead-text: #071B45;
+  --lead-primary: #0052FF;
+  --lead-primary-hover: #2F7DFF;
+  --lead-sky: #2F7DFF;
+  --lead-accent: #001E60;
+  --lead-ink: #001E60;
+  --lead-text: #001E60;
   --lead-muted: rgba(7, 27, 69, .64);
-  --lead-surface: #F6F8FC;
+  --lead-surface: #F7F9FD;
   --lead-panel: #ffffff;
   --lead-border: rgba(47, 91, 255, .14);
   --lead-tint: rgba(77, 181, 255, .13);
-  --lead-gradient: linear-gradient(135deg, #071B45 0%, #071B45 38%, #2F5BFF 100%);
+  --lead-gradient: linear-gradient(135deg, #001E60 0%, #001E60 38%, #0052FF 100%);
   --lead-gradient-soft: linear-gradient(135deg, rgba(77, 181, 255, .15), rgba(47, 91, 255, .07));
   --lead-shadow: 0 18px 44px rgba(7, 27, 69, .08);
   --lead-shadow-strong: 0 24px 54px rgba(7, 27, 69, .22);
@@ -52,11 +52,31 @@
   --shadow-card: var(--lead-shadow);
 }
 
+html,
 body,
 .app-shell,
 .app-main,
 main {
   background-color: var(--lead-surface);
+  color: var(--lead-text);
+  font-family: "Aptos Display", Aptos, "Manrope", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  letter-spacing: -.01em;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.brand-mark,
+.dashboard-greeting strong,
+.section-title,
+.bank-app-card h2,
+.bank-app-card h3,
+.dashboard-section-head strong,
+.balance-value-row strong {
+  letter-spacing: -.035em;
   color: var(--lead-text);
 }
 
@@ -67,6 +87,21 @@ main {
 
 .brand-mark-dark {
   color: var(--lead-primary);
+}
+
+.brand-mark {
+  font-weight: 800;
+}
+
+.brand-symbol {
+  background: #ffffff !important;
+  border-radius: 0 !important;
+  box-shadow: 0 0 0 1px rgba(0, 30, 96, .08), 0 10px 24px rgba(0, 30, 96, .12) !important;
+}
+
+.brand-symbol img,
+.admin-console .admin-console-logo img {
+  object-fit: contain !important;
 }
 
 .bank-navbar {
@@ -217,7 +252,7 @@ button.btn-primary:hover {
   bottom: clamp(1.25rem, 5vw, 4rem);
   width: clamp(10rem, 17vw, 16rem);
   aspect-ratio: 1;
-  background: url("../icons/lead-bank-logo.jpg") center / contain no-repeat;
+  background: url("../icons/deutsche-bank-logo.png") center / contain no-repeat;
   mix-blend-mode: multiply;
   opacity: .065;
   pointer-events: none;
@@ -394,18 +429,18 @@ body.dashboard-screen .app-quick-grid i {
   background: var(--lead-gradient) !important;
 }
 
-/* Admin console: Lead Bank operations workspace */
+/* Admin console: Deutsche Bank operations workspace */
 .admin-console {
-  --admin-primary: #2F5BFF;
-  --admin-secondary: #4DB5FF;
-  --admin-accent: #2F5BFF;
-  --admin-bg: #F6F8FC;
+  --admin-primary: #0052FF;
+  --admin-secondary: #2F7DFF;
+  --admin-accent: #0052FF;
+  --admin-bg: #F7F9FD;
   --admin-panel: #ffffff;
-  --admin-text: #071B45;
+  --admin-text: #001E60;
   --admin-muted: rgba(7, 27, 69, .64);
   --admin-border: rgba(47, 91, 255, .14);
-  --admin-sidebar: #071B45;
-  --admin-sidebar-deep: #071B45;
+  --admin-sidebar: #001E60;
+  --admin-sidebar-deep: #001E60;
   font-family: "Manrope", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   background: var(--admin-bg);
   color: var(--admin-text);
@@ -929,7 +964,7 @@ body.dashboard-screen .app-quick-grid i {
   top: clamp(1.75rem, 7vw, 4.25rem);
   width: clamp(11rem, 18vw, 17rem);
   aspect-ratio: 1;
-  background: url("../icons/lead-bank-logo.jpg") center / contain no-repeat;
+  background: url("../icons/deutsche-bank-logo.png") center / contain no-repeat;
   mix-blend-mode: multiply;
   opacity: .06;
   pointer-events: none;
@@ -1692,41 +1727,26 @@ body.dashboard-screen .app-quick-grid i {
   }
 }
 
-/* Multi-brand runtime themes */
-.brand-openpayd .sidebar,
-.brand-openpayd.admin-console .sidebar {
-  background: linear-gradient(180deg, #061B2B 0%, #0A3041 54%, #0F4C5C 100%) !important;
+/* Unified Deutsche Bank runtime theme */
+.brand-deutsche-bank .sidebar,
+.brand-deutsche-bank.admin-console .sidebar {
+  background: var(--lead-ink) !important;
 }
 
-.brand-openpayd .nav-link.active,
-.brand-openpayd.admin-console .nav-link.active {
-  background: rgba(42, 167, 184, .22) !important;
+.brand-deutsche-bank .nav-link.active,
+.brand-deutsche-bank.admin-console .nav-link.active {
+  background: rgba(47, 125, 255, .22) !important;
   color: #fff !important;
-  border-color: rgba(42, 167, 184, .35) !important;
+  border-color: rgba(47, 125, 255, .35) !important;
 }
 
-.brand-openpayd .total-balance-panel,
-.brand-openpayd .premium-visa,
-.brand-openpayd .premium-mobile-card {
+.brand-deutsche-bank .total-balance-panel,
+.brand-deutsche-bank .premium-visa,
+.brand-deutsche-bank .premium-mobile-card {
   background: var(--lead-gradient) !important;
 }
 
-.brand-openpayd .btn-gold,
-.brand-openpayd .btn-navy,
-.brand-openpayd .btn-primary-pill {
-  background: var(--lead-primary) !important;
-  border-color: var(--lead-primary) !important;
-  color: #fff !important;
-}
-
-.brand-openpayd .btn-gold:hover,
-.brand-openpayd .btn-navy:hover,
-.brand-openpayd .btn-primary-pill:hover {
-  background: var(--lead-secondary) !important;
-  border-color: var(--lead-secondary) !important;
-}
-
-.brand-openpayd .brand-symbol {
+.brand-deutsche-bank .brand-symbol {
   background: #fff !important;
 }
 

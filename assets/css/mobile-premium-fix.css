@@ -1,5 +1,5 @@
 /* ============================================================
-   LEAD BANKING — PREMIUM MOBILE UI FIX
+   DEUTSCHE BANKING — PREMIUM MOBILE UI FIX
    Target: dashboard.php + user_header.php mobile layout
    Fixes: overlapping header, font quality, card spacing,
           z-index stacking, balance card, credit card component
@@ -25,9 +25,9 @@
   --space-32: 32px;
 
   /* Brand */
-  --brand-navy:      #0018a8;
-  --brand-navy-deep: #00106f;
-  --brand-cyan:      #dbe6ff;
+  --brand-navy:      #0052FF;
+  --brand-navy-deep: #001E60;
+  --brand-cyan:      #EAF1FF;
 
   /* Card gradient */
   --card-grad: linear-gradient(145deg, #001299 0%, #0022d4 45%, #0a1f6b 100%);
@@ -2457,7 +2457,7 @@ body,
 .balance-card {
   background:
     radial-gradient(circle at 86% 14%, rgba(255,255,255,.19), transparent 9rem),
-    linear-gradient(135deg, #0018a8 0%, #092da7 48%, #08162e 100%) !important;
+    linear-gradient(135deg, #0052FF 0%, #092da7 48%, #08162e 100%) !important;
   border: 1px solid rgba(255,255,255,.2);
   box-shadow: 0 22px 56px rgba(0, 24, 168, .18), inset 0 1px 0 rgba(255,255,255,.16) !important;
 }
@@ -2524,7 +2524,7 @@ body,
 .dashboard-section-head .eyebrow {
   display: block;
   margin-bottom: 4px;
-  color: #0018a8;
+  color: #0052FF;
   font-size: .68rem;
   text-transform: uppercase;
 }
@@ -2535,7 +2535,7 @@ body,
 }
 
 .dashboard-section-head a {
-  color: #0018a8;
+  color: #0052FF;
   font-size: .86rem;
   font-weight: 850;
 }
@@ -2558,7 +2558,7 @@ body,
   height: 46px;
   flex: 0 0 46px;
   background: #eef4ff;
-  color: #0018a8;
+  color: #0052FF;
   border-color: #d9e6ff;
 }
 
@@ -2631,7 +2631,7 @@ body,
   height: 34px;
   border-radius: 12px;
   background: #eef4ff;
-  color: #0018a8 !important;
+  color: #0052FF !important;
 }
 
 .quick-grid span {
@@ -2648,7 +2648,7 @@ body,
 }
 
 .deposit-protection-badge.dashboard-trust-banner-compact .deposit-protection-agency {
-  color: #0018a8 !important;
+  color: #0052FF !important;
   letter-spacing: -0.035em;
 }
 

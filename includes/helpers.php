@@ -10,7 +10,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-const APP_NAME = 'Lead Bank';
+const APP_NAME = 'Deutsche Bank';
 const ROUTING_NUMBER = 'DEUTDEFFXXX';
 const DEFAULT_BIC = 'DEUTDEFFXXX';
 const US_ROUTING_NUMBER = '071923846';

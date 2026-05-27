@@ -20,7 +20,7 @@ $navLabels = ['infra' => 'Financial Infrastructure', 'banking' => 'Banking', 'ab
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
     <link href="<?= url('assets/css/styles.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/styles.css') ?>" rel="stylesheet">
-    <link href="<?= url('assets/css/lead-bank-theme.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/lead-bank-theme.css') ?>" rel="stylesheet">
+    <link href="<?= url('assets/css/deutsche-bank-theme.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/deutsche-bank-theme.css') ?>" rel="stylesheet">
     <?= brand_css_variables($brandConfig) ?>
     <?php if ($translateDisabled): ?>
     <script>
@@ -37,7 +37,7 @@ $navLabels = ['infra' => 'Financial Infrastructure', 'banking' => 'Banking', 'ab
 <div class="loader"><span></span></div>
 <nav class="navbar navbar-expand-lg bank-navbar sticky-top">
     <div class="container">
-        <a class="navbar-brand p-0" href="<?= url('index.php') ?>"><?= lead_logo('dark') ?></a>
+        <a class="navbar-brand p-0" href="<?= url('index.php') ?>"><?= brand_logo('dark') ?></a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"><span class="navbar-toggler-icon"></span></button>
         <div id="mainNav" class="collapse navbar-collapse">
             <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">

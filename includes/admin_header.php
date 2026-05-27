@@ -21,7 +21,7 @@ $GLOBALS['brandConfig'] = $brandConfig;
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
     <link href="<?= url('assets/css/styles.css') ?>" rel="stylesheet">
-    <link href="<?= url('assets/css/lead-bank-theme.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/lead-bank-theme.css') ?>" rel="stylesheet">
+    <link href="<?= url('assets/css/deutsche-bank-theme.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/deutsche-bank-theme.css') ?>" rel="stylesheet">
     <?= brand_css_variables($brandConfig) ?>
     <meta name="google" content="notranslate">
     <script>

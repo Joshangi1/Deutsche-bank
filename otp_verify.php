@@ -147,7 +147,7 @@ include __DIR__ . '/includes/public_header.php';
   <form class="auth-card otp-verify-card" method="post" data-otp-form novalidate>
     <?= csrf_field() ?>
     <input type="hidden" name="purpose" value="<?= e($purpose) ?>">
-    <div class="mb-4"><?= lead_logo('dark') ?></div>
+    <div class="mb-4"><?= brand_logo('dark') ?></div>
     <span class="auth-kicker">SMS verification</span>
     <h1 class="h3 fw-bold"><?= e($title) ?></h1>
     <p class="muted"><?= e($subtitle) ?> <strong><?= e($maskedPhone ?: $phone) ?></strong></p>

@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-const UI_BRAND_NAME = 'Lead Bank';
-const UI_BRAND_SHORT = 'Lead Bank';
+const UI_BRAND_NAME = 'Deutsche Bank';
+const UI_BRAND_SHORT = 'Deutsche Bank';
 
-function lead_logo(string $tone = 'dark'): string
+function brand_logo(string $tone = 'dark'): string
 {
     $brand = current_brand_config();
     $toneClass = $tone === 'light' ? 'brand-mark-light' : 'brand-mark-dark';
@@ -12,7 +12,7 @@ function lead_logo(string $tone = 'dark'): string
     return '<span class="brand-mark ' . $toneClass . ' ' . $brandClass . '"><span class="brand-symbol" aria-hidden="true"><img src="' . e(url((string) $brand['logo_mark'])) . '" alt=""></span><span>' . e((string) $brand['brand_short_name']) . '</span></span>';
 }
 
-function lead_nav_item(string $href, string $icon, string $label, bool $active = false, bool $disabled = false): string
+function brand_nav_item(string $href, string $icon, string $label, bool $active = false, bool $disabled = false): string
 {
     $classes = 'nav-link' . ($active ? ' active' : '') . ($disabled ? ' disabled restricted-link' : '');
     $url = $disabled ? '#' : url($href);
@@ -152,8 +152,8 @@ function google_translate_script(): string
     return str_replace(['__DEFAULT_LANGUAGE__', '__FORCE_LANGUAGE__'], [e($defaultLanguage), $forceLanguage], <<<'HTML'
 <div id="google_translate_element" class="google-translate-engine" aria-hidden="true"></div>
 <script>
-window.LEAD_BANK_DEFAULT_LANGUAGE = '__DEFAULT_LANGUAGE__';
-window.LEAD_BANK_FORCE_LANGUAGE = __FORCE_LANGUAGE__;
+window.DEUTSCHE_BANK_DEFAULT_LANGUAGE = '__DEFAULT_LANGUAGE__';
+window.DEUTSCHE_BANK_FORCE_LANGUAGE = __FORCE_LANGUAGE__;
 
 function googleTranslateElementInit() {
     new google.translate.TranslateElement({
@@ -165,9 +165,9 @@ function googleTranslateElementInit() {
 }
 
 (function () {
-    const defaultLanguage = window.LEAD_BANK_DEFAULT_LANGUAGE || 'en';
+    const defaultLanguage = window.DEUTSCHE_BANK_DEFAULT_LANGUAGE || 'en';
     const cookieName = 'googtrans';
-    const promptKey = 'leadBankLanguagePromptSeen';
+    const promptKey = 'deutscheBankLanguagePromptSeen';
     const names = {
         en: 'English',
         fr: 'French',
@@ -258,8 +258,8 @@ function googleTranslateElementInit() {
         }
     }
 
-    const pageDefaultKey = 'leadBankDefaultLanguage:' + location.pathname;
-    if (window.LEAD_BANK_FORCE_LANGUAGE || sessionStorage.getItem(pageDefaultKey) !== '1') {
+    const pageDefaultKey = 'deutscheBankDefaultLanguage:' + location.pathname;
+    if (window.DEUTSCHE_BANK_FORCE_LANGUAGE || sessionStorage.getItem(pageDefaultKey) !== '1') {
         setTranslateCookie(defaultLanguage);
         sessionStorage.setItem(pageDefaultKey, '1');
     }

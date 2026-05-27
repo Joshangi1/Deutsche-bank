@@ -80,7 +80,7 @@ include __DIR__ . '/includes/public_header.php';
 <section class="auth-shell">
 <?php if (!$row): ?>
   <div class="auth-card">
-    <div class="mb-4"><?= lead_logo('dark') ?></div>
+    <div class="mb-4"><?= brand_logo('dark') ?></div>
     <h1 class="h3 fw-bold">Link expired</h1>
     <p class="muted">This password reset link is invalid or has already been used. Please request a new one.</p>
     <a href="forgot_password.php" class="btn btn-gold w-100">Request new link</a>
@@ -89,7 +89,7 @@ include __DIR__ . '/includes/public_header.php';
   <form class="auth-card" method="post">
     <?= csrf_field() ?>
     <input type="hidden" name="token" value="<?= e($token) ?>">
-    <div class="mb-4"><?= lead_logo('dark') ?></div>
+    <div class="mb-4"><?= brand_logo('dark') ?></div>
     <h1 class="h3 fw-bold">Choose a new password</h1>
     <p class="muted">Hello <?= e($row['first_name']) ?>, enter a new password for your account.</p>
     <div class="secure-input mb-3">

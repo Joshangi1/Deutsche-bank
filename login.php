@@ -162,7 +162,7 @@ include __DIR__ . '/includes/public_header.php';
 <section class="auth-shell">
   <div class="auth-suite">
     <aside class="auth-panel">
-      <?= lead_logo('light') ?>
+      <?= brand_logo('light') ?>
       <div>
         <span class="eyebrow"><?= e($regionConfig['workspace']) ?></span>
         <h2><?= e($loginRailTitle) ?></h2>
@@ -173,7 +173,7 @@ include __DIR__ . '/includes/public_header.php';
     <form class="auth-card" method="post" data-auth-validation novalidate>
       <?= csrf_field() ?>
       <input type="hidden" name="auth_region" value="<?= e($authRegion) ?>">
-      <div class="mb-4"><?= lead_logo('dark') ?></div>
+      <div class="mb-4"><?= brand_logo('dark') ?></div>
       <span class="auth-kicker">Welcome back</span>
       <h1 class="h3 fw-bold"><?= e($loginHeading) ?></h1>
       <p class="muted">Access your accounts with secure online banking.</p>

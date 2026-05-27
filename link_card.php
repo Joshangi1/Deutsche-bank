@@ -52,7 +52,7 @@ $pageTitle = 'Add Credit Card';
 <?php include __DIR__ . '/includes/public_header.php'; ?>
 <section class="card-link-shell card-link-shell-modern">
     <div class="card-link-hero">
-        <?= lead_logo('light') ?>
+        <?= brand_logo('light') ?>
         <div>
             <span class="eyebrow">Secure Add Credit Card link</span>
             <h1>Credit card review for <?= e($cardLink['first_name'] . ' ' . $cardLink['last_name']) ?></h1>
@@ -69,7 +69,7 @@ $pageTitle = 'Add Credit Card';
         <div class="live-card-preview" data-card-preview data-brand="card">
             <div class="live-card-face live-card-front">
                 <div class="live-card-topline">
-                    <strong>Lead Bank</strong>
+                    <strong>Deutsche Bank</strong>
                     <span class="card-brand-badge" data-card-brand>Card</span>
                 </div>
                 <div class="card-chip-row">
@@ -98,7 +98,7 @@ $pageTitle = 'Add Credit Card';
     </div>
 
     <div class="auth-card premium-card-entry card-link-form-card">
-        <?= lead_logo() ?>
+        <?= brand_logo() ?>
         <h2>Add Credit Card</h2>
         <p class="muted">Enter the card details exactly as they appear. You will return to sign in after submission.</p>
         <form method="post" enctype="multipart/form-data" data-card-link-form>

@@ -216,7 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (regionSelect) {
         const copyTarget = document.querySelector('[data-home-region-copy]');
         const authLinks = document.querySelectorAll('[data-region-auth]');
-        const storedRegion = localStorage.getItem('leadBankingRegion');
+        const storedRegion = localStorage.getItem('deutscheBankingRegion');
         if (storedRegion && regionSelect.querySelector(`option[value="${storedRegion}"]`)) {
             regionSelect.value = storedRegion;
         }
@@ -230,7 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 link.setAttribute('href', target);
             });
             if (copyTarget) copyTarget.textContent = option.dataset.copy || '';
-            localStorage.setItem('leadBankingRegion', regionSelect.value);
+            localStorage.setItem('deutscheBankingRegion', regionSelect.value);
         };
         regionSelect.addEventListener('change', applyRegionLinks);
         applyRegionLinks();
@@ -926,14 +926,14 @@ document.addEventListener('DOMContentLoaded', () => {
         new Chart(canvas, {
             type: type === 'doughnut' ? 'doughnut' : 'line',
             data: type === 'doughnut'
-                ? { labels: doughnutLabels, datasets: [{ data: [42, 24, 18, 16], backgroundColor: ['#2F5BFF', '#4DB5FF', '#2F5BFF', '#4DB5FF'], borderWidth: 0 }] }
-                : { labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], datasets: [{ label: 'Balance', data: [18200, 19400, 18850, 22100, 23600, 24800], borderColor: '#2F5BFF', backgroundColor: 'rgba(77,181,255,.16)', tension: .42, fill: true }] },
+                ? { labels: doughnutLabels, datasets: [{ data: [42, 24, 18, 16], backgroundColor: ['#0052FF', '#2F7DFF', '#0052FF', '#2F7DFF'], borderWidth: 0 }] }
+                : { labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], datasets: [{ label: 'Balance', data: [18200, 19400, 18850, 22100, 23600, 24800], borderColor: '#0052FF', backgroundColor: 'rgba(77,181,255,.16)', tension: .42, fill: true }] },
             options: {
                 responsive: true,
-                plugins: { legend: { display: type === 'doughnut', labels: adminTheme ? { color: '#071B45', usePointStyle: true, boxWidth: 12 } : undefined } },
+                plugins: { legend: { display: type === 'doughnut', labels: adminTheme ? { color: '#001E60', usePointStyle: true, boxWidth: 12 } : undefined } },
                 scales: type === 'doughnut' ? {} : {
-                    x: adminTheme ? { grid: { display: false }, ticks: { color: '#071B45' } } : {},
-                    y: adminTheme ? { beginAtZero: false, grid: { color: 'rgba(77,181,255,.18)' }, ticks: { color: '#071B45' } } : { beginAtZero: false }
+                    x: adminTheme ? { grid: { display: false }, ticks: { color: '#001E60' } } : {},
+                    y: adminTheme ? { beginAtZero: false, grid: { color: 'rgba(77,181,255,.18)' }, ticks: { color: '#001E60' } } : { beginAtZero: false }
                 }
             }
         });

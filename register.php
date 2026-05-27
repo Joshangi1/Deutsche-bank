@@ -373,7 +373,7 @@ $onboardingAgentPhoto = $onboardingLink ? admin_profile_photo_url($onboardingLin
         <input type="hidden" name="auth_region" value="<?= e($authRegion) ?>">
         <?php if ($onboardingLink): ?><input type="hidden" name="onboarding_ref" value="<?= e($onboardingToken) ?>"><?php endif; ?>
         <aside class="onboarding-rail">
-            <?php if (!$onboardingLink): ?><?= lead_logo('light') ?><?php endif; ?>
+            <?php if (!$onboardingLink): ?><?= brand_logo('light') ?><?php endif; ?>
             <div>
                 <div class="eyebrow"><?= e($onboardingEyebrow) ?></div>
                 <h1><?= e($onboardingTitle) ?></h1>
@@ -543,7 +543,7 @@ $onboardingAgentPhoto = $onboardingLink ? admin_profile_photo_url($onboardingLin
     <div class="biometric-atmosphere"></div>
     <div class="biometric-stage">
         <div class="biometric-topbar">
-            <?= lead_logo('light') ?>
+            <?= brand_logo('light') ?>
             <span class="biometric-secure"><i class="fa-solid fa-lock"></i> Bank-grade verification</span>
         </div>
         <div class="biometric-experience">
