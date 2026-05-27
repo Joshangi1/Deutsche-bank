@@ -16,6 +16,33 @@ const DEFAULT_BIC = 'DEUTDEFFXXX';
 const US_ROUTING_NUMBER = '071923846';
 const SESSION_IDLE_TIMEOUT = 600;
 
+/**
+ * Session-based IP rate limiter.
+ *
+ * @param string $action  Unique key for this action (e.g. 'register', 'login').
+ * @param int    $limit   Max attempts allowed within the window.
+ * @param int    $window  Rolling window in seconds.
+ * @return bool  TRUE if the request is allowed, FALSE if the limit is exceeded.
+ */
+function ip_rate_limit(string $action, int $limit, int $window): bool
+{
+    $ip  = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $key = 'rl_' . $action . '_' . md5($ip);
+    $now = time();
+
+    if (!isset($_SESSION[$key])) {
+        $_SESSION[$key] = ['count' => 0, 'window_start' => $now];
+    }
+
+    if ($now - $_SESSION[$key]['window_start'] >= $window) {
+        $_SESSION[$key] = ['count' => 0, 'window_start' => $now];
+    }
+
+    $_SESSION[$key]['count']++;
+
+    return $_SESSION[$key]['count'] <= $limit;
+}
+
 function ensure_banking_schema(): void
 {
     static $done = false;

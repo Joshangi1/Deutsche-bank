@@ -51,6 +51,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' && $onboardingLink) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
+    if (!ip_rate_limit('register', 5, 3600)) {
+        flash('danger', 'Too many registration attempts. Please try again in an hour.');
+        header('Location: ' . $pageRegisterUrl);
+        exit;
+    }
     $fullName = trim(preg_replace('/\s+/', ' ', (string) ($_POST['full_name'] ?? '')));
     $nameParts = $fullName !== '' ? explode(' ', $fullName, 2) : ['', ''];
     $first = $nameParts[0] ?? '';

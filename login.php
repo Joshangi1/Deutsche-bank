@@ -21,6 +21,11 @@ $oldLogin = $_POST ?? [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
+    if (!ip_rate_limit('login', 10, 900)) {
+        flash('danger', 'Too many sign-in attempts from this device. Please wait 15 minutes and try again.');
+        header('Location: ' . $pageLoginUrl);
+        exit;
+    }
     $email = strtolower(trim($_POST['email'] ?? ''));
     $password = (string) ($_POST['password'] ?? '');
     $user = null;
