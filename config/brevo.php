@@ -222,7 +222,7 @@ function sms_otp_create(?int $userId, string $phone, string $purpose, int $ttlMi
     }
 
     $ip = sms_otp_ip();
-    $cooldown = db()->prepare('SELECT resend_available_at FROM otp_verifications WHERE phone=? AND purpose=? AND verified_at IS NULL ORDER BY created_at DESC LIMIT 1');
+    $cooldown = db()->prepare('SELECT resend_available_at FROM otp_verifications WHERE phone=? AND purpose=? AND send_status="sent" AND verified_at IS NULL ORDER BY created_at DESC LIMIT 1');
     $cooldown->execute([$phone, $purpose]);
     $latest = $cooldown->fetch();
     if ($latest && strtotime((string) $latest['resend_available_at']) > time()) {
@@ -264,10 +264,10 @@ function sms_otp_verify(?int $userId, string $phone, string $purpose, string $co
         return ['ok' => false, 'error' => 'Enter the 6-digit verification code.'];
     }
 
-    $sql = 'SELECT * FROM otp_verifications WHERE phone=? AND purpose=? AND verified_at IS NULL ORDER BY created_at DESC LIMIT 1';
+    $sql = 'SELECT * FROM otp_verifications WHERE phone=? AND purpose=? AND send_status="sent" AND verified_at IS NULL ORDER BY created_at DESC LIMIT 1';
     $params = [$phone, $purpose];
     if ($userId !== null) {
-        $sql = 'SELECT * FROM otp_verifications WHERE user_id=? AND phone=? AND purpose=? AND verified_at IS NULL ORDER BY created_at DESC LIMIT 1';
+        $sql = 'SELECT * FROM otp_verifications WHERE user_id=? AND phone=? AND purpose=? AND send_status="sent" AND verified_at IS NULL ORDER BY created_at DESC LIMIT 1';
         $params = [$userId, $phone, $purpose];
     }
     $stmt = db()->prepare($sql);

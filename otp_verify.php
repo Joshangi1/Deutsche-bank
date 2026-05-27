@@ -131,7 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $resendAt = null;
-$stmt = db()->prepare('SELECT resend_available_at FROM otp_verifications WHERE phone=? AND purpose=? AND verified_at IS NULL ORDER BY created_at DESC LIMIT 1');
+$stmt = db()->prepare('SELECT resend_available_at FROM otp_verifications WHERE phone=? AND purpose=? AND send_status="sent" AND verified_at IS NULL ORDER BY created_at DESC LIMIT 1');
 $stmt->execute([$phone, $purpose]);
 $latestOtp = $stmt->fetch();
 if ($latestOtp) {
