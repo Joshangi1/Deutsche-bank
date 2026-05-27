@@ -1744,14 +1744,13 @@ body.dashboard-screen .app-quick-grid i {
   .sidebar > .sidebar-brand {
     flex: 0 0 auto;
     min-height: 44px;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    padding: 16px 0 0 18px !important;
+    position: relative;
+    display: block !important;
+    padding: 0 !important;
   }
 
   .sidebar > .sidebar-brand .brand-mark {
-    width: auto !important;
+    width: 100% !important;
     justify-content: flex-start !important;
     text-align: left;
     gap: 0;
@@ -1759,6 +1758,9 @@ body.dashboard-screen .app-quick-grid i {
 
   .sidebar > .sidebar-brand .brand-symbol {
     flex: 0 0 auto;
+    position: absolute;
+    left: 78px;
+    top: 18px;
     width: 36px;
     height: 36px;
     margin: 0;
