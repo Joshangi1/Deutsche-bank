@@ -28,11 +28,17 @@ define('SMS_API_KEY', sms_config('SMS_API_KEY', sms_config('SENDINC_API_KEY', sm
 define('SMS_API_SECRET', sms_config('SMS_API_SECRET', sms_config('SENDINC_API_SECRET', sms_config('SEND_API_SECRET'))));
 define('SMS_SENDER_ID', substr(preg_replace('/[^A-Za-z0-9]/', '', sms_config('SMS_SENDER_ID', sms_config('BREVO_SMS_SENDER', 'Deutsche Bank'))), 0, 11));
 define('SMS_BASE_URL', rtrim(sms_config('SMS_BASE_URL', sms_config('SENDINC_BASE_URL', sms_config('SEND_BASE_URL', 'https://api.brevo.com/v3/transactionalSMS/sms'))), '/'));
+define('SMS_PROVIDER', strtolower(sms_config('SMS_PROVIDER', 'brevo')));
+define('TWILIO_ACCOUNT_SID', sms_config('TWILIO_ACCOUNT_SID'));
+define('TWILIO_AUTH_TOKEN', sms_config('TWILIO_AUTH_TOKEN'));
+define('TWILIO_API_KEY_SID', sms_config('TWILIO_API_KEY_SID'));
+define('TWILIO_API_KEY_SECRET', sms_config('TWILIO_API_KEY_SECRET'));
+define('TWILIO_FROM_NUMBER', sms_config('TWILIO_FROM_NUMBER'));
+define('TWILIO_MESSAGING_SERVICE_SID', sms_config('TWILIO_MESSAGING_SERVICE_SID'));
 define('BREVO_API_KEY', SMS_API_KEY);
 define('BREVO_FROM_NAME', sms_config('BREVO_FROM_NAME', defined('APP_NAME') ? APP_NAME : 'Deutsche Bank'));
 define('BREVO_SMS_SENDER', SMS_SENDER_ID);
-// Temporary testing switch. Keep OTP code intact, but mute all OTP gates until API setup is complete.
-defined('OTP_ENABLED') || define('OTP_ENABLED', false);
+defined('OTP_ENABLED') || define('OTP_ENABLED', filter_var(sms_config('OTP_ENABLED', '0'), FILTER_VALIDATE_BOOLEAN));
 define('SMS_OTP_ENABLED', OTP_ENABLED && filter_var(sms_config('SMS_OTP_ENABLED', '0'), FILTER_VALIDATE_BOOLEAN));
 $GLOBALS['sms_last_error'] = '';
 
@@ -72,7 +78,15 @@ function is_valid_sms_phone(string $phone): bool
 
 function sms_is_configured(): bool
 {
-    return SMS_OTP_ENABLED && SMS_API_KEY !== '' && SMS_SENDER_ID !== '' && SMS_BASE_URL !== '';
+    if (!SMS_OTP_ENABLED) {
+        return false;
+    }
+    if (SMS_PROVIDER === 'twilio') {
+        $hasAuth = TWILIO_AUTH_TOKEN !== '' || (TWILIO_API_KEY_SID !== '' && TWILIO_API_KEY_SECRET !== '');
+        $hasSender = TWILIO_FROM_NUMBER !== '' || TWILIO_MESSAGING_SERVICE_SID !== '';
+        return TWILIO_ACCOUNT_SID !== '' && $hasAuth && $hasSender;
+    }
+    return SMS_API_KEY !== '' && SMS_SENDER_ID !== '' && SMS_BASE_URL !== '';
 }
 
 function brevo_sms_is_configured(): bool
@@ -92,6 +106,10 @@ function sms_send_message(string $toPhone, string $message): bool
         sms_set_last_error('SMS API is not configured or cURL is unavailable.');
         error_log(sms_last_error());
         return false;
+    }
+
+    if (SMS_PROVIDER === 'twilio') {
+        return twilio_send_sms($recipient, $message);
     }
 
     $payload = [
@@ -131,6 +149,48 @@ function sms_send_message(string $toPhone, string $message): bool
         $reason = $error ?: substr((string) $response, 0, 500);
         sms_set_last_error('SMS provider rejected the message. Check API URL, credentials, sender ID, credits, and phone country support.');
         error_log('SMS request failed: HTTP ' . $httpCode . ' ' . $reason);
+        return false;
+    }
+
+    sms_set_last_error('');
+    return true;
+}
+
+function twilio_send_sms(string $toPhone, string $message): bool
+{
+    $url = 'https://api.twilio.com/2010-04-01/Accounts/' . rawurlencode(TWILIO_ACCOUNT_SID) . '/Messages.json';
+    $payload = [
+        'To' => $toPhone,
+        'Body' => $message,
+    ];
+    if (TWILIO_MESSAGING_SERVICE_SID !== '') {
+        $payload['MessagingServiceSid'] = TWILIO_MESSAGING_SERVICE_SID;
+    } else {
+        $payload['From'] = TWILIO_FROM_NUMBER;
+    }
+
+    $username = TWILIO_API_KEY_SID !== '' ? TWILIO_API_KEY_SID : TWILIO_ACCOUNT_SID;
+    $password = TWILIO_API_KEY_SECRET !== '' ? TWILIO_API_KEY_SECRET : TWILIO_AUTH_TOKEN;
+
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => http_build_query($payload),
+        CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
+        CURLOPT_USERPWD => $username . ':' . $password,
+        CURLOPT_HTTPHEADER => ['Content-Type: application/x-www-form-urlencoded'],
+        CURLOPT_TIMEOUT => 12,
+    ]);
+    $response = curl_exec($ch);
+    $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $error = curl_error($ch);
+    curl_close($ch);
+
+    if ($httpCode < 200 || $httpCode >= 300) {
+        $reason = $error ?: substr((string) $response, 0, 500);
+        sms_set_last_error('Twilio rejected the SMS. Check credentials, sender number, trial restrictions, credits, and phone country support.');
+        error_log('Twilio SMS request failed: HTTP ' . $httpCode . ' ' . $reason);
         return false;
     }
 
