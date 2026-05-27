@@ -189,7 +189,19 @@ function twilio_send_sms(string $toPhone, string $message): bool
 
     if ($httpCode < 200 || $httpCode >= 300) {
         $reason = $error ?: substr((string) $response, 0, 500);
-        sms_set_last_error('Twilio rejected the SMS. Check credentials, sender number, trial restrictions, credits, and phone country support.');
+        $twilioMessage = '';
+        $twilioCode = '';
+        $decoded = json_decode((string) $response, true);
+        if (is_array($decoded)) {
+            $twilioCode = isset($decoded['code']) ? (string) $decoded['code'] : '';
+            $twilioMessage = isset($decoded['message']) ? trim((string) $decoded['message']) : '';
+        }
+        if ($twilioMessage !== '') {
+            $twilioMessage = substr($twilioMessage, 0, 180);
+            sms_set_last_error('Twilio error' . ($twilioCode !== '' ? ' ' . $twilioCode : '') . ': ' . $twilioMessage);
+        } else {
+            sms_set_last_error('Twilio rejected the SMS. Check credentials, sender number, trial restrictions, credits, and phone country support.');
+        }
         error_log('Twilio SMS request failed: HTTP ' . $httpCode . ' ' . $reason);
         return false;
     }

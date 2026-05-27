@@ -136,6 +136,8 @@ $stmt->execute([$phone, $purpose]);
 $latestOtp = $stmt->fetch();
 if ($latestOtp) {
     $resendAt = (string) $latestOtp['resend_available_at'];
+} elseif ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    $otpInfo = 'No active SMS code was sent. Use Resend code after fixing the SMS provider error.';
 }
 
 $maskedPhone = preg_replace('/\d(?=\d{4})/', '*', $phone);
@@ -151,6 +153,7 @@ include __DIR__ . '/includes/public_header.php';
     <span class="auth-kicker">SMS verification</span>
     <h1 class="h3 fw-bold"><?= e($title) ?></h1>
     <p class="muted"><?= e($subtitle) ?> <strong><?= e($maskedPhone ?: $phone) ?></strong></p>
+    <?php if ($otpInfo !== ''): ?><div class="alert alert-info py-2"><?= e($otpInfo) ?></div><?php endif; ?>
     <label class="form-label" for="otp_code">6-digit SMS code</label>
     <input id="otp_code" name="otp_code" class="form-control<?= isset($otpErrors['code']) ? ' is-invalid' : '' ?>" inputmode="numeric" minlength="6" maxlength="6" pattern="\d{6}" autocomplete="one-time-code" required autofocus>
     <?php if (isset($otpErrors['code'])): ?><div class="field-error"><?= e($otpErrors['code']) ?></div><?php endif; ?>
