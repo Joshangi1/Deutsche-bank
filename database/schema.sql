@@ -662,6 +662,8 @@ CREATE TABLE `users` (
   `state_code` char(2) DEFAULT NULL,
   `postal_code` varchar(16) DEFAULT NULL,
   `country` varchar(80) DEFAULT NULL,
+  `brand` varchar(40) DEFAULT NULL,
+  `banking_region` varchar(40) DEFAULT NULL,
   `employment_status` varchar(80) DEFAULT NULL,
   `annual_income_range` varchar(80) DEFAULT NULL,
   `verification_status` enum('not_started','pending','approved','rejected','reupload_requested') DEFAULT 'not_started',

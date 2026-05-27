@@ -8,6 +8,8 @@ cleanup_customer_notifications((int) $user['id']);
 $accountForRegion = user_account((int) $user['id']);
 $bankingRegion = user_banking_region($user, $accountForRegion);
 $regionConfig = banking_region_config($bankingRegion);
+$brandConfig = brand_config_for_user($user, $accountForRegion);
+$GLOBALS['brandConfig'] = $brandConfig;
 $isUsExperience = $bankingRegion === 'us';
 $accountLanguage = 'en';
 $useGermanLabels = false;
@@ -28,8 +30,8 @@ $isDashboardPage = basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')) === 'dashb
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="google" content="notranslate">
-    <title><?= e($pageTitle ?? 'Member Dashboard') ?> | <?= e(UI_BRAND_NAME) ?></title>
-    <link rel="icon" href="<?= url('assets/icons/favicon.svg') ?>" type="image/svg+xml">
+    <title><?= e($pageTitle ?? 'Member Dashboard') ?> | <?= e((string) $brandConfig['brand_short_name']) ?></title>
+    <link rel="icon" href="<?= e(url((string) $brandConfig['favicon'])) ?>" type="<?= e(brand_favicon_type($brandConfig)) ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -39,6 +41,7 @@ $isDashboardPage = basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')) === 'dashb
     <link href="<?= url('assets/css/premium-banking.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/premium-banking.css') ?>" rel="stylesheet">
     <link href="<?= url('assets/css/mobile-premium-fix.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/mobile-premium-fix.css') ?>" rel="stylesheet">
     <link href="<?= url('assets/css/lead-bank-theme.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/lead-bank-theme.css') ?>" rel="stylesheet">
+    <?= brand_css_variables($brandConfig) ?>
     <script>
         (function () {
             document.cookie = 'googtrans=;path=/;expires=Thu, 01 Jan 1970 00:00:00 GMT';
@@ -48,7 +51,7 @@ $isDashboardPage = basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')) === 'dashb
         })();
     </script>
 </head>
-<body class="notranslate<?= $isDashboardPage ? ' dashboard-screen' : '' ?>" translate="no" data-session-timeout="<?= SESSION_IDLE_TIMEOUT ?>" data-session-logout-url="<?= e(url('logout.php')) ?>">
+<body class="notranslate <?= e(brand_body_class($brandConfig)) ?><?= $isDashboardPage ? ' dashboard-screen' : '' ?>" translate="no" data-session-timeout="<?= SESSION_IDLE_TIMEOUT ?>" data-session-logout-url="<?= e(url('logout.php')) ?>">
 <div class="app-shell">
 
 <!-- ═══════════════════════════════════════════

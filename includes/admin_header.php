@@ -5,14 +5,16 @@ require_once __DIR__ . '/frontend_components.php';
 ensure_banking_schema();
 $admin = require_admin();
 $isAdminDashboard = basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')) === 'index.php';
+$brandConfig = getBrandConfig('us');
+$GLOBALS['brandConfig'] = $brandConfig;
 ?>
 <!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?= e($pageTitle ?? 'Admin') ?> | <?= e(UI_BRAND_NAME) ?></title>
-    <link rel="icon" href="<?= url('assets/icons/favicon.svg') ?>" type="image/svg+xml">
+    <title><?= e($pageTitle ?? 'Admin') ?> | Banking Platform</title>
+    <link rel="icon" href="<?= e(url((string) $brandConfig['favicon'])) ?>" type="<?= e(brand_favicon_type($brandConfig)) ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -20,6 +22,7 @@ $isAdminDashboard = basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')) === 'inde
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
     <link href="<?= url('assets/css/styles.css') ?>" rel="stylesheet">
     <link href="<?= url('assets/css/lead-bank-theme.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/lead-bank-theme.css') ?>" rel="stylesheet">
+    <?= brand_css_variables($brandConfig) ?>
     <meta name="google" content="notranslate">
     <script>
         (function () {
@@ -30,12 +33,12 @@ $isAdminDashboard = basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')) === 'inde
         })();
     </script>
 </head>
-<body class="notranslate admin-console<?= $isAdminDashboard ? ' admin-analytics-screen' : '' ?>" translate="no" data-session-timeout="<?= SESSION_IDLE_TIMEOUT ?>" data-session-logout-url="<?= e(url('admin/logout.php')) ?>">
+<body class="notranslate admin-console <?= e(brand_body_class($brandConfig)) ?><?= $isAdminDashboard ? ' admin-analytics-screen' : '' ?>" translate="no" data-session-timeout="<?= SESSION_IDLE_TIMEOUT ?>" data-session-logout-url="<?= e(url('admin/logout.php')) ?>">
 <div class="app-shell">
 <aside class="sidebar">
     <a class="sidebar-brand admin-console-brand" href="<?= url('admin/index.php') ?>">
-        <span class="admin-console-logo" aria-hidden="true"><img src="<?= e(url('assets/icons/lead-bank-logo.jpg')) ?>" alt=""></span>
-        <span class="admin-console-brand-copy"><strong>Lead Bank</strong><small>Administrative Console</small></span>
+        <span class="admin-console-logo" aria-hidden="true"><img src="<?= e(url((string) $brandConfig['logo_mark'])) ?>" alt=""></span>
+        <span class="admin-console-brand-copy"><strong>Banking Platform</strong><small>Administrative Console</small></span>
     </a>
     <nav class="nav flex-column">
         <?php $nav = [
@@ -71,7 +74,7 @@ $isAdminDashboard = basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')) === 'inde
         <div class="d-flex align-items-center gap-3">
             <button class="btn btn-navy mobile-toggle" data-toggle-sidebar aria-label="Open navigation" aria-expanded="false"><i class="fa-solid fa-bars"></i></button>
             <div class="admin-page-heading">
-                <h1><?= $isAdminDashboard ? 'Lead Bank Admin Analytics' : e($pageTitle ?? 'Admin') ?></h1>
+                <h1><?= $isAdminDashboard ? 'Banking Platform Admin Analytics' : e($pageTitle ?? 'Admin') ?></h1>
                 <div>Operational Command Center</div>
             </div>
         </div>

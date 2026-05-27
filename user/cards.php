@@ -38,12 +38,14 @@ $stmt->execute([$user['id']]);
 $card = $stmt->fetch();
 $cardTx = db()->prepare('SELECT * FROM transactions WHERE user_id=? AND transaction_type="debit_card_purchase" ORDER BY created_at DESC LIMIT 6');
 $cardTx->execute([$user['id']]);
+$account = user_account((int) $user['id']);
+$brandConfig = brand_config_for_user($user, $account);
 ?>
 <?php include __DIR__ . '/../includes/user_header.php'; ?>
 <div class="row g-4">
     <div class="col-xl-5">
         <div class="virtual-card premium-visa">
-            <div class="d-flex justify-content-between"><strong>Lead Bank</strong><i class="fa-brands fa-cc-visa fa-2x"></i></div>
+            <div class="d-flex justify-content-between"><strong><?= e((string) $brandConfig['brand_short_name']) ?></strong><i class="fa-brands fa-cc-visa fa-2x"></i></div>
             <div class="fs-4 fw-bold">4582 •••• •••• <?= e($card['card_last4']) ?></div>
             <div class="d-flex justify-content-between"><span><?= e(strtoupper($user['first_name'].' '.$user['last_name'])) ?></span><span><?= e(strtoupper($card['status'])) ?></span></div>
         </div>

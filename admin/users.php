@@ -93,7 +93,7 @@ $stmt->execute([$q, $q, $q]);
     </div>
     <div class="table-responsive">
         <table class="table align-middle mb-0">
-            <thead><tr><th>Member</th><th>Status</th><th>Verification</th><th>Balances</th><th>Admin controls</th></tr></thead>
+            <thead><tr><th>Member</th><th>Brand</th><th>Status</th><th>Verification</th><th>Balances</th><th>Admin controls</th></tr></thead>
             <tbody>
             <?php foreach ($stmt as $u): ?>
                 <?php
@@ -106,6 +106,7 @@ $stmt->execute([$q, $q, $q]);
                         'account_type' => $u['account_type'],
                     ];
                     $userRegion = user_banking_region($u, $userAccount);
+                    $userBrand = brand_config_for_user($u, $userAccount);
                     $bankingDetails = user_banking_details((int) $u['id'], $u, $userAccount, false);
                     $detailRows = array_merge($bankingDetails, array_fill(0, 3, [
                         'id' => '',
@@ -122,6 +123,7 @@ $stmt->execute([$q, $q, $q]);
                             <div><strong><?= e($u['first_name'] . ' ' . $u['last_name']) ?></strong><div class="small muted"><?= e($u['email']) ?></div></div>
                         </div>
                     </td>
+                    <td><span class="status-pill status-info"><?= e((string) $userBrand['brand_short_name']) ?></span><div class="small muted"><?= e((string) $userBrand['country']) ?></div></td>
                     <td><span class="status-pill status-<?= $u['status']==='active'?'success':'danger' ?>"><?= e(strtoupper($u['status'])) ?></span></td>
                     <td><span class="status-pill status-<?= ($u['verification_status'] ?? 'not_started')==='approved'?'success':'warning' ?>"><?= e(strtoupper(str_replace('_',' ', $u['verification_status'] ?? 'not started'))) ?></span><div class="small muted"><?= e(strtoupper(str_replace('_',' ', $u['risk_status'] ?? 'clear'))) ?></div></td>
                     <td><?= money($u['available_balance']) ?> checking<br><?= money($u['pending_balance']) ?> pending<br><?= money($u['savings_balance']) ?> savings</td>

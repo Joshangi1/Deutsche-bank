@@ -5,8 +5,11 @@ require_once __DIR__ . '/config/brevo.php';
 ensure_banking_schema();
 
 $scriptName = basename((string) ($_SERVER['SCRIPT_NAME'] ?? 'login.php'));
-$authRegion = $GLOBALS['authRegion'] ?? (str_contains($scriptName, '_us') ? 'us' : (str_contains($scriptName, '_ca') ? 'ca' : (str_contains($scriptName, '_uk') ? 'uk' : (str_contains($scriptName, '_ch') ? 'ch' : (str_contains($scriptName, '_de') ? 'de' : 'us')))));
+$requestedRegion = $_POST['auth_region'] ?? ($_GET['region'] ?? '');
+$authRegion = $GLOBALS['authRegion'] ?? ($requestedRegion !== '' ? banking_region_config((string) $requestedRegion)['region'] : (str_contains($scriptName, '_us') ? 'us' : (str_contains($scriptName, '_ca') ? 'ca' : (str_contains($scriptName, '_uk') ? 'uk' : (str_contains($scriptName, '_ch') ? 'ch' : (str_contains($scriptName, '_de') ? 'de' : 'us'))))));
 $regionConfig = banking_region_config($authRegion);
+$brandConfig = getBrandConfig($authRegion);
+$GLOBALS['brandConfig'] = $brandConfig;
 $isUsPortal = $authRegion === 'us';
 $isGermanPortal = false;
 $pageLanguage = 'en';
@@ -128,29 +131,26 @@ $pageTitle = match ($regionConfig['region']) {
     'ca' => 'Canada Online Banking Login',
     'uk' => 'UK Online Banking Login',
     'ch' => 'Swiss Online Banking Login',
-    default => 'Germany Online Banking Login',
+    'hk' => 'Hong Kong Online Banking Login',
+    default => $regionConfig['country'] . ' Online Banking Login',
 };
 $prefillEmail = filter_var($_GET['email'] ?? '', FILTER_VALIDATE_EMAIL) ? strtolower((string) $_GET['email']) : '';
-$loginRailTitle = match ($regionConfig['region']) {
-    'us' => 'Modern access for checking, cards, ACH, Instant Pay, and wires.',
-    'ca' => 'Modern access for chequing, cards, Interac, EFT, and wires.',
-    'uk' => 'Modern access for current accounts, cards, Faster Payments, and CHAPS.',
-    'ch' => 'Modern access for Swiss accounts, cards, SIC, QR-bills, and international transfers.',
-    default => 'Modern access for German accounts, cards, SEPA, and transfers.',
-};
+$loginRailTitle = 'Modern access for ' . strtolower($regionConfig['account_type']) . ', cards, ' . implode(', ', array_slice($brandConfig['payment_rails'], 0, 2)) . ', and transfers.';
 $loginHeading = match ($regionConfig['region']) {
     'us' => 'U.S. online banking sign in',
     'ca' => 'Canadian online banking sign in',
     'uk' => 'UK online banking sign in',
     'ch' => 'Swiss online banking sign in',
-    default => 'Germany online banking sign in',
+    'hk' => 'Hong Kong online banking sign in',
+    default => $regionConfig['country'] . ' online banking sign in',
 };
 $createAccountLabel = match ($regionConfig['region']) {
     'us' => 'Create U.S. account',
     'ca' => 'Create Canadian account',
     'uk' => 'Create UK account',
     'ch' => 'Create Swiss account',
-    default => 'Create Germany account',
+    'hk' => 'Create Hong Kong account',
+    default => 'Create ' . $regionConfig['country'] . ' account',
 };
 $loginFieldClass = static fn (string $name): string => isset($loginErrors[$name]) ? ' is-invalid' : '';
 $loginFieldError = static function (string $name) use (&$loginErrors): string {
@@ -172,6 +172,7 @@ include __DIR__ . '/includes/public_header.php';
     </aside>
     <form class="auth-card" method="post" data-auth-validation novalidate>
       <?= csrf_field() ?>
+      <input type="hidden" name="auth_region" value="<?= e($authRegion) ?>">
       <div class="mb-4"><?= lead_logo('dark') ?></div>
       <span class="auth-kicker">Welcome back</span>
       <h1 class="h3 fw-bold"><?= e($loginHeading) ?></h1>

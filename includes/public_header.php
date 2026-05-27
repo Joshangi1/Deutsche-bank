@@ -1,6 +1,8 @@
 <?php require_once __DIR__ . '/../config/database.php'; require_once __DIR__ . '/helpers.php'; require_once __DIR__ . '/frontend_components.php'; ?>
 <?php
 $publicLoginUrl = $GLOBALS['pageLoginUrl'] ?? 'choose_banking.php?next=login';
+$brandConfig = $GLOBALS['brandConfig'] ?? getBrandConfig($GLOBALS['authRegion'] ?? ($_GET['region'] ?? 'us'));
+$GLOBALS['brandConfig'] = $brandConfig;
 $pageLanguage = 'en';
 $translateDisabled = true;
 $publicStaticMode = !empty($GLOBALS['publicStaticMode']);
@@ -11,20 +13,15 @@ $navLabels = ['infra' => 'Financial Infrastructure', 'banking' => 'Banking', 'ab
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Lead Bank digital banking and financial infrastructure.">
+    <meta name="description" content="<?= e((string) $brandConfig['brand_name']) ?> digital banking and financial infrastructure.">
     <?php if ($translateDisabled): ?><meta name="google" content="notranslate"><?php endif; ?>
-    <title><?= e($pageTitle ?? UI_BRAND_NAME) ?></title>
-    <link rel="icon" href="<?= url('assets/icons/favicon.svg') ?>" type="image/svg+xml">
+    <title><?= e($pageTitle ?? (string) $brandConfig['brand_short_name']) ?></title>
+    <link rel="icon" href="<?= e(url((string) $brandConfig['favicon'])) ?>" type="<?= e(brand_favicon_type($brandConfig)) ?>">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
     <link href="<?= url('assets/css/styles.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/styles.css') ?>" rel="stylesheet">
-    <style>
-        :root {
-            --navy: <?= e($publicStaticMode ? '#2F5BFF' : setting('theme_navy', '#2F5BFF')) ?>;
-            --gold: <?= e($publicStaticMode ? '#4DB5FF' : setting('theme_gold', '#4DB5FF')) ?>;
-        }
-    </style>
     <link href="<?= url('assets/css/lead-bank-theme.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/lead-bank-theme.css') ?>" rel="stylesheet">
+    <?= brand_css_variables($brandConfig) ?>
     <?php if ($translateDisabled): ?>
     <script>
         (function () {
@@ -36,7 +33,7 @@ $navLabels = ['infra' => 'Financial Infrastructure', 'banking' => 'Banking', 'ab
     </script>
     <?php endif; ?>
 </head>
-<body<?= $translateDisabled ? ' class="notranslate" translate="no"' : '' ?>>
+<body class="<?= e(trim(($translateDisabled ? 'notranslate ' : '') . brand_body_class($brandConfig))) ?>"<?= $translateDisabled ? ' translate="no"' : '' ?>>
 <div class="loader"><span></span></div>
 <nav class="navbar navbar-expand-lg bank-navbar sticky-top">
     <div class="container">

@@ -6,8 +6,10 @@ const UI_BRAND_SHORT = 'Lead Bank';
 
 function lead_logo(string $tone = 'dark'): string
 {
+    $brand = current_brand_config();
     $toneClass = $tone === 'light' ? 'brand-mark-light' : 'brand-mark-dark';
-    return '<span class="brand-mark ' . $toneClass . '"><span class="brand-symbol" aria-hidden="true"><img src="' . e(url('assets/icons/lead-bank-logo.jpg')) . '" alt=""></span><span>' . e(UI_BRAND_NAME) . '</span></span>';
+    $brandClass = 'brand-mark-' . e((string) $brand['brand_key']);
+    return '<span class="brand-mark ' . $toneClass . ' ' . $brandClass . '"><span class="brand-symbol" aria-hidden="true"><img src="' . e(url((string) $brand['logo_mark'])) . '" alt=""></span><span>' . e((string) $brand['brand_short_name']) . '</span></span>';
 }
 
 function lead_nav_item(string $href, string $icon, string $label, bool $active = false, bool $disabled = false): string

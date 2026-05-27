@@ -16,6 +16,8 @@ $allAccounts = $allAccounts ?: [$account];
 
 $bankingRegion = user_banking_region($user, $account);
 $regionConfig = banking_region_config($bankingRegion);
+$brandConfig = brand_config_for_user($user, $account);
+$GLOBALS['brandConfig'] = $brandConfig;
 $isUsAccount = $bankingRegion === 'us';
 $currency = user_account_currency($user, $account);
 $useGermanLabels = $regionConfig['language'] === 'de';
@@ -149,6 +151,10 @@ if ($bankingRegion === 'us') {
     ];
 }
 
+$ui['hero_eyebrow'] = 'Welcome to ' . $brandConfig['brand_short_name'];
+$ui['hero_title'] = 'Your ' . strtolower((string) $regionConfig['account_type']) . ' is ready';
+$ui['hero_copy'] = implode(', ', (array) $brandConfig['payment_rails']) . ' tools are available after verification.';
+
 $statusMeta = match (true) {
     $accountStatus === 'frozen' => ['Frozen', 'status-warning', 'fa-snowflake'],
     $accountStatus === 'suspended' => ['Suspended', 'status-danger', 'fa-ban'],
@@ -181,13 +187,13 @@ $quickActions = [
     ['type' => 'link', 'href' => 'user/deposits.php', 'icon' => 'fa-camera', 'label' => $useGermanLabels ? 'Einzahlen' : 'Deposit'],
     ['type' => 'link', 'href' => 'user/send_money.php', 'icon' => 'fa-paper-plane', 'label' => $isUsAccount ? 'Instant Pay' : $regionConfig['rail_primary']],
 ];
-$primaryAccountLabel = in_array($bankingRegion, ['us', 'ca', 'uk'], true)
+$primaryAccountLabel = in_array($bankingRegion, ['us', 'ca', 'uk', 'hk'], true)
     ? e($regionConfig['account_label']) . ' ' . e(mask_account((string) $account['account_number']))
     : 'IBAN ' . e($displayIban);
-$routingLabel = in_array($bankingRegion, ['us', 'ca', 'uk'], true)
+$routingLabel = in_array($bankingRegion, ['us', 'ca', 'uk', 'hk'], true)
     ? e($regionConfig['routing_label']) . ' ' . e((string) ($account['routing_number'] ?: $regionConfig['routing']))
     : 'BIC/SWIFT ' . e($displayBic);
-$maskedAccountNumber = in_array($bankingRegion, ['us', 'ca', 'uk'], true)
+$maskedAccountNumber = in_array($bankingRegion, ['us', 'ca', 'uk', 'hk'], true)
     ? mask_account((string) $account['account_number'])
     : $displayIban;
 $routingNumberValue = in_array($bankingRegion, ['us', 'ca', 'uk'], true)

@@ -18,16 +18,20 @@ if ($onboardingToken !== '') {
 }
 $onboardingRegion = $onboardingLink ? onboarding_country_to_region($onboardingLink['country'] ?? '') : '';
 $onboardingBonusEligible = $onboardingLink && trim((string) ($onboardingLink['agent_id'] ?? '')) !== '';
-$authRegion = $GLOBALS['authRegion'] ?? ($onboardingRegion ?: (str_contains($scriptName, '_us') ? 'us' : (str_contains($scriptName, '_ca') ? 'ca' : (str_contains($scriptName, '_uk') ? 'uk' : (str_contains($scriptName, '_ch') ? 'ch' : (str_contains($scriptName, '_de') ? 'de' : 'us'))))));
+$requestedRegion = $_POST['auth_region'] ?? ($_GET['region'] ?? '');
+$authRegion = $GLOBALS['authRegion'] ?? ($onboardingRegion ?: ($requestedRegion !== '' ? banking_region_config((string) $requestedRegion)['region'] : (str_contains($scriptName, '_us') ? 'us' : (str_contains($scriptName, '_ca') ? 'ca' : (str_contains($scriptName, '_uk') ? 'uk' : (str_contains($scriptName, '_ch') ? 'ch' : (str_contains($scriptName, '_de') ? 'de' : 'us')))))));
 $regionConfig = banking_region_config($authRegion);
+$brandConfig = getBrandConfig($authRegion);
+$GLOBALS['brandConfig'] = $brandConfig;
 $isUsPortal = $authRegion === 'us';
 $isGermanPortal = false;
-$usesIbanOnboarding = in_array($authRegion, ['de', 'ch'], true);
+$usesIbanOnboarding = !in_array($authRegion, ['us', 'ca', 'uk', 'hk'], true);
 $requiresTaxId = $authRegion !== 'us';
 $defaultPhoneCode = match ($authRegion) {
     'us', 'ca' => '+1',
     'uk' => '+44',
     'ch' => '+41',
+    'hk' => '+852',
     default => '+49',
 };
 $forcedCountry = $regionConfig['country'];
@@ -64,11 +68,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $country = $forcedCountry;
     $region = $regionConfig['region'];
     $isUsOnboarding = $region === 'us';
-    $usesIbanOnboarding = in_array($region, ['de', 'ch'], true);
+    $usesIbanOnboarding = !in_array($region, ['us', 'ca', 'uk', 'hk'], true);
     $defaultPhoneCode = match ($region) {
         'us', 'ca' => '+1',
         'uk' => '+44',
         'ch' => '+41',
+        'hk' => '+852',
         default => '+49',
     };
     $phoneRaw = trim((string) ($_POST['phone'] ?? ''));
@@ -87,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $address1 = trim((string) ($_POST['address_line1'] ?? ''));
     $address2 = trim((string) ($_POST['address_line2'] ?? ''));
     $city = trim((string) ($_POST['city'] ?? ''));
-    $state = in_array($region, ['us', 'ca'], true) ? strtoupper(substr(trim((string) ($_POST['state_code'] ?? '')), 0, 2)) : strtoupper($region);
+    $state = in_array($region, ['us', 'ca'], true) ? strtoupper(substr(trim((string) ($_POST['state_code'] ?? '')), 0, 2)) : strtoupper(substr($region, 0, 2));
     $postal = trim((string) ($_POST['postal_code'] ?? ''));
     $employment = trim((string) ($_POST['employment_status'] ?? ''));
     $income = trim((string) ($_POST['annual_income_range'] ?? ''));
@@ -107,13 +112,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $identityOk = $isUsOnboarding ? is_valid_us_ssn($ssnDigits) : ($region === 'de' ? is_valid_german_tax_id($taxId) : strlen($taxId) >= 4);
     $bankingOk = !$usesIbanOnboarding
         ? (!$linkJointAccount || ($linkedInstitution !== '' && preg_match('/^\d{9}$/', $externalRouting) && preg_match('/^\d{4,17}$/', $externalAccount)))
-        : ($iban === '' || ($region === 'ch' ? preg_match('/^CH[0-9A-Z]{19}$/', $iban) : is_valid_german_iban($iban)));
+        : ($iban === '' || ($region === 'ch' ? preg_match('/^CH[0-9A-Z]{19}$/', $iban) : preg_match('/^[A-Z]{2}[0-9A-Z]{13,32}$/', $iban)));
     $postalOk = match ($region) {
         'us' => preg_match('/^\d{5}(-\d{4})?$/', $postal),
         'ca' => preg_match('/^[A-Z]\d[A-Z][ -]?\d[A-Z]\d$/i', $postal),
         'uk' => preg_match('/^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i', $postal),
         'ch' => preg_match('/^\d{4}$/', $postal),
-        default => preg_match('/^\d{5}$/', $postal),
+        default => preg_match('/^[A-Z0-9][A-Z0-9 -]{2,15}$/i', $postal),
     };
     $stateOk = $region === 'us' ? preg_match('/^[A-Z]{2}$/', $state) : true;
     if ($fullName === '' || strlen($fullName) < 3 || strlen($fullName) > 120 || !$first || !$last) {
@@ -151,7 +156,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     if (!$bankingOk) {
         if ($usesIbanOnboarding) {
-            $signupErrors['iban'] = $region === 'ch' ? 'Enter a valid Swiss IBAN or leave it blank.' : 'Enter a valid German IBAN or leave it blank.';
+            $signupErrors['iban'] = $region === 'ch' ? 'Enter a valid Swiss IBAN or leave it blank.' : 'Enter a valid IBAN or leave it blank.';
         } else {
             if ($linkJointAccount && $linkedInstitution === '') $signupErrors['linked_institution_name'] = 'Enter the external bank name.';
             if ($linkJointAccount && !preg_match('/^\d{9}$/', $externalRouting)) $signupErrors['routing_number'] = 'Routing number must contain 9 digits.';
@@ -185,11 +190,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             db()->beginTransaction();
             $pinHash = password_hash($transactionPin, PASSWORD_BCRYPT);
-            $stmt = db()->prepare('INSERT INTO users (first_name,last_name,email,phone,date_of_birth,ssn_last4,tax_id,iban,address_line1,address_line2,city,state_code,postal_code,country,employment_status,annual_income_range,verification_status,risk_status,onboarded_by_admin_id,onboarding_link_id,password_hash,transaction_pin_hash,email_verified,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,"pending","verification_review",?,?,?,?,0,"disabled")');
+            $stmt = db()->prepare('INSERT INTO users (first_name,last_name,email,phone,date_of_birth,ssn_last4,tax_id,iban,address_line1,address_line2,city,state_code,postal_code,country,brand,banking_region,employment_status,annual_income_range,verification_status,risk_status,onboarded_by_admin_id,onboarding_link_id,password_hash,transaction_pin_hash,email_verified,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,"pending","verification_review",?,?,?,?,0,"disabled")');
             $storedTaxId = $isUsOnboarding ? null : $taxId;
             $storedIban = $usesIbanOnboarding ? ($iban !== '' ? $iban : null) : null;
             $storedSsnLast4 = $isUsOnboarding ? substr($ssnDigits, -4) : substr($taxId, -4);
-            $stmt->execute([$first,$last,$email,$phone,$dob,$storedSsnLast4,$storedTaxId,$storedIban,$address1,$address2,$city,$state,$postal,$country,$employment,$income,$onboardingLink ? (int) $onboardingLink['admin_id'] : null,$onboardingLink ? (int) $onboardingLink['id'] : null,$hash,$pinHash]);
+            $stmt->execute([$first,$last,$email,$phone,$dob,$storedSsnLast4,$storedTaxId,$storedIban,$address1,$address2,$city,$state,$postal,$country,$brandConfig['brand_key'],$region,$employment,$income,$onboardingLink ? (int) $onboardingLink['admin_id'] : null,$onboardingLink ? (int) $onboardingLink['id'] : null,$hash,$pinHash]);
             $userId = (int) db()->lastInsertId();
             if (!$usesIbanOnboarding) {
                 $acct = ($region === 'uk' ? (string) random_int(10000000, 99999999) : '904' . random_int(100000000, 999999999));
@@ -199,7 +204,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ->execute([$userId, $linkedInstitution, $jointOwnerName !== '' ? $jointOwnerName : null, substr($externalAccount, -4), $externalRouting]);
                 }
             } else {
-                $accountIban = $iban !== '' ? $iban : ($region === 'ch' ? 'CH9300762011623852957' : generated_german_iban());
+                $accountIban = $iban !== '' ? $iban : generated_region_iban($region);
                 $acct = substr($accountIban, -10);
                 db()->prepare('INSERT INTO accounts (user_id, account_number, routing_number, iban, bic, account_type, available_balance, pending_balance, savings_balance) VALUES (?,?,?,?,?,?,?,?,?)')->execute([$userId,$acct,$regionConfig['routing'],$accountIban,$regionConfig['routing'],$regionConfig['account_type'],0,0,0]);
             }
@@ -254,7 +259,7 @@ $postalPattern = match ($authRegion) {
     'ca' => '[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d',
     'uk' => '[A-Za-z]{1,2}\d[A-Za-z\d]?\s*\d[A-Za-z]{2}',
     'ch' => '\d{4}',
-    default => '\d{5}',
+    default => '[A-Za-z0-9][A-Za-z0-9 -]{2,15}',
 };
 $postalPlaceholder = match ($authRegion) {
     'us' => '10001',
@@ -268,7 +273,8 @@ $regionTitle = match ($authRegion) {
     'ca' => 'Open Canadian Account',
     'uk' => 'Open UK Account',
     'ch' => 'Open Swiss Account',
-    default => 'Open Germany Account',
+    'hk' => 'Open Hong Kong Account',
+    default => 'Open ' . $regionConfig['country'] . ' Account',
 };
 $pageTitle = $regionTitle;
 $onboardingEyebrow = match ($authRegion) {
@@ -276,21 +282,17 @@ $onboardingEyebrow = match ($authRegion) {
     'ca' => 'Canada account opening',
     'uk' => 'UK account opening',
     'ch' => 'Swiss account opening',
-    default => 'Germany account opening',
+    'hk' => 'Hong Kong account opening',
+    default => $regionConfig['country'] . ' account opening',
 };
-$onboardingTitle = match ($authRegion) {
-    'us' => 'Open your U.S. Lead Bank account',
-    'ca' => 'Open your Canadian Lead Bank account',
-    'uk' => 'Open your UK Lead Bank account',
-    'ch' => 'Open your Swiss Lead Bank account',
-    default => 'Open your Germany Lead Bank account',
-};
+$onboardingTitle = 'Open your ' . $brandConfig['brand_short_name'] . ' account';
 $onboardingCopy = match ($authRegion) {
     'us' => 'Complete U.S. onboarding with SSN, address, phone, and identity verification.',
     'ca' => 'Complete Canadian onboarding with address, phone, identity verification, Interac, EFT, and wire tools.',
     'uk' => 'Complete UK onboarding with address, phone, identity verification, sort code, Faster Payments, and CHAPS tools.',
     'ch' => 'Complete Swiss onboarding with address, phone, identity verification, IBAN, SIC, QR-bill, and transfer tools.',
-    default => 'Complete Germany onboarding with tax ID, address, phone, identity verification, IBAN, and SEPA tools.',
+    'hk' => 'Complete Hong Kong onboarding with address, phone, identity verification, FPS, and SWIFT tools.',
+    default => 'Complete ' . $regionConfig['country'] . ' onboarding with tax ID, address, phone, identity verification, IBAN, and SEPA tools.',
 };
 if ($onboardingLink) {
     $onboardingEyebrow = 'Secure account opening';
@@ -303,6 +305,7 @@ $identityLabel = match ($authRegion) {
     'ca' => 'Social Insurance Number',
     'uk' => 'National Insurance Number',
     'ch' => 'Tax identification number',
+    'hk' => 'Hong Kong identity number',
     default => 'Tax identification number',
 };
 $identityPlaceholder = match ($authRegion) {
@@ -310,6 +313,7 @@ $identityPlaceholder = match ($authRegion) {
     'ca' => '123 456 789',
     'uk' => 'QQ 12 34 56 C',
     'ch' => 'Swiss tax ID',
+    'hk' => 'HKID or tax ID',
     default => '11 digits',
 };
 $ibanPlaceholder = $authRegion === 'ch' ? 'CH93 0076 2011 6238 5295 7' : 'DE89 3704 0044 0532 0130 00';
@@ -366,6 +370,7 @@ $onboardingAgentPhoto = $onboardingLink ? admin_profile_photo_url($onboardingLin
     <?php endif; ?>
     <form class="onboarding-flow" method="post" enctype="multipart/form-data" data-onboarding-form data-auth-region="<?= e($authRegion) ?>">
         <?= csrf_field() ?>
+        <input type="hidden" name="auth_region" value="<?= e($authRegion) ?>">
         <?php if ($onboardingLink): ?><input type="hidden" name="onboarding_ref" value="<?= e($onboardingToken) ?>"><?php endif; ?>
         <aside class="onboarding-rail">
             <?php if (!$onboardingLink): ?><?= lead_logo('light') ?><?php endif; ?>
@@ -406,9 +411,9 @@ $onboardingAgentPhoto = $onboardingLink ? admin_profile_photo_url($onboardingLin
                         <label class="form-label">Phone number</label>
                         <div class="input-group">
                             <select name="phone_country_code" class="form-select" style="max-width: 145px">
-                                <option value="+49" <?= $defaultPhoneCode === '+49' ? 'selected' : '' ?>>DE +49</option><option value="+1" <?= $defaultPhoneCode === '+1' ? 'selected' : '' ?>>US/CA +1</option><option value="+44" <?= $defaultPhoneCode === '+44' ? 'selected' : '' ?>>UK +44</option><option value="+41" <?= $defaultPhoneCode === '+41' ? 'selected' : '' ?>>CH +41</option><option value="+43">AT +43</option><option value="+33">FR +33</option><option value="+31">NL +31</option><option value="+32">BE +32</option><option value="+34">ES +34</option><option value="+39">IT +39</option><option value="+351">PT +351</option><option value="+234">NG +234</option>
+                                <option value="+49" <?= $defaultPhoneCode === '+49' ? 'selected' : '' ?>>DE +49</option><option value="+1" <?= $defaultPhoneCode === '+1' ? 'selected' : '' ?>>US/CA +1</option><option value="+44" <?= $defaultPhoneCode === '+44' ? 'selected' : '' ?>>UK +44</option><option value="+41" <?= $defaultPhoneCode === '+41' ? 'selected' : '' ?>>CH +41</option><option value="+852" <?= $defaultPhoneCode === '+852' ? 'selected' : '' ?>>HK +852</option><option value="+43">AT +43</option><option value="+33">FR +33</option><option value="+31">NL +31</option><option value="+32">BE +32</option><option value="+34">ES +34</option><option value="+39">IT +39</option><option value="+351">PT +351</option><option value="+234">NG +234</option>
                             </select>
-                            <input name="phone" class="form-control<?= e($fieldClass('phone')) ?>" autocomplete="tel" placeholder="<?= $defaultPhoneCode === '+1' ? '2125550147' : ($defaultPhoneCode === '+44' ? '7700900123' : ($defaultPhoneCode === '+41' ? '791234567' : '15123456789')) ?>" value="<?= e($fieldValue('phone')) ?>" required>
+                            <input name="phone" class="form-control<?= e($fieldClass('phone')) ?>" autocomplete="tel" placeholder="<?= $defaultPhoneCode === '+1' ? '2125550147' : ($defaultPhoneCode === '+44' ? '7700900123' : ($defaultPhoneCode === '+41' ? '791234567' : ($defaultPhoneCode === '+852' ? '51234567' : '15123456789'))) ?>" value="<?= e($fieldValue('phone')) ?>" required>
                         </div>
                         <?= $fieldErrorHtml('phone') ?>
                     </div>
@@ -562,7 +567,7 @@ $onboardingAgentPhoto = $onboardingLink ? admin_profile_photo_url($onboardingLin
             <div class="biometric-success" data-biometric-success hidden>
                 <div class="verification-badge"><i class="fa-solid fa-shield-check"></i></div>
                 <h2>Face verification complete.</h2>
-                <p>Review your application details before submitting to Lead Bank.</p>
+                <p>Review your application details before submitting to <?= e($brandConfig['brand_short_name']) ?>.</p>
             </div>
             <div class="biometric-actions">
                 <button type="button" class="btn btn-light border" data-biometric-cancel>Return to application</button>

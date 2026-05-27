@@ -1,11 +1,12 @@
 </main>
+<?php $footerBrandConfig = current_brand_config(); ?>
 <footer class="site-footer">
     <div class="container">
         <div class="row g-4">
             <div class="col-lg-4">
                 <div class="mb-3"><?= lead_logo('light') ?></div>
                 <p><?= e(!empty($GLOBALS['publicStaticMode']) ? 'Programmable banking services, modern security, and financial tools designed for everyday momentum.' : setting('footer_summary', 'Programmable banking services, modern security, and financial tools designed for everyday momentum.')) ?></p>
-                <div class="trust-row"><span>NCUA insured</span><span>Equal Housing Lender</span><span>256-bit SSL</span></div>
+                <div class="trust-row"><span><?= e((string) $footerBrandConfig['brand_short_name']) ?></span><span><?= e((string) $footerBrandConfig['country']) ?></span><span>256-bit SSL</span></div>
             </div>
             <div class="col-6 col-lg-2"><h6>Banking</h6><a href="<?= url('personal.php') ?>">Personal</a><a href="<?= url('business.php') ?>">Business</a><a href="<?= url('cards.php') ?>">Cards</a><a href="<?= url('loans.php') ?>">Loans</a></div>
             <div class="col-6 col-lg-2"><h6>Company</h6><a href="<?= url('about.php') ?>">About</a><a href="<?= url('security.php') ?>">Security</a><a href="<?= url('support.php') ?>">Support</a><a href="<?= url('contact.php') ?>">Contact</a></div>
@@ -18,7 +19,7 @@
             ?>
             <div class="col-lg-4"><h6>Member Care</h6><p class="mb-2"><i class="fa-solid fa-phone me-2"></i><a href="tel:<?= e(preg_replace('/[^0-9+]/', '', $supportCall)) ?>"><?= e($supportPhone) ?></a></p><p class="mb-2"><i class="fa-brands fa-whatsapp me-2"></i><a href="https://wa.me/<?= e(preg_replace('/\D/', '', $supportWhatsapp)) ?>" target="_blank" rel="noopener">WhatsApp support</a></p><p class="mb-2"><i class="fa-solid fa-envelope me-2"></i><?= e($supportEmail) ?></p></div>
         </div>
-        <div class="footer-bottom">&copy; <?= date('Y') ?> <?= e(UI_BRAND_NAME) ?>. All rights reserved.</div>
+        <div class="footer-bottom">&copy; <?= date('Y') ?> <?= e((string) $footerBrandConfig['brand_name']) ?>. All rights reserved.</div>
     </div>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

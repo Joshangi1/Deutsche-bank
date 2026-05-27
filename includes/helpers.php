@@ -16,6 +16,8 @@ const DEFAULT_BIC = 'DEUTDEFFXXX';
 const US_ROUTING_NUMBER = '071923846';
 const SESSION_IDLE_TIMEOUT = 600;
 
+require_once __DIR__ . '/brand_config.php';
+
 /**
  * Session-based IP rate limiter.
  *
@@ -407,6 +409,8 @@ function ensure_banking_schema(): void
         ['users', 'employment_status', 'ALTER TABLE users ADD COLUMN employment_status VARCHAR(80) NULL AFTER postal_code'],
         ['users', 'annual_income_range', 'ALTER TABLE users ADD COLUMN annual_income_range VARCHAR(80) NULL AFTER employment_status'],
         ['users', 'country', 'ALTER TABLE users ADD COLUMN country VARCHAR(80) NULL AFTER postal_code'],
+        ['users', 'brand', 'ALTER TABLE users ADD COLUMN brand VARCHAR(40) NULL AFTER country'],
+        ['users', 'banking_region', 'ALTER TABLE users ADD COLUMN banking_region VARCHAR(40) NULL AFTER brand'],
         ['users', 'tax_id', 'ALTER TABLE users ADD COLUMN tax_id VARCHAR(32) NULL AFTER ssn_last4'],
         ['users', 'iban', 'ALTER TABLE users ADD COLUMN iban VARCHAR(34) NULL AFTER tax_id'],
         ['users', 'verification_status', 'ALTER TABLE users ADD COLUMN verification_status ENUM("not_started","pending","approved","rejected","reupload_requested") DEFAULT "not_started" AFTER annual_income_range'],
@@ -554,6 +558,33 @@ function generated_german_iban(): string
     }
     $check = str_pad((string) (98 - $remainder), 2, '0', STR_PAD_LEFT);
     return 'DE' . $check . $bban;
+}
+
+function generated_region_iban(string $region): string
+{
+    $region = banking_region_config($region)['region'];
+    if ($region === 'de') {
+        return generated_german_iban();
+    }
+    if ($region === 'ch') {
+        return 'CH9300762011623852957';
+    }
+    $countryCode = strtoupper(match ($region) {
+        'fr' => 'FR', 'it' => 'IT', 'es' => 'ES', 'nl' => 'NL', 'be' => 'BE',
+        'at' => 'AT', 'ie' => 'IE', 'pt' => 'PT', 'lu' => 'LU', 'se' => 'SE',
+        'no' => 'NO', 'dk' => 'DK', 'fi' => 'FI',
+        default => 'LU',
+    });
+    $bban = '00' . str_pad((string) random_int(1000000000000000, 9999999999999999), 16, '0', STR_PAD_LEFT);
+    $numeric = '';
+    foreach (str_split($bban . $countryCode . '00') as $char) {
+        $numeric .= ctype_alpha($char) ? (string) (ord($char) - 55) : $char;
+    }
+    $remainder = 0;
+    foreach (str_split($numeric) as $digit) {
+        $remainder = ($remainder * 10 + (int) $digit) % 97;
+    }
+    return $countryCode . str_pad((string) (98 - $remainder), 2, '0', STR_PAD_LEFT) . $bban;
 }
 
 function banking_update_linked_account_name(int $linkedAccountId, ?string $jointOwnerName, array $actor): void
@@ -727,12 +758,8 @@ function mask_account(string $number): string
 
 function user_is_us_account(?array $user = null, ?array $account = null): bool
 {
-    $country = strtolower(trim((string) ($user['country'] ?? '')));
-    if (in_array($country, ['united states', 'usa', 'us'], true)) {
-        return true;
-    }
-    if (in_array($country, ['canada', 'ca', 'united kingdom', 'uk', 'gb', 'great britain', 'switzerland', 'swiss', 'ch', 'germany', 'deutschland', 'de'], true)) {
-        return false;
+    if (!empty($user['country']) || !empty($user['banking_region'])) {
+        return user_banking_region($user, $account) === 'us';
     }
     if ($account && empty($account['iban']) && !empty($account['routing_number'])) {
         return true;
@@ -742,35 +769,20 @@ function user_is_us_account(?array $user = null, ?array $account = null): bool
 
 function banking_region_config(string $regionOrCountry): array
 {
-    $key = strtolower(trim($regionOrCountry));
-    $key = match ($key) {
-        'united states', 'usa', 'us' => 'us',
-        'germany', 'deutschland', 'de', 'eu' => 'de',
-        'canada', 'ca' => 'ca',
-        'united kingdom', 'uk', 'gb', 'great britain' => 'uk',
-        'switzerland', 'swiss', 'ch' => 'ch',
-        default => $key,
-    };
-    $configs = [
-        'us' => ['region' => 'us', 'country' => 'United States', 'language' => 'en', 'currency' => 'USD', 'login' => 'login_us.php', 'register' => 'register_us.php', 'account_type' => 'Premium Checking', 'routing' => US_ROUTING_NUMBER, 'rail_primary' => 'Instant Pay', 'rail_scheduled' => 'Bill Pay', 'rail_bank' => 'ACH Transfers', 'rail_wire' => 'Wire Transfers', 'transfer' => 'Wire transfer', 'workspace' => 'Lead Bank US banking', 'account_label' => 'Account', 'routing_label' => 'Routing'],
-        'de' => ['region' => 'de', 'country' => 'Germany', 'language' => 'en', 'currency' => 'EUR', 'login' => 'login_de.php', 'register' => 'register_de.php', 'account_type' => 'Current Account', 'routing' => DEFAULT_BIC, 'rail_primary' => 'SEPA Instant', 'rail_scheduled' => 'Standing Orders', 'rail_bank' => 'SEPA Transfers', 'rail_wire' => 'Transfers', 'transfer' => 'SEPA transfer', 'workspace' => 'Lead Bank Germany banking', 'account_label' => 'IBAN', 'routing_label' => 'BIC/SWIFT'],
-        'ca' => ['region' => 'ca', 'country' => 'Canada', 'language' => 'en', 'currency' => 'CAD', 'login' => 'login_ca.php', 'register' => 'register_ca.php', 'account_type' => 'Premium Chequing', 'routing' => '001000002', 'rail_primary' => 'Interac e-Transfer', 'rail_scheduled' => 'Bill Payments', 'rail_bank' => 'EFT Transfers', 'rail_wire' => 'Wire Transfers', 'transfer' => 'Wire transfer', 'workspace' => 'Lead Bank Canada banking', 'account_label' => 'Account', 'routing_label' => 'Institution/Transit'],
-        'uk' => ['region' => 'uk', 'country' => 'United Kingdom', 'language' => 'en', 'currency' => 'GBP', 'login' => 'login_uk.php', 'register' => 'register_uk.php', 'account_type' => 'Current Account', 'routing' => '040004', 'rail_primary' => 'Faster Payments', 'rail_scheduled' => 'Direct Debits', 'rail_bank' => 'Standing Orders', 'rail_wire' => 'CHAPS Transfers', 'transfer' => 'CHAPS transfer', 'workspace' => 'Lead Bank UK banking', 'account_label' => 'Account', 'routing_label' => 'Sort code'],
-        'ch' => ['region' => 'ch', 'country' => 'Switzerland', 'language' => 'en', 'currency' => 'CHF', 'login' => 'login_ch.php', 'register' => 'register_ch.php', 'account_type' => 'Private Account', 'routing' => 'DEUTCHZZXXX', 'rail_primary' => 'SIC Instant', 'rail_scheduled' => 'QR-Bills', 'rail_bank' => 'Swiss Transfers', 'rail_wire' => 'International Transfers', 'transfer' => 'International transfer', 'workspace' => 'Lead Bank Switzerland banking', 'account_label' => 'IBAN', 'routing_label' => 'BIC/SWIFT'],
-    ];
-    return $configs[$key] ?? $configs['de'];
+    return brand_banking_region_config($regionOrCountry);
 }
 
 function user_banking_region(?array $user = null, ?array $account = null): string
 {
-    $country = strtolower(trim((string) ($user['country'] ?? '')));
-    if (in_array($country, ['united states', 'usa', 'us'], true)) return 'us';
-    if (in_array($country, ['canada', 'ca'], true)) return 'ca';
-    if (in_array($country, ['united kingdom', 'uk', 'gb', 'great britain'], true)) return 'uk';
-    if (in_array($country, ['switzerland', 'swiss', 'ch'], true)) return 'ch';
-    if (in_array($country, ['germany', 'deutschland', 'de'], true)) return 'de';
+    if (!empty($user['banking_region'])) {
+        return banking_region_config((string) $user['banking_region'])['region'];
+    }
+    if (!empty($user['country'])) {
+        return banking_region_config((string) $user['country'])['region'];
+    }
     if ($account && empty($account['iban']) && !empty($account['routing_number'])) {
         $routing = preg_replace('/\D+/', '', (string) $account['routing_number']);
+        if ($routing === '024') return 'hk';
         if (strlen($routing) === 6) return 'uk';
         if (strlen($routing) === 9 && str_starts_with($routing, '001')) return 'ca';
         return 'us';
@@ -791,7 +803,7 @@ function default_banking_detail_rows(array $user, ?array $account): array
     $accountNumber = trim((string) ($account['account_number'] ?? ''));
     $routing = trim((string) ($account['routing_number'] ?? $config['routing']));
     $iban = trim((string) ($account['iban'] ?? $user['iban'] ?? ''));
-    $bic = trim((string) ($account['bic'] ?? ($region === 'us' || $region === 'ca' || $region === 'uk' ? '' : DEFAULT_BIC)));
+    $bic = trim((string) ($account['bic'] ?? (in_array($region, ['us', 'ca', 'uk', 'hk'], true) ? '' : $config['routing'])));
     $rows = [];
 
     $push = static function (string $label, string $value, bool $copyable = true) use (&$rows): void {
@@ -803,9 +815,9 @@ function default_banking_detail_rows(array $user, ?array $account): array
     };
 
     $push('Account Type', (string) ($account['account_type'] ?? $config['account_type']), false);
-    if (in_array($region, ['de', 'ch'], true)) {
+    if (!in_array($region, ['us', 'ca', 'uk', 'hk'], true)) {
         $push($region === 'ch' ? 'Swiss IBAN' : 'IBAN', $iban !== '' ? format_iban_display($iban) : '');
-        $push('BIC / SWIFT', $bic);
+        $push($region === 'ch' ? 'SWIFT' : 'BIC', $bic);
     } elseif ($region === 'uk') {
         $push('Account Number', $accountNumber);
         $push('Sort Code', $routing);
@@ -815,6 +827,10 @@ function default_banking_detail_rows(array $user, ?array $account): array
         $push('Institution / Transit', $routing);
         $push('Account Number', $accountNumber);
         $push('SWIFT / BIC', $bic);
+    } elseif ($region === 'hk') {
+        $push('Account Number', $accountNumber);
+        $push('Bank Code', $routing);
+        $push('SWIFT', $bic);
     } else {
         $push('Account Number', $accountNumber);
         $push('Routing Number', $routing);
@@ -2346,15 +2362,8 @@ function secure_admin_profile_photo_upload(array $file): ?string
 
 function onboarding_country_to_region(?string $country): string
 {
-    $country = strtolower(trim((string) $country));
-    return match (true) {
-        in_array($country, ['united states', 'usa', 'us'], true) => 'us',
-        in_array($country, ['canada', 'ca'], true) => 'ca',
-        in_array($country, ['united kingdom', 'uk', 'gb', 'great britain'], true) => 'uk',
-        in_array($country, ['switzerland', 'ch'], true) => 'ch',
-        in_array($country, ['germany', 'de', 'deutschland'], true) => 'de',
-        default => '',
-    };
+    $country = trim((string) $country);
+    return $country === '' ? '' : banking_region_config($country)['region'];
 }
 
 function admin_onboarding_link_public_url(string $token): string
@@ -2744,7 +2753,7 @@ function banking_create_user_account(int $userId, string $accountType, array $ac
     $primary = user_account($userId);
     $region = user_banking_region($user, $primary);
     $regionConfig = banking_region_config($region);
-    $usesIban = in_array($region, ['de', 'ch'], true);
+    $usesIban = !in_array($region, ['us', 'ca', 'uk', 'hk'], true);
     $accountNumber = '';
     do {
         $accountNumber = (string) random_int(1000000000, 9999999999);
@@ -2756,7 +2765,7 @@ function banking_create_user_account(int $userId, string $accountType, array $ac
     $bic = null;
     $routing = $regionConfig['routing'];
     if ($usesIban) {
-        $iban = $region === 'ch' ? 'CH9300762011623852957' : generated_german_iban();
+        $iban = generated_region_iban($region);
         $bic = $regionConfig['routing'];
         if ($accountType === 'Premium Checking' || $accountType === 'Everyday Checking') {
             $accountType = $regionConfig['account_type'];

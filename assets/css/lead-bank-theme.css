@@ -1691,3 +1691,55 @@ body.dashboard-screen .app-quick-grid i {
     padding-top: 18px;
   }
 }
+
+/* Multi-brand runtime themes */
+.brand-openpayd .sidebar,
+.brand-openpayd.admin-console .sidebar {
+  background: linear-gradient(180deg, #061B2B 0%, #0A3041 54%, #0F4C5C 100%) !important;
+}
+
+.brand-openpayd .nav-link.active,
+.brand-openpayd.admin-console .nav-link.active {
+  background: rgba(42, 167, 184, .22) !important;
+  color: #fff !important;
+  border-color: rgba(42, 167, 184, .35) !important;
+}
+
+.brand-openpayd .total-balance-panel,
+.brand-openpayd .premium-visa,
+.brand-openpayd .premium-mobile-card {
+  background: var(--lead-gradient) !important;
+}
+
+.brand-openpayd .btn-gold,
+.brand-openpayd .btn-navy,
+.brand-openpayd .btn-primary-pill {
+  background: var(--lead-primary) !important;
+  border-color: var(--lead-primary) !important;
+  color: #fff !important;
+}
+
+.brand-openpayd .btn-gold:hover,
+.brand-openpayd .btn-navy:hover,
+.brand-openpayd .btn-primary-pill:hover {
+  background: var(--lead-secondary) !important;
+  border-color: var(--lead-secondary) !important;
+}
+
+.brand-openpayd .brand-symbol {
+  background: #fff !important;
+}
+
+.country-choice-card em {
+  display: block;
+  margin-top: 4px;
+  font-style: normal;
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .02em;
+  color: var(--lead-primary);
+}
+
+.country-choice-grid {
+  grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+}
