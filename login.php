@@ -135,7 +135,21 @@ $pageTitle = match ($regionConfig['region']) {
     default => $regionConfig['country'] . ' Online Banking Login',
 };
 $prefillEmail = filter_var($_GET['email'] ?? '', FILTER_VALIDATE_EMAIL) ? strtolower((string) $_GET['email']) : '';
-$loginRailTitle = 'Modern access for ' . strtolower($regionConfig['account_type']) . ', cards, ' . implode(', ', array_slice($brandConfig['payment_rails'], 0, 2)) . ', and transfers.';
+$loginRailTitle = match ($regionConfig['region']) {
+    'us' => 'Modern U.S. Banking Built for Premium Clients',
+    'ca' => 'Premium Canadian Banking for Everyday & Business Needs',
+    'uk' => 'Modern UK Banking Built for Premium Clients',
+    'ch' => 'Swiss Private Banking Built for Premium Clients',
+    'hk' => 'Modern Hong Kong Banking Built for Premium Clients',
+    default => 'Modern ' . $regionConfig['country'] . ' Banking Built for Premium Clients',
+};
+$loginRailCopy = match ($regionConfig['region']) {
+    'us' => 'Checking, cards, ACH, Instant Pay, and wires are available through a secure protected dashboard.',
+    'ca' => 'Chequing, cards, Interac e-Transfer, EFT, bill payments, and wires are available through a secure protected dashboard.',
+    'uk' => 'Current accounts, cards, Faster Payments, standing orders, and CHAPS are available through a secure protected dashboard.',
+    'ch' => 'Swiss accounts, cards, SIC, QR-bills, and international transfers are available through a secure protected dashboard.',
+    default => $regionConfig['account_type'] . ', cards, ' . implode(', ', array_slice($brandConfig['payment_rails'], 0, 2)) . ', and transfers are available through a secure protected dashboard.',
+};
 $loginHeading = match ($regionConfig['region']) {
     'us' => 'U.S. online banking sign in',
     'ca' => 'Canadian online banking sign in',
@@ -166,7 +180,7 @@ include __DIR__ . '/includes/public_header.php';
       <div>
         <span class="eyebrow"><?= e($regionConfig['workspace']) ?></span>
         <h2><?= e($loginRailTitle) ?></h2>
-        <p>Sign in with your profile credentials. Transactions use your 4-digit code and are reviewed by admin before completion.</p>
+        <p><?= e($loginRailCopy) ?> Transactions use your 4-digit code and are reviewed by admin before completion.</p>
       </div>
       <div class="auth-assurance"><span><i class="fa-solid fa-key"></i> 4-digit code</span><span><i class="fa-solid fa-building-columns"></i> Protected dashboard</span><span><i class="fa-solid fa-user-shield"></i> Admin approval</span></div>
     </aside>

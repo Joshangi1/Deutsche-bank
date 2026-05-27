@@ -1,17 +1,17 @@
 /* Deutsche Bank global palette layer. Loaded last to recolor existing layouts only. */
 :root {
-  --lead-primary: #0052FF;
-  --lead-primary-hover: #2F7DFF;
-  --lead-sky: #2F7DFF;
-  --lead-accent: #001E60;
-  --lead-ink: #001E60;
-  --lead-text: #001E60;
-  --lead-muted: rgba(7, 27, 69, .64);
-  --lead-surface: #F7F9FD;
+  --lead-primary: #0A3D91;
+  --lead-primary-hover: #001F5B;
+  --lead-sky: #4DB5FF;
+  --lead-accent: #001F5B;
+  --lead-ink: #001F5B;
+  --lead-text: #001F5B;
+  --lead-muted: rgba(0, 31, 91, .64);
+  --lead-surface: #F6F8FC;
   --lead-panel: #ffffff;
   --lead-border: rgba(47, 91, 255, .14);
   --lead-tint: rgba(77, 181, 255, .13);
-  --lead-gradient: linear-gradient(135deg, #001E60 0%, #001E60 38%, #0052FF 100%);
+  --lead-gradient: linear-gradient(135deg, #001F5B 0%, #062E78 48%, #0A3D91 100%);
   --lead-gradient-soft: linear-gradient(135deg, rgba(77, 181, 255, .15), rgba(47, 91, 255, .07));
   --lead-shadow: 0 18px 44px rgba(7, 27, 69, .08);
   --lead-shadow-strong: 0 24px 54px rgba(7, 27, 69, .22);
@@ -128,8 +128,8 @@ h6,
 button.btn-primary {
   color: #fff !important;
   border-color: transparent !important;
-  background: var(--lead-primary) !important;
-  box-shadow: 0 12px 25px rgba(47, 91, 255, .2);
+  background: linear-gradient(135deg, #001F5B 0%, #0A3D91 100%) !important;
+  box-shadow: 0 12px 25px rgba(0, 31, 91, .22);
 }
 
 .btn-primary-pill:hover,
@@ -138,8 +138,8 @@ button.btn-primary {
 .btn-primary:hover,
 button.btn-primary:hover {
   color: #fff !important;
-  background: var(--lead-sky) !important;
-  box-shadow: 0 16px 34px rgba(77, 181, 255, .26);
+  background: linear-gradient(135deg, #001946 0%, #08347D 100%) !important;
+  box-shadow: 0 16px 34px rgba(0, 31, 91, .28);
 }
 
 .btn-outline-primary {
@@ -275,6 +275,26 @@ button.btn-primary:hover {
   background:
     radial-gradient(circle at 16% 12%, rgba(77, 181, 255, .12), transparent 14rem),
     var(--lead-gradient) !important;
+}
+
+.auth-panel .brand-mark,
+.auth-panel .eyebrow,
+.auth-panel h2,
+.auth-panel p {
+  color: #fff !important;
+}
+
+.auth-panel h2 {
+  max-width: 430px;
+  font-size: clamp(2.15rem, 3.35vw, 3.15rem);
+  line-height: 1.08;
+  font-weight: 650;
+}
+
+.auth-panel p {
+  max-width: 440px;
+  color: rgba(255, 255, 255, .82) !important;
+  line-height: 1.58;
 }
 
 .agent-onboarding-banner,
@@ -1036,13 +1056,13 @@ body.dashboard-screen .app-quick-grid i {
   background: var(--lead-panel) !important;
   box-shadow: 0 12px 28px rgba(7, 27, 69, .05);
   text-decoration: none;
-  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
 }
 
 .country-choice-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   border-color: var(--lead-sky) !important;
-  box-shadow: 0 18px 34px rgba(47, 91, 255, .12);
+  box-shadow: 0 20px 42px rgba(0, 31, 91, .13);
 }
 
 .country-choice-flag {
@@ -1084,6 +1104,11 @@ body.dashboard-screen .app-quick-grid i {
 .country-choice-card > i {
   margin-top: auto;
   color: var(--lead-primary);
+  transition: transform .2s ease;
+}
+
+.country-choice-card:hover > i {
+  transform: translateX(5px);
 }
 
 /* Deposit center and gift card review surfaces */
@@ -1719,7 +1744,18 @@ body.dashboard-screen .app-quick-grid i {
   .sidebar > .sidebar-brand {
     flex: 0 0 auto;
     min-height: 96px;
-    padding: 25px 10px 20px !important;
+    justify-content: center;
+    padding: 25px 16px 20px !important;
+  }
+
+  .sidebar > .sidebar-brand .brand-mark {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .sidebar > .sidebar-brand .brand-symbol {
+    flex: 0 0 auto;
   }
 
   .sidebar > .nav {
@@ -1762,4 +1798,34 @@ body.dashboard-screen .app-quick-grid i {
 
 .country-choice-grid {
   grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+}
+
+/* Premium final polish: Deutsche Bank-inspired contrast, geometry, and movement. */
+.total-balance-panel,
+body.dashboard-screen .bank-home-grid > .total-balance-panel.bank-app-card {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, .045) 0 1px, transparent 1px 36px),
+    linear-gradient(30deg, rgba(255, 255, 255, .035) 0 1px, transparent 1px 42px),
+    radial-gradient(circle at 86% 12%, rgba(77, 181, 255, .12), transparent 13rem),
+    var(--lead-gradient) !important;
+}
+
+.total-balance-panel > *,
+body.dashboard-screen .bank-home-grid > .total-balance-panel.bank-app-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.total-balance-panel::after,
+body.dashboard-screen .bank-home-grid > .total-balance-panel.bank-app-card::after {
+  content: "";
+  position: absolute;
+  inset: auto -4rem -5rem auto;
+  width: 24rem;
+  aspect-ratio: 1;
+  border: 1px solid rgba(255, 255, 255, .055);
+  transform: rotate(45deg);
+  pointer-events: none;
 }
