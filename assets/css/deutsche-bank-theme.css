@@ -1,20 +1,20 @@
-/* Lead Bank global palette layer. Loaded last to recolor existing layouts only. */
+/* Deutsche Bank global palette layer. Loaded last to recolor existing layouts only. */
 :root {
-  --lead-primary: #2F5BFF;
-  --lead-primary-hover: #4DB5FF;
-  --lead-sky: #4DB5FF;
-  --lead-accent: #071B45;
-  --lead-ink: #071B45;
-  --lead-text: #071B45;
-  --lead-muted: rgba(7, 27, 69, .64);
-  --lead-surface: #F6F8FC;
+  --lead-primary: #0052FF;
+  --lead-primary-hover: #2F7DFF;
+  --lead-sky: #2F7DFF;
+  --lead-accent: #001E60;
+  --lead-ink: #001E60;
+  --lead-text: #061737;
+  --lead-muted: rgba(6, 23, 55, .66);
+  --lead-surface: #F7F9FD;
   --lead-panel: #ffffff;
-  --lead-border: rgba(47, 91, 255, .14);
-  --lead-tint: rgba(77, 181, 255, .13);
-  --lead-gradient: linear-gradient(135deg, #071B45 0%, #071B45 38%, #2F5BFF 100%);
-  --lead-gradient-soft: linear-gradient(135deg, rgba(77, 181, 255, .15), rgba(47, 91, 255, .07));
-  --lead-shadow: 0 18px 44px rgba(7, 27, 69, .08);
-  --lead-shadow-strong: 0 24px 54px rgba(7, 27, 69, .22);
+  --lead-border: rgba(0, 82, 255, .14);
+  --lead-tint: rgba(0, 82, 255, .08);
+  --lead-gradient: linear-gradient(135deg, #001E60 0%, #002E8A 45%, #0052FF 100%);
+  --lead-gradient-soft: linear-gradient(135deg, rgba(0, 82, 255, .11), rgba(0, 30, 96, .04));
+  --lead-shadow: 0 20px 52px rgba(0, 30, 96, .09);
+  --lead-shadow-strong: 0 26px 64px rgba(0, 30, 96, .24);
 
   --lead-blue: var(--lead-primary);
   --lead-blue-2: var(--lead-primary-hover);
@@ -52,11 +52,31 @@
   --shadow-card: var(--lead-shadow);
 }
 
+html,
 body,
 .app-shell,
 .app-main,
 main {
   background-color: var(--lead-surface);
+  color: var(--lead-text);
+  font-family: "Aptos Display", Aptos, "Manrope", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  letter-spacing: -.01em;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.brand-mark,
+.dashboard-greeting strong,
+.section-title,
+.bank-app-card h2,
+.bank-app-card h3,
+.dashboard-section-head strong,
+.balance-value-row strong {
+  letter-spacing: -.035em;
   color: var(--lead-text);
 }
 
@@ -67,6 +87,21 @@ main {
 
 .brand-mark-dark {
   color: var(--lead-primary);
+}
+
+.brand-mark {
+  font-weight: 800;
+}
+
+.brand-symbol {
+  background: #ffffff !important;
+  border-radius: 0 !important;
+  box-shadow: 0 0 0 1px rgba(0, 30, 96, .08), 0 10px 24px rgba(0, 30, 96, .12) !important;
+}
+
+.brand-symbol img,
+.admin-console .admin-console-logo img {
+  object-fit: contain !important;
 }
 
 .bank-navbar {
@@ -94,7 +129,9 @@ button.btn-primary {
   color: #fff !important;
   border-color: transparent !important;
   background: var(--lead-primary) !important;
-  box-shadow: 0 12px 25px rgba(47, 91, 255, .2);
+  box-shadow: 0 13px 28px rgba(0, 82, 255, .22);
+  font-weight: 760;
+  letter-spacing: -.01em;
 }
 
 .btn-primary-pill:hover,
@@ -104,7 +141,7 @@ button.btn-primary {
 button.btn-primary:hover {
   color: #fff !important;
   background: var(--lead-sky) !important;
-  box-shadow: 0 16px 34px rgba(77, 181, 255, .26);
+  box-shadow: 0 16px 34px rgba(0, 82, 255, .28);
 }
 
 .btn-outline-primary {
@@ -217,7 +254,7 @@ button.btn-primary:hover {
   bottom: clamp(1.25rem, 5vw, 4rem);
   width: clamp(10rem, 17vw, 16rem);
   aspect-ratio: 1;
-  background: url("../icons/lead-bank-logo.jpg") center / contain no-repeat;
+  background: url("../icons/deutsche-bank-logo.png") center / contain no-repeat;
   mix-blend-mode: multiply;
   opacity: .065;
   pointer-events: none;
@@ -394,19 +431,19 @@ body.dashboard-screen .app-quick-grid i {
   background: var(--lead-gradient) !important;
 }
 
-/* Admin console: Lead Bank operations workspace */
+/* Admin console: Deutsche Bank operations workspace */
 .admin-console {
-  --admin-primary: #2F5BFF;
-  --admin-secondary: #4DB5FF;
-  --admin-accent: #2F5BFF;
-  --admin-bg: #F6F8FC;
+  --admin-primary: #0052FF;
+  --admin-secondary: #2F7DFF;
+  --admin-accent: #0052FF;
+  --admin-bg: #F7F9FD;
   --admin-panel: #ffffff;
-  --admin-text: #071B45;
-  --admin-muted: rgba(7, 27, 69, .64);
-  --admin-border: rgba(47, 91, 255, .14);
-  --admin-sidebar: #071B45;
-  --admin-sidebar-deep: #071B45;
-  font-family: "Manrope", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --admin-text: #061737;
+  --admin-muted: rgba(6, 23, 55, .66);
+  --admin-border: rgba(0, 82, 255, .14);
+  --admin-sidebar: #001E60;
+  --admin-sidebar-deep: #001E60;
+  font-family: "Aptos Display", Aptos, "Manrope", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   background: var(--admin-bg);
   color: var(--admin-text);
 }
@@ -446,7 +483,7 @@ body.dashboard-screen .app-quick-grid i {
   min-width: 36px;
   display: inline-flex;
   overflow: hidden;
-  border-radius: 10px;
+  border-radius: 0;
   background: #fff;
   box-shadow: 0 8px 18px rgba(0, 0, 0, .22);
 }
@@ -929,7 +966,7 @@ body.dashboard-screen .app-quick-grid i {
   top: clamp(1.75rem, 7vw, 4.25rem);
   width: clamp(11rem, 18vw, 17rem);
   aspect-ratio: 1;
-  background: url("../icons/lead-bank-logo.jpg") center / contain no-repeat;
+  background: url("../icons/deutsche-bank-logo.png") center / contain no-repeat;
   mix-blend-mode: multiply;
   opacity: .06;
   pointer-events: none;

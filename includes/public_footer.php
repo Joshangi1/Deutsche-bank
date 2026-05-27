@@ -3,7 +3,7 @@
     <div class="container">
         <div class="row g-4">
             <div class="col-lg-4">
-                <div class="mb-3"><?= lead_logo('light') ?></div>
+                <div class="mb-3"><?= brand_logo('light') ?></div>
                 <p><?= e(!empty($GLOBALS['publicStaticMode']) ? 'Programmable banking services, modern security, and financial tools designed for everyday momentum.' : setting('footer_summary', 'Programmable banking services, modern security, and financial tools designed for everyday momentum.')) ?></p>
                 <div class="trust-row"><span>NCUA insured</span><span>Equal Housing Lender</span><span>256-bit SSL</span></div>
             </div>

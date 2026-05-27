@@ -11,7 +11,7 @@ $navLabels = ['infra' => 'Financial Infrastructure', 'banking' => 'Banking', 'ab
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Lead Bank digital banking and financial infrastructure.">
+    <meta name="description" content="Deutsche Bank digital banking and financial infrastructure.">
     <?php if ($translateDisabled): ?><meta name="google" content="notranslate"><?php endif; ?>
     <title><?= e($pageTitle ?? UI_BRAND_NAME) ?></title>
     <link rel="icon" href="<?= url('assets/icons/favicon.svg') ?>" type="image/svg+xml">
@@ -20,11 +20,11 @@ $navLabels = ['infra' => 'Financial Infrastructure', 'banking' => 'Banking', 'ab
     <link href="<?= url('assets/css/styles.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/styles.css') ?>" rel="stylesheet">
     <style>
         :root {
-            --navy: <?= e($publicStaticMode ? '#2F5BFF' : setting('theme_navy', '#2F5BFF')) ?>;
-            --gold: <?= e($publicStaticMode ? '#4DB5FF' : setting('theme_gold', '#4DB5FF')) ?>;
+            --navy: <?= e($publicStaticMode ? '#001E60' : setting('theme_navy', '#001E60')) ?>;
+            --gold: <?= e($publicStaticMode ? '#2F7DFF' : setting('theme_gold', '#2F7DFF')) ?>;
         }
     </style>
-    <link href="<?= url('assets/css/lead-bank-theme.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/lead-bank-theme.css') ?>" rel="stylesheet">
+    <link href="<?= url('assets/css/deutsche-bank-theme.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/deutsche-bank-theme.css') ?>" rel="stylesheet">
     <?php if ($translateDisabled): ?>
     <script>
         (function () {
@@ -40,7 +40,7 @@ $navLabels = ['infra' => 'Financial Infrastructure', 'banking' => 'Banking', 'ab
 <div class="loader"><span></span></div>
 <nav class="navbar navbar-expand-lg bank-navbar sticky-top">
     <div class="container">
-        <a class="navbar-brand p-0" href="<?= url('index.php') ?>"><?= lead_logo('dark') ?></a>
+        <a class="navbar-brand p-0" href="<?= url('index.php') ?>"><?= brand_logo('dark') ?></a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"><span class="navbar-toggler-icon"></span></button>
         <div id="mainNav" class="collapse navbar-collapse">
             <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">

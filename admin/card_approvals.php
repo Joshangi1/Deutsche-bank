@@ -115,7 +115,7 @@ include __DIR__ . '/../includes/admin_header.php';
                     <span class="status-pill status-<?= $card['status'] === 'approved' ? 'success' : ($card['status'] === 'rejected' || $card['status'] === 'disabled' ? 'danger' : 'warning') ?>"><?= e(strtoupper(str_replace('_', ' ', $card['status']))) ?></span>
                 </div>
                 <div class="admin-card-preview mb-3">
-                    <div><strong>Lead Bank</strong><span><?= e($card['card_brand'] ?: 'Card') ?></span></div>
+                    <div><strong>Deutsche Bank</strong><span><?= e($card['card_brand'] ?: 'Card') ?></span></div>
                     <h3>•••• •••• •••• <?= e($card['card_last4'] ?: '----') ?></h3>
                     <div><span><?= e(strtoupper($card['cardholder_name'] ?: 'PENDING SUBMISSION')) ?></span><span><?= e(($card['expiry_month'] ?: 'MM') . '/' . substr((string) ($card['expiry_year'] ?: 'YY'), -2)) ?></span></div>
                 </div>

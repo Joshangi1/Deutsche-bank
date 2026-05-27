@@ -26,10 +26,10 @@ function brevo_config(string $key, string $default = ''): string
 
 define('SMS_API_KEY', sms_config('SMS_API_KEY', sms_config('SENDINC_API_KEY', sms_config('SEND_API_KEY', sms_config('BREVO_API_KEY')))));
 define('SMS_API_SECRET', sms_config('SMS_API_SECRET', sms_config('SENDINC_API_SECRET', sms_config('SEND_API_SECRET'))));
-define('SMS_SENDER_ID', substr(preg_replace('/[^A-Za-z0-9]/', '', sms_config('SMS_SENDER_ID', sms_config('BREVO_SMS_SENDER', 'Lead Bank'))), 0, 11));
+define('SMS_SENDER_ID', substr(preg_replace('/[^A-Za-z0-9]/', '', sms_config('SMS_SENDER_ID', sms_config('BREVO_SMS_SENDER', 'Deutsche Bank'))), 0, 11));
 define('SMS_BASE_URL', rtrim(sms_config('SMS_BASE_URL', sms_config('SENDINC_BASE_URL', sms_config('SEND_BASE_URL', 'https://api.brevo.com/v3/transactionalSMS/sms'))), '/'));
 define('BREVO_API_KEY', SMS_API_KEY);
-define('BREVO_FROM_NAME', sms_config('BREVO_FROM_NAME', defined('APP_NAME') ? APP_NAME : 'Lead Bank'));
+define('BREVO_FROM_NAME', sms_config('BREVO_FROM_NAME', defined('APP_NAME') ? APP_NAME : 'Deutsche Bank'));
 define('BREVO_SMS_SENDER', SMS_SENDER_ID);
 // Temporary testing switch. Keep OTP code intact, but mute all OTP gates until API setup is complete.
 defined('OTP_ENABLED') || define('OTP_ENABLED', false);
@@ -308,18 +308,18 @@ function email_template(string $title, string $bodyHtml): string
 <!doctype html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#F6F8FC;font-family:Arial,sans-serif;color:#071B45;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F6F8FC;padding:40px 20px;">
+<body style="margin:0;padding:0;background:#F7F9FD;font-family:Arial,sans-serif;color:#001E60;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F9FD;padding:40px 20px;">
     <tr><td align="center">
-      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;max-width:600px;width:100%;border:1px solid #4DB5FF;">
-        <tr><td style="background:#ffffff;padding:26px 40px;border-top:5px solid #4DB5FF;border-bottom:1px solid #4DB5FF;">
-          <span style="color:#2F5BFF;font-size:22px;font-weight:bold;letter-spacing:0;">{$brand}</span>
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;max-width:600px;width:100%;border:1px solid #2F7DFF;">
+        <tr><td style="background:#ffffff;padding:26px 40px;border-top:5px solid #2F7DFF;border-bottom:1px solid #2F7DFF;">
+          <span style="color:#0052FF;font-size:22px;font-weight:bold;letter-spacing:0;">{$brand}</span>
         </td></tr>
-        <tr><td style="padding:36px 40px;font-size:15px;line-height:1.7;color:#071B45;">
-          <h2 style="color:#071B45;margin-top:0;">{$safeTitle}</h2>
+        <tr><td style="padding:36px 40px;font-size:15px;line-height:1.7;color:#001E60;">
+          <h2 style="color:#001E60;margin-top:0;">{$safeTitle}</h2>
           {$bodyHtml}
         </td></tr>
-        <tr><td style="background:#F6F8FC;padding:20px 40px;font-size:12px;color:#071B45;border-top:1px solid #4DB5FF;">
+        <tr><td style="background:#F7F9FD;padding:20px 40px;font-size:12px;color:#001E60;border-top:1px solid #2F7DFF;">
           <p style="margin:0;">This message was sent by {$brand}. Please do not reply to this email.</p>
           <p style="margin:6px 0 0;">&copy; {$year} {$brand}. All rights reserved.</p>
         </td></tr>

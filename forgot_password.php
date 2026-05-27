@@ -16,7 +16,7 @@ include __DIR__ . '/includes/public_header.php';
 <section class="auth-shell">
   <form class="auth-card" method="post">
     <?= csrf_field() ?>
-    <div class="mb-4"><?= lead_logo('dark') ?></div>
+    <div class="mb-4"><?= brand_logo('dark') ?></div>
     <h1 class="h3 fw-bold">Reset access</h1>
     <p class="muted">Email password reset is currently disabled. Submit your registered email and support will help recover account access.</p>
     <input name="email" type="email" class="form-control mb-3" placeholder="you@example.com" required>

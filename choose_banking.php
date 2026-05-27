@@ -4,7 +4,7 @@ require_once __DIR__ . '/includes/helpers.php';
 
 $mode = strtolower((string) ($_GET['next'] ?? 'login'));
 $mode = $mode === 'register' ? 'register' : 'login';
-$pageTitle = 'Choose Your Banking Region | Lead Bank';
+$pageTitle = 'Choose Your Banking Region | Deutsche Bank';
 $GLOBALS['publicStaticMode'] = true;
 $GLOBALS['pageLoginUrl'] = 'choose_banking.php?next=login';
 
@@ -23,7 +23,7 @@ include __DIR__ . '/includes/public_header.php';
     <div class="container">
         <div class="country-choice-portal">
             <div class="country-choice-head">
-                <span class="eyebrow">Lead Bank International</span>
+                <span class="eyebrow">Deutsche Bank International</span>
                 <h1>Choose Your Banking Region</h1>
                 <p>Select your region to continue to secure <?= $mode === 'register' ? 'account opening' : 'sign in' ?>.</p>
             </div>

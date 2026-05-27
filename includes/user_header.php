@@ -38,7 +38,7 @@ $isDashboardPage = basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')) === 'dashb
     <link href="<?= url('assets/css/styles.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/styles.css') ?>" rel="stylesheet">
     <link href="<?= url('assets/css/premium-banking.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/premium-banking.css') ?>" rel="stylesheet">
     <link href="<?= url('assets/css/mobile-premium-fix.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/mobile-premium-fix.css') ?>" rel="stylesheet">
-    <link href="<?= url('assets/css/lead-bank-theme.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/lead-bank-theme.css') ?>" rel="stylesheet">
+    <link href="<?= url('assets/css/deutsche-bank-theme.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/deutsche-bank-theme.css') ?>" rel="stylesheet">
     <script>
         (function () {
             document.cookie = 'googtrans=;path=/;expires=Thu, 01 Jan 1970 00:00:00 GMT';
@@ -55,7 +55,7 @@ $isDashboardPage = basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')) === 'dashb
      SIDEBAR
      ═══════════════════════════════════════════ -->
 <aside class="sidebar">
-    <a class="sidebar-brand" href="<?= url('dashboard.php') ?>"><?= lead_logo('light') ?></a>
+    <a class="sidebar-brand" href="<?= url('dashboard.php') ?>"><?= brand_logo('light') ?></a>
     <nav class="nav flex-column">
         <?php $nav = [
             ['dashboard.php','fa-gauge-high','Overview'],
@@ -78,7 +78,7 @@ $isDashboardPage = basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')) === 'dashb
         <?php $restrictedPaths = ['user/send_money.php','user/bill_pay.php','user/ach_transfers.php','user/transfers.php','user/cards.php','user/deposits.php']; ?>
         <?php foreach ($nav as $item): ?>
             <?php $disabled = $isRestricted && in_array($item[0], $restrictedPaths, true); ?>
-            <?= lead_nav_item($item[0], $item[1], $item[2], str_ends_with($_SERVER['SCRIPT_NAME'], $item[0]), $disabled) ?>
+            <?= brand_nav_item($item[0], $item[1], $item[2], str_ends_with($_SERVER['SCRIPT_NAME'], $item[0]), $disabled) ?>
         <?php endforeach; ?>
     </nav>
     <div class="sidebar-session mt-auto">

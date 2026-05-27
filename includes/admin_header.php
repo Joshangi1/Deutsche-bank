@@ -19,7 +19,7 @@ $isAdminDashboard = basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')) === 'inde
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
     <link href="<?= url('assets/css/styles.css') ?>" rel="stylesheet">
-    <link href="<?= url('assets/css/lead-bank-theme.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/lead-bank-theme.css') ?>" rel="stylesheet">
+    <link href="<?= url('assets/css/deutsche-bank-theme.css') ?>?v=<?= filemtime(__DIR__ . '/../assets/css/deutsche-bank-theme.css') ?>" rel="stylesheet">
     <meta name="google" content="notranslate">
     <script>
         (function () {
@@ -34,8 +34,8 @@ $isAdminDashboard = basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')) === 'inde
 <div class="app-shell">
 <aside class="sidebar">
     <a class="sidebar-brand admin-console-brand" href="<?= url('admin/index.php') ?>">
-        <span class="admin-console-logo" aria-hidden="true"><img src="<?= e(url('assets/icons/lead-bank-logo.jpg')) ?>" alt=""></span>
-        <span class="admin-console-brand-copy"><strong>Lead Bank</strong><small>Administrative Console</small></span>
+        <span class="admin-console-logo" aria-hidden="true"><img src="<?= e(url('assets/icons/deutsche-bank-logo.png')) ?>" alt=""></span>
+        <span class="admin-console-brand-copy"><strong>Deutsche Bank</strong><small>Administrative Console</small></span>
     </a>
     <nav class="nav flex-column">
         <?php $nav = [
@@ -71,7 +71,7 @@ $isAdminDashboard = basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')) === 'inde
         <div class="d-flex align-items-center gap-3">
             <button class="btn btn-navy mobile-toggle" data-toggle-sidebar aria-label="Open navigation" aria-expanded="false"><i class="fa-solid fa-bars"></i></button>
             <div class="admin-page-heading">
-                <h1><?= $isAdminDashboard ? 'Lead Bank Admin Analytics' : e($pageTitle ?? 'Admin') ?></h1>
+                <h1><?= $isAdminDashboard ? 'Deutsche Bank Admin Analytics' : e($pageTitle ?? 'Admin') ?></h1>
                 <div>Operational Command Center</div>
             </div>
         </div>
