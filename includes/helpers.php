@@ -2297,9 +2297,34 @@ function save_setting(string $key, string $value): void
     $stmt->execute([$key, $value]);
 }
 
+function public_upload_url(?string $storedValue, string $subdir, ?string $fallback = null): ?string
+{
+    $storedValue = trim((string) $storedValue);
+    if ($storedValue === '') {
+        return $fallback;
+    }
+    if (preg_match('/^https?:\/\//i', $storedValue)) {
+        return $storedValue;
+    }
+
+    $normalized = str_replace('\\', '/', $storedValue);
+    $filename = basename(parse_url($normalized, PHP_URL_PATH) ?: $normalized);
+    if ($filename === '' || $filename === '.' || $filename === '..') {
+        return $fallback;
+    }
+
+    $relativePath = 'uploads/' . trim($subdir, '/\\') . '/' . $filename;
+    $absolutePath = __DIR__ . '/../' . $relativePath;
+    if (!is_file($absolutePath)) {
+        return $fallback;
+    }
+
+    return url($relativePath) . '?v=' . filemtime($absolutePath);
+}
+
 function avatar_url(?string $avatar): string
 {
-    return $avatar ? url('uploads/avatars/' . $avatar) : url('assets/icons/default-avatar.svg');
+    return public_upload_url($avatar, 'avatars', url('assets/icons/default-avatar.svg')) ?? url('assets/icons/default-avatar.svg');
 }
 
 function admin_display_name(array $admin): string
@@ -2330,8 +2355,21 @@ function initials_from_name(string $name): string
 
 function admin_profile_photo_url(?string $photo): ?string
 {
-    $photo = trim((string) $photo);
-    return $photo !== '' ? url('uploads/admin_profiles/' . $photo) : null;
+    return public_upload_url($photo, 'admin_profiles');
+}
+
+function ensure_public_upload_dir(string $targetDir): bool
+{
+    if (!is_dir($targetDir) && !mkdir($targetDir, 0755, true) && !is_dir($targetDir)) {
+        return false;
+    }
+
+    $htaccess = rtrim($targetDir, '/\\') . DIRECTORY_SEPARATOR . '.htaccess';
+    if (!is_file($htaccess)) {
+        @file_put_contents($htaccess, "Options -Indexes\n<FilesMatch \"\\.(php|phtml|phar|cgi|pl|asp|aspx|jsp|sh)$\">\n    Require all denied\n</FilesMatch>\n");
+    }
+
+    return true;
 }
 
 function secure_admin_profile_photo_upload(array $file): ?string
@@ -2352,8 +2390,8 @@ function secure_admin_profile_photo_upload(array $file): ?string
         throw new RuntimeException('Agent photo must be a readable image at least 120px wide and tall.');
     }
     $dir = __DIR__ . '/../uploads/admin_profiles';
-    if (!is_dir($dir)) {
-        mkdir($dir, 0755, true);
+    if (!ensure_public_upload_dir($dir)) {
+        throw new RuntimeException('Could not prepare the agent profile photo folder.');
     }
     $name = 'agent_' . bin2hex(random_bytes(16)) . '.' . $allowed[$mime];
     $path = $dir . DIRECTORY_SEPARATOR . $name;
@@ -2897,8 +2935,8 @@ function secure_upload(array $file, string $targetDir): ?string
     if (!isset($allowed[$mime]) || ($file['size'] ?? 0) > 4 * 1024 * 1024) {
         return null;
     }
-    if (!is_dir($targetDir)) {
-        mkdir($targetDir, 0755, true);
+    if (!ensure_public_upload_dir($targetDir)) {
+        return null;
     }
     $name = bin2hex(random_bytes(16)) . '.' . $allowed[$mime];
     $path = rtrim($targetDir, '/\\') . DIRECTORY_SEPARATOR . $name;

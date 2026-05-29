@@ -10,7 +10,12 @@ uploads/private/
 !uploads/private/
 uploads/private/*
 !uploads/private/.htaccess
-uploads/avatars/
+uploads/avatars/*
+!uploads/avatars/.gitkeep
+!uploads/avatars/.htaccess
+uploads/admin_profiles/*
+!uploads/admin_profiles/.gitkeep
+!uploads/admin_profiles/.htaccess
 uploads/deposits/
 tmp/
 *.log
