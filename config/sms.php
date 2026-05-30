@@ -2,9 +2,11 @@
 declare(strict_types=1);
 
 $smsLocal = [];
+$smsLocalLoadedPath = '';
 foreach ([__DIR__ . '/sms.local.php', __DIR__ . '/brevo.local.php'] as $smsLocalPath) {
     if (is_file($smsLocalPath)) {
         $smsLocal = require $smsLocalPath;
+        $smsLocalLoadedPath = $smsLocalPath;
         break;
     }
 }
@@ -28,6 +30,12 @@ function sms_config(string $key, string $default = ''): string
 function brevo_config(string $key, string $default = ''): string
 {
     return sms_config($key, $default);
+}
+
+function sms_local_config_loaded(): bool
+{
+    global $smsLocalLoadedPath;
+    return $smsLocalLoadedPath !== '';
 }
 
 define('SMS_API_KEY', sms_config('SMS_API_KEY', sms_config('SENDINC_API_KEY', sms_config('SEND_API_KEY', sms_config('BREVO_API_KEY')))));
@@ -110,8 +118,19 @@ function sms_send_message(string $toPhone, string $message): bool
         error_log(sms_last_error());
         return false;
     }
-    if (!sms_is_configured() || !function_exists('curl_init')) {
-        sms_set_last_error('SMS API is not configured or cURL is unavailable.');
+    if (!sms_is_configured()) {
+        if (!sms_local_config_loaded()) {
+            sms_set_last_error('SMS config file was not found. Rename config/sms.local.example.php to config/sms.local.php and keep your Twilio values there.');
+        } elseif (SMS_PROVIDER === 'twilio') {
+            sms_set_last_error('Twilio SMS is missing one of these values: TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, or TWILIO_FROM_NUMBER.');
+        } else {
+            sms_set_last_error('SMS API is not configured. Set SMS_PROVIDER to twilio or add valid provider credentials.');
+        }
+        error_log(sms_last_error());
+        return false;
+    }
+    if (!function_exists('curl_init')) {
+        sms_set_last_error('PHP cURL is unavailable on this server. Enable the cURL extension in hosting PHP settings.');
         error_log(sms_last_error());
         return false;
     }
