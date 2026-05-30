@@ -56,6 +56,7 @@ define('BREVO_SMS_SENDER', SMS_SENDER_ID);
 defined('OTP_ENABLED') || define('OTP_ENABLED', filter_var(sms_config('OTP_ENABLED', '1'), FILTER_VALIDATE_BOOLEAN));
 define('SMS_OTP_ENABLED', OTP_ENABLED && filter_var(sms_config('SMS_OTP_ENABLED', '1'), FILTER_VALIDATE_BOOLEAN));
 define('SMS_OTP_TTL_MINUTES', max(1, (int) sms_config('SMS_OTP_TTL_MINUTES', '5')));
+define('SMS_OTP_MAX_PER_HOUR', max(1, (int) sms_config('SMS_OTP_MAX_PER_HOUR', '10')));
 $GLOBALS['sms_last_error'] = '';
 
 function sms_set_last_error(string $message): void
@@ -269,9 +270,9 @@ function sms_otp_create(?int $userId, string $phone, string $purpose, ?int $ttlM
         return ['ok' => false, 'error' => 'Please wait before requesting another code.', 'retry_at' => $latest['resend_available_at']];
     }
 
-    $rate = db()->prepare('SELECT COUNT(*) c FROM otp_verifications WHERE created_at >= DATE_SUB(NOW(), INTERVAL 1 HOUR) AND (phone=? OR ip_address=? OR (user_id IS NOT NULL AND user_id=?))');
+    $rate = db()->prepare('SELECT COUNT(*) c FROM otp_verifications WHERE created_at >= DATE_SUB(NOW(), INTERVAL 1 HOUR) AND send_status="sent" AND (phone=? OR ip_address=? OR (user_id IS NOT NULL AND user_id=?))');
     $rate->execute([$phone, $ip, $userId ?? 0]);
-    if ((int) ($rate->fetch()['c'] ?? 0) >= 5) {
+    if ((int) ($rate->fetch()['c'] ?? 0) >= SMS_OTP_MAX_PER_HOUR) {
         return ['ok' => false, 'error' => 'Too many verification codes were requested. Please try again later.'];
     }
 

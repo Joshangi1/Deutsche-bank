@@ -3,6 +3,7 @@ return [
     'OTP_ENABLED' => '1',
     'SMS_OTP_ENABLED' => '1',
     'SMS_OTP_TTL_MINUTES' => '5',
+    'SMS_OTP_MAX_PER_HOUR' => '10',
     'SMS_PROVIDER' => 'twilio',
 
     // Twilio SMS OTP. Copy this file to sms.local.php, then paste only these 3 values.
