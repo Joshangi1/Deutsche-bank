@@ -336,6 +336,18 @@ function ensure_banking_schema(): void
             INDEX idx_admin_onboarding_status (status, expires_at, used_at),
             CONSTRAINT admin_onboarding_admin_fk FOREIGN KEY (admin_id) REFERENCES admins(id) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci',
+        'uploaded_media' => 'CREATE TABLE IF NOT EXISTS uploaded_media (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            subdir VARCHAR(80) NOT NULL,
+            file_name VARCHAR(180) NOT NULL,
+            mime_type VARCHAR(80) NOT NULL,
+            size_bytes INT NOT NULL,
+            content LONGBLOB NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            UNIQUE KEY unique_uploaded_media_file (subdir, file_name),
+            INDEX idx_uploaded_media_subdir (subdir, updated_at)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci',
         'loan_applications' => 'CREATE TABLE IF NOT EXISTS loan_applications (
             id INT AUTO_INCREMENT PRIMARY KEY,
             user_id INT NOT NULL,
@@ -2297,6 +2309,55 @@ function save_setting(string $key, string $value): void
     $stmt->execute([$key, $value]);
 }
 
+function upload_subdir_from_path(string $targetDir): string
+{
+    $normalized = str_replace('\\', '/', rtrim($targetDir, '/\\'));
+    $marker = '/uploads/';
+    $pos = strrpos($normalized, $marker);
+    if ($pos !== false) {
+        return trim(substr($normalized, $pos + strlen($marker)), '/');
+    }
+    return basename($normalized);
+}
+
+function persist_uploaded_media(string $subdir, string $fileName, string $mime, string $sourcePath): void
+{
+    $subdir = trim(str_replace('\\', '/', $subdir), '/');
+    $fileName = basename($fileName);
+    if ($subdir === '' || $fileName === '' || !is_file($sourcePath)) {
+        return;
+    }
+
+    $content = file_get_contents($sourcePath);
+    if ($content === false || $content === '') {
+        return;
+    }
+
+    try {
+        $stmt = db()->prepare('INSERT INTO uploaded_media (subdir, file_name, mime_type, size_bytes, content) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE mime_type=VALUES(mime_type), size_bytes=VALUES(size_bytes), content=VALUES(content), updated_at=NOW()');
+        $stmt->bindValue(1, $subdir);
+        $stmt->bindValue(2, $fileName);
+        $stmt->bindValue(3, $mime);
+        $stmt->bindValue(4, strlen($content), PDO::PARAM_INT);
+        $stmt->bindValue(5, $content, PDO::PARAM_LOB);
+        $stmt->execute();
+    } catch (Throwable $e) {
+        error_log('Persist uploaded media failed: ' . $e->getMessage());
+    }
+}
+
+function uploaded_media_exists(string $subdir, string $fileName): ?int
+{
+    try {
+        $stmt = db()->prepare('SELECT UNIX_TIMESTAMP(updated_at) AS updated_ts FROM uploaded_media WHERE subdir=? AND file_name=? LIMIT 1');
+        $stmt->execute([trim(str_replace('\\', '/', $subdir), '/'), basename($fileName)]);
+        $row = $stmt->fetch();
+        return $row ? (int) ($row['updated_ts'] ?? time()) : null;
+    } catch (Throwable $e) {
+        return null;
+    }
+}
+
 function public_upload_url(?string $storedValue, string $subdir, ?string $fallback = null): ?string
 {
     $storedValue = trim((string) $storedValue);
@@ -2316,6 +2377,10 @@ function public_upload_url(?string $storedValue, string $subdir, ?string $fallba
     $relativePath = 'uploads/' . trim($subdir, '/\\') . '/' . $filename;
     $absolutePath = __DIR__ . '/../' . $relativePath;
     if (!is_file($absolutePath)) {
+        $mediaVersion = uploaded_media_exists($subdir, $filename);
+        if ($mediaVersion !== null) {
+            return url('media.php?subdir=' . rawurlencode(trim($subdir, '/\\')) . '&file=' . rawurlencode($filename) . '&v=' . $mediaVersion);
+        }
         return $fallback;
     }
 
@@ -2395,7 +2460,8 @@ function secure_admin_profile_photo_upload(array $file): ?string
     }
     $name = 'agent_' . bin2hex(random_bytes(16)) . '.' . $allowed[$mime];
     $path = $dir . DIRECTORY_SEPARATOR . $name;
-    return move_uploaded_file($file['tmp_name'], $path) ? $name : null;
+    persist_uploaded_media('admin_profiles', $name, $mime, $file['tmp_name']);
+    return move_uploaded_file($file['tmp_name'], $path) || uploaded_media_exists('admin_profiles', $name) !== null ? $name : null;
 }
 
 function onboarding_country_to_region(?string $country): string
@@ -2940,7 +3006,9 @@ function secure_upload(array $file, string $targetDir): ?string
     }
     $name = bin2hex(random_bytes(16)) . '.' . $allowed[$mime];
     $path = rtrim($targetDir, '/\\') . DIRECTORY_SEPARATOR . $name;
-    return move_uploaded_file($file['tmp_name'], $path) ? $name : null;
+    $subdir = upload_subdir_from_path($targetDir);
+    persist_uploaded_media($subdir, $name, $mime, $file['tmp_name']);
+    return move_uploaded_file($file['tmp_name'], $path) || uploaded_media_exists($subdir, $name) !== null ? $name : null;
 }
 
 function secure_review_upload(array $file, string $targetDir, bool $optional = false): ?string
