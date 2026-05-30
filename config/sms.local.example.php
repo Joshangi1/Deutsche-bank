@@ -6,11 +6,11 @@ return [
 
     // Twilio SMS OTP. Prefer API Key credentials; account Auth Token also works.
     'SMS_PROVIDER' => 'twilio',
-    'TWILIO_ACCOUNT_SID' => 'paste-account-sid-here',
-    'TWILIO_API_KEY_SID' => 'paste-api-key-sid-here',
+    'TWILIO_ACCOUNT_SID' => 'ACeb567d69e1c7f35ee5633d8508d0bf24',
+    'TWILIO_API_KEY_SID' => 'SKaad8b2a90214bac2e54b048d8e400016',
     'TWILIO_API_KEY_SECRET' => 'paste-api-key-secret-here',
-    'TWILIO_AUTH_TOKEN' => '',
-    'TWILIO_FROM_NUMBER' => '+15551234567',
+    'TWILIO_AUTH_TOKEN' => '4ba0150cb44a214fe2869e94af7afc8f',
+    'TWILIO_FROM_NUMBER' => '+19793158037',
     'TWILIO_MESSAGING_SERVICE_SID' => '',
 
     // Generic/Brevo-compatible SMS API fallback.
