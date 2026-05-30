@@ -1,6 +1,6 @@
 <?php
 $pageTitle = 'Identity Verification';
-require_once __DIR__ . '/../config/brevo.php';
+require_once __DIR__ . '/../config/sms.php';
 include __DIR__ . '/../includes/admin_header.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

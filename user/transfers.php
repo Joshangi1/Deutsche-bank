@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/helpers.php';
-require_once __DIR__ . '/../config/brevo.php';
+require_once __DIR__ . '/../config/sms.php';
 $user = require_user();
 require_unrestricted_account($user);
 $account = user_account((int) $user['id']);
@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header('Location: profile.php');
                 exit;
             }
-            $sent = sms_otp_create((int) $user['id'], (string) $user['phone'], 'transfer', 10);
+            $sent = sms_otp_create((int) $user['id'], (string) $user['phone'], 'transfer');
             if (($sent['ok'] ?? false) || isset($sent['retry_at'])) {
                 $_SESSION['pending_transfer_context'] = $otpContext;
                 $_SESSION['pending_transfer_return'] = 'user/transfers.php?review=1';

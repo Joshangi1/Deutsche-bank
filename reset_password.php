@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/helpers.php';
-require_once __DIR__ . '/config/brevo.php';
+require_once __DIR__ . '/config/sms.php';
 
 // Ensure password_resets table exists
 db()->exec("CREATE TABLE IF NOT EXISTS password_resets (

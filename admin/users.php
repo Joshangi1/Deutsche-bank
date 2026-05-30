@@ -1,7 +1,7 @@
 <?php
 $pageTitle = 'User Management';
 require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/../config/brevo.php';
+require_once __DIR__ . '/../config/sms.php';
 require_once __DIR__ . '/../includes/helpers.php';
 $admin = require_admin();
 

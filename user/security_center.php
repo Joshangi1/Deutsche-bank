@@ -1,7 +1,7 @@
 <?php
 $pageTitle = 'Security Center';
 require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/../config/brevo.php';
+require_once __DIR__ . '/../config/sms.php';
 require_once __DIR__ . '/../includes/helpers.php';
 $user = require_user();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

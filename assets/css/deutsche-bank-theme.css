@@ -1856,3 +1856,102 @@ body.dashboard-screen .bank-home-grid > .total-balance-panel.bank-app-card::afte
 .brand-deutsche-bank .transactions-panel a {
   color: var(--lead-ink) !important;
 }
+
+/* Breathing room for the assisted signup header and dashboard balance card. */
+.agent-assisted-signup .onboarding-rail {
+  padding: 32px 40px 28px !important;
+  display: flex !important;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.agent-assisted-signup .onboarding-rail .eyebrow {
+  margin-bottom: 0 !important;
+}
+
+.agent-assisted-signup .onboarding-rail h1 {
+  margin: 0 !important;
+  line-height: 1.14 !important;
+}
+
+.agent-assisted-signup .onboarding-rail p {
+  margin: 0 !important;
+  line-height: 1.55 !important;
+}
+
+.agent-assisted-signup .onboarding-assurance,
+.agent-assisted-signup .onboarding-stepper {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 12px !important;
+  margin: 0 !important;
+}
+
+.agent-assisted-signup .onboarding-assurance span,
+.agent-assisted-signup .onboarding-stepper span {
+  margin: 0 !important;
+  min-height: 38px;
+  align-items: center;
+}
+
+@media (min-width: 1024px) {
+  body.dashboard-screen .bank-home-grid > .total-balance-panel.bank-app-card {
+    height: auto !important;
+    min-height: 324px !important;
+    max-height: none !important;
+    padding: 30px 34px 26px !important;
+    gap: 14px;
+  }
+
+  body.dashboard-screen .balance-hero-top {
+    margin-bottom: 12px !important;
+  }
+
+  body.dashboard-screen .total-balance-panel .balance-label {
+    margin-bottom: 8px !important;
+  }
+
+  body.dashboard-screen .total-balance-panel .balance-value-row {
+    gap: 16px !important;
+  }
+
+  body.dashboard-screen .total-balance-panel .balance-mask {
+    margin-top: 12px !important;
+  }
+
+  body.dashboard-screen .total-balance-panel .balance-account-meta {
+    margin-top: auto !important;
+    gap: 14px !important;
+  }
+
+  body.dashboard-screen .total-balance-panel .balance-account-meta div {
+    min-height: 80px;
+    padding: 18px !important;
+  }
+}
+
+body.dashboard-screen .balance-hero-top .account-status-pill {
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: max-content;
+  padding: 8px 15px !important;
+  color: #eafff5 !important;
+  background: rgba(255, 255, 255, .14) !important;
+  border-color: rgba(255, 255, 255, .3) !important;
+}
+
+@media (max-width: 767.98px) {
+  .agent-assisted-signup .onboarding-rail {
+    padding: 26px 22px 24px !important;
+    gap: 12px;
+  }
+
+  .agent-assisted-signup .onboarding-assurance span,
+  .agent-assisted-signup .onboarding-stepper span {
+    min-height: 36px;
+  }
+
+  body.dashboard-screen .total-balance-panel {
+    padding: 24px 20px !important;
+  }
+}

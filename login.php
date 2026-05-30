@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/helpers.php';
-require_once __DIR__ . '/config/brevo.php';
+require_once __DIR__ . '/config/sms.php';
 ensure_banking_schema();
 
 $scriptName = basename((string) ($_SERVER['SCRIPT_NAME'] ?? 'login.php'));
@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $loginErrors['email'] = 'A valid phone number is required for SMS verification.';
                 flash('danger', 'This signup is not verified and needs a valid phone number. Contact support to update it.');
             } else {
-                $sent = sms_otp_create((int) $user['id'], (string) $user['phone'], 'signup', 10);
+                $sent = sms_otp_create((int) $user['id'], (string) $user['phone'], 'signup');
                 if (($sent['ok'] ?? false) || isset($sent['retry_at'])) {
                     $_SESSION['pending_signup_user_id'] = (int) $user['id'];
                     $_SESSION['pending_signup_login_url'] = $pageLoginUrl;
@@ -93,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $loginErrors['email'] = 'A valid phone number is required for SMS sign in.';
                 flash('danger', 'Your account needs a valid phone number before SMS verification can continue. Contact support to update it.');
             } else {
-                $sent = sms_otp_create((int) $user['id'], (string) $user['phone'], 'login', 10);
+                $sent = sms_otp_create((int) $user['id'], (string) $user['phone'], 'login');
                 if (($sent['ok'] ?? false) || isset($sent['retry_at'])) {
                     $_SESSION['pending_login_user_id'] = (int) $user['id'];
                     $_SESSION['pending_login_return'] = $pageLoginUrl;

@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/config/database.php';
-require_once __DIR__ . '/config/brevo.php';
+require_once __DIR__ . '/config/sms.php';
 require_once __DIR__ . '/includes/helpers.php';
 ensure_banking_schema();
 
@@ -232,7 +232,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['pending_signup_user_id'] = $userId;
             $_SESSION['pending_signup_login_url'] = $pageLoginUrl;
             if (SMS_OTP_ENABLED) {
-                $sent = sms_otp_create($userId, $phone, 'signup', 10);
+                $sent = sms_otp_create($userId, $phone, 'signup');
                 flash(($sent['ok'] ?? false) || isset($sent['retry_at']) ? 'success' : 'danger', ($sent['ok'] ?? false) ? 'We sent an SMS verification code to your phone.' : ((string) ($sent['error'] ?? 'Your account was saved, but SMS verification could not be sent. Try resending the code.')));
                 header('Location: otp_verify.php?purpose=signup');
             } else {

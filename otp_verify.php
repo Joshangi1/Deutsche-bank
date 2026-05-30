@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/helpers.php';
-require_once __DIR__ . '/config/brevo.php';
+require_once __DIR__ . '/config/sms.php';
 ensure_banking_schema();
 
 $purpose = (string) ($_GET['purpose'] ?? $_POST['purpose'] ?? '');
@@ -95,7 +95,7 @@ if (!is_valid_sms_phone($phone)) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
     if (isset($_POST['resend_code'])) {
-        $sent = sms_otp_create($userId ?: null, $phone, $purpose, 10);
+        $sent = sms_otp_create($userId ?: null, $phone, $purpose);
         if ($sent['ok'] ?? false) {
             flash('success', 'A new verification code was sent.');
         } else {
@@ -162,7 +162,7 @@ include __DIR__ . '/includes/public_header.php';
       <button class="btn btn-link p-0" name="resend_code" value="1" type="submit" data-resend-button formnovalidate>Resend code</button>
       <?php if ($resendAt): ?><span class="small muted" data-code-timer="<?= e((string) max(0, strtotime($resendAt) - time())) ?>">Wait before resending</span><?php endif; ?>
     </div>
-    <p class="small muted mb-0">Codes expire after 10 minutes. Never share this code with anyone.</p>
+    <p class="small muted mb-0">Codes expire after <?= e((string) SMS_OTP_TTL_MINUTES) ?> minutes. Never share this code with anyone.</p>
   </form>
 </section>
 <?php include __DIR__ . '/includes/public_footer.php'; ?>
